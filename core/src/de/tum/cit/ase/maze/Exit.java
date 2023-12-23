@@ -14,4 +14,5 @@ public class Exit extends GameObject {
     public Exit(int x, int y) {
         super(x, y);
     }
+
 }

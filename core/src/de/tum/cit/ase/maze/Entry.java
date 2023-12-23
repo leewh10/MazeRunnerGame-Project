@@ -14,4 +14,5 @@ public class Entry extends GameObject{
     public Entry(int x, int y) {
         super(x, y);
     }
+
 }

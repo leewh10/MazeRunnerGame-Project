@@ -17,4 +17,5 @@ public class Trap extends GameObject{
         super(x, y);
         this.isReady = true; // Traps are ready by default
     }
+
 }
