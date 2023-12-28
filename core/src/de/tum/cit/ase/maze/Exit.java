@@ -24,5 +24,4 @@ public class Exit extends GameObject {
     public boolean canExit(Character character) {
         return character.hasKey();
     }
-
 }
