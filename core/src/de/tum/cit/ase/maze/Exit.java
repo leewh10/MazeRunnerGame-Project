@@ -15,4 +15,14 @@ public class Exit extends GameObject {
         super(x, y);
     }
 
+    /**
+     * Check if the character has a key to exit the maze.
+     * The exit is only opened if the character have collected a key.
+     * @param character The player character
+     * @return True if the character has collected a key and hence can exit, otherwise false.
+     */
+    public boolean canExit(Character character) {
+        return character.hasKey();
+    }
+
 }
