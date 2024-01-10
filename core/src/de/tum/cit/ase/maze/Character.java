@@ -59,4 +59,5 @@ public class Character extends GameObject {
     public void useKey() {
         hasKey = false;
     }
+
 }
