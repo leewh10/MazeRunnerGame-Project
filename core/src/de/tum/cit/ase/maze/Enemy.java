@@ -11,7 +11,7 @@ public class Enemy extends GameObject{
      * @param x The initial x-coordinate of the Enemy.
      * @param y The initial y-coordinate of the Enemy.
      */
-    public Enemy(int x, int y) {
+    public Enemy(float x, float y) {
         super(x, y);
     }
 

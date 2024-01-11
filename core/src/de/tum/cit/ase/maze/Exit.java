@@ -11,7 +11,7 @@ public class Exit extends GameObject {
      * @param x The initial x-coordinate of the Exit.
      * @param y The initial y-coordinate of the Exit.
      */
-    public Exit(int x, int y) {
+    public Exit(float x, float y) {
         super(x, y);
     }
 

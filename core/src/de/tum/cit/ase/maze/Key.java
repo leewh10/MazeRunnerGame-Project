@@ -11,7 +11,7 @@ public class Key extends GameObject{
      * @param x The initial x-coordinate of the Key.
      * @param y The initial y-coordinate of the Key.
      */
-    public Key(int x, int y) {
+    public Key(float x, float y) {
         super(x, y);
     }
 }

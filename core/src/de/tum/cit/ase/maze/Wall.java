@@ -12,7 +12,7 @@ public class Wall extends GameObject{
      * @param x The initial x-coordinate of the Wall.
      * @param y The initial y-coordinate of the Wall.
      */
-    public Wall(int x, int y) {
+    public Wall(float x, float y) {
         super(x, y);
     }
 
