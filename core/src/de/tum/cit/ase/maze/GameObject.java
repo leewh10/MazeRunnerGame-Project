@@ -8,9 +8,9 @@ package de.tum.cit.ase.maze;
 
 public abstract class GameObject {
     /** The x-coordinate of the GameObject */
-    protected int x;
+    protected float x;
     /** The y-coordinate of the GameObject */
-    protected int y;
+    protected float y;
 
     /**
      * Constructor for GameObject.
@@ -18,13 +18,13 @@ public abstract class GameObject {
      * @param x The initial x-coordinate of the GameObject.
      * @param y The initial y-coordinate of the GameObject.
      */
-    public GameObject(int x, int y) {
+    public GameObject(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
     //Getter and Setter
-    public int getX() {
+    public float getX() {
         return x;
     }
 
@@ -32,7 +32,7 @@ public abstract class GameObject {
         this.x = x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 

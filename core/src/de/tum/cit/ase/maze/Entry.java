@@ -11,7 +11,7 @@ public class Entry extends GameObject{
      * @param x The initial x-coordinate of the Entry.
      * @param y The initial y-coordinate of the Entry.
      */
-    public Entry(int x, int y) {
+    public Entry(float x, float y) {
         super(x, y);
     }
 

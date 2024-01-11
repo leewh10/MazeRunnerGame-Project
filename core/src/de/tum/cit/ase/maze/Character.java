@@ -15,7 +15,7 @@ public class Character extends GameObject {
      * @param y The initial y-coordinate of the Character.
      * @param lives the initial number of lives of the character
      */
-    public Character(int x, int y, int lives) {
+    public Character(float x, float y, int lives) {
         super(x, y);
         this.lives = lives;
         this.hasKey = false; // The character starts the game without possessing a key.
