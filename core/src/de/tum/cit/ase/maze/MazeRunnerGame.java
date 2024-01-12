@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
+import java.util.List;
+
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
  * It manages the screens and global resources like SpriteBatch and Skin.

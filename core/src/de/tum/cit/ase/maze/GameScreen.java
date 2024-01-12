@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.util.List;
+
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
  * It handles the game logic and rendering of the game elements.
@@ -16,8 +18,8 @@ public class GameScreen implements Screen {
     private final MazeRunnerGame game;
     private final OrthographicCamera camera;
     private final BitmapFont font;
-
     private float sinusInput = 0f;
+
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -34,6 +36,7 @@ public class GameScreen implements Screen {
 
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
+
     }
 
 
