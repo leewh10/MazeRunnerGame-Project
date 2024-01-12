@@ -39,10 +39,8 @@ public class GameScreen implements Screen {
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
 
-        //Initialising the character (Starting point)
-        character = new Character(0,0,5);
-
     }
+
 
 
     // Screen interface methods with necessary functionality
@@ -53,15 +51,11 @@ public class GameScreen implements Screen {
             game.goToMenu();
         }
 
-        //Check for W,A,S,D keys and move the player accordingly (12.01.2024)
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            character.moveUp(); }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            character.moveLeft(); }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            character.moveDown(); }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            character.moveRight(); }
+        /**
+         *onnecting the character to animation
+         */
+        draw();
+
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
@@ -92,6 +86,15 @@ public class GameScreen implements Screen {
         game.getSpriteBatch().end(); // Important to call this after drawing everything
     }
 
+    private void draw() {
+        /**
+         * moves stuff
+         */
+        game.getSpriteBatch().begin();
+        game.getSpriteBatch().end();
+    }
+
+
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false);
@@ -107,7 +110,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
     }
 
     @Override

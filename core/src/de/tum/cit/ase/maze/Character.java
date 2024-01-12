@@ -1,77 +1,79 @@
 package de.tum.cit.ase.maze;
 
-/**
- * Represents the player character in the maze.
- */
-public class Character extends GameObject {
-    private int lives; // Number of lives that the character has
-    private boolean hasKey; // Whether the character has a key or not
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import javax.swing.*;
+
+public class Character {
+    private float x, y;
+    private boolean hasKey;
+    private int lives;
+    private Texture texture;
 
 
-    /**
-     * Constructor for Character.
-     *
-     * @param x The initial x-coordinate of the Character.
-     * @param y The initial y-coordinate of the Character.
-     * @param lives the initial number of lives of the character
-     */
-    public Character(float x, float y, int lives) {
-        super(x, y);
+    //Constructor
+    public Character(float x, float y, boolean hasKey, int lives) {
+        this.x = x;
+        this.y = y;
+        this.hasKey = hasKey;
         this.lives = lives;
-        this.hasKey = false; // The character starts the game without possessing a key.
+        this.texture = new Texture("assets/character.png");
     }
 
-    /**
-     * Getter for the attribute 'lives'.
-     * Get the remaining number of lives that the character has.
-     * @return The number of lives.
-     */
+    //getters and setters
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public boolean isHasKey() {
+        return hasKey;
+    }
+
+    public void setHasKey(boolean hasKey) {
+        this.hasKey = hasKey;
+    }
+
     public int getLives() {
         return lives;
     }
 
-    /**
-     * Method to decrease the number of lives that the character has.
-     * Decreases the character's remaining lives by 1.
-     */
-    public void loseLives() {
-        lives --;
+    public void setLives(int lives) {
+        this.lives = lives;
     }
 
-    /**
-     * Check if the character has a key or not.
-     * @return true if the character has a key, otherwise false.
-     */
-    public boolean hasKey() {
-        return hasKey;
+    public void move() {
+        float speed = 5; // Adjust the speed as needed
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            x -= speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            x += speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            y += speed;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            y -= speed;
+        }
     }
 
-    /**
-     * Updates the character's status when the character collects a key.
-     */
-    public void collectKey() {
-        hasKey = true;
+    public void render(SpriteBatch batch) {
+        batch.draw(texture, x, y);
     }
-
-    /**
-     * Updates the character's key status when the character uses a key.
-     */
-    public void useKey() {
-        hasKey = false;
-    }
-
-    public void moveUp() {
-        y += 1.0f;
-    }
-    public void moveDown() {
-        y -= 1.0f;
-    }
-    public void moveLeft() {
-        x -= 1.0f;
-    }
-    public void moveRight() {
-        x += 1.0f;
-    }
-
-
 }

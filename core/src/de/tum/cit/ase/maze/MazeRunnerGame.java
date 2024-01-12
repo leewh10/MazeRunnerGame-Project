@@ -2,6 +2,7 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -30,6 +31,8 @@ public class MazeRunnerGame extends Game {
 
     // Character animation downwards
     private Animation<TextureRegion> characterDownAnimation;
+    private Animation<TextureRegion> characterUpAnimation;
+
 
     /**
      * Constructor for MazeRunnerGame.
@@ -99,6 +102,8 @@ public class MazeRunnerGame extends Game {
         }
 
         characterDownAnimation = new Animation<>(0.1f, walkFrames);
+
+
     }
 
     /**

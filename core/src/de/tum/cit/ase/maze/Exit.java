@@ -21,7 +21,9 @@ public class Exit extends GameObject {
      * @param character The player character
      * @return True if the character has collected a key and hence can exit, otherwise false.
      */
-    public boolean canExit(Character character) {
+
+    /**public boolean canExit(Character character) {
         return character.hasKey();
     }
+     */
 }
