@@ -20,15 +20,6 @@ public class GameScreen implements Screen {
     private final BitmapFont font;
     private float sinusInput = 0f;
 
-    //Attributes: GameObjects
-    private Character character;
-    private List<Enemy> enemies;
-    private Entry entry;
-    private Exit exit;
-    private List<Key> keys;
-    private List<Trap> traps;
-    private Wall wall;
-
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -45,6 +36,7 @@ public class GameScreen implements Screen {
 
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
+
     }
 
 
