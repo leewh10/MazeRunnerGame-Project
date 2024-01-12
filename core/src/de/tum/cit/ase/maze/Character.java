@@ -60,4 +60,18 @@ public class Character extends GameObject {
         hasKey = false;
     }
 
+    public void moveUp() {
+        y += 1.0f;
+    }
+    public void moveDown() {
+        y -= 1.0f;
+    }
+    public void moveLeft() {
+        x -= 1.0f;
+    }
+    public void moveRight() {
+        x += 1.0f;
+    }
+
+
 }
