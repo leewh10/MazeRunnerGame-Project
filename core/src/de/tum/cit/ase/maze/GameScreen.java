@@ -20,6 +20,8 @@ public class GameScreen implements Screen {
     private final BitmapFont font;
     private float sinusInput = 0f;
 
+    private Character character;
+
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -37,6 +39,9 @@ public class GameScreen implements Screen {
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
 
+        //Initialising the character (Starting point)
+        character = new Character(0,0,5);
+
     }
 
 
@@ -47,6 +52,16 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToMenu();
         }
+
+        //Check for W,A,S,D keys and move the player accordingly (12.01.2024)
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            character.moveUp(); }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            character.moveLeft(); }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            character.moveDown(); }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            character.moveRight(); }
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
