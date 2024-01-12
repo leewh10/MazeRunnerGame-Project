@@ -47,7 +47,7 @@ public class GameScreen implements Screen {
 
         // Create and configure the camera for the game view
         camera = new OrthographicCamera();
-        camera.setToOrtho(false);
+        camera.setToOrtho(true);
         camera.zoom = 0.75f;
 
         // Get the font from the game's skin
@@ -64,11 +64,31 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         // Check for escape key press to go back to the menu
+        if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
+            game.dispose1();
+        }
+
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToMenu();
         }
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
+
+
+
+
+        //camera stuff
+        game.getSpriteBatch().begin();
+        game.getSpriteBatch().draw(game.getBackgroundTexture(), 0, 0, 500, 600);
+        game.getSpriteBatch().draw(game.getBackgroundTexture(), 500, 0, 500, 600);
+        game.getSpriteBatch().draw(game.getBackgroundTexture(), 1000, 0, 500, 600);
+
+        game.getSpriteBatch().end();
+
+
+
+
 
         camera.update(); // Update the camera
 
@@ -119,30 +139,23 @@ public class GameScreen implements Screen {
                 128
         );
 
-        /*game.getSpriteBatch().draw(
-                game.getCharacterDownAnimation().getKeyFrame(sinusInput, true),
-                textX - 96,
-                textY - 64,
-                64,
-                128
-        );
-         */
+    /*game.getSpriteBatch().draw(
+            game.getCharacterDownAnimation().getKeyFrame(sinusInput, true),
+            textX - 96,
+            textY - 64,
+            64,
+            128
+
+
+            OG
+    );
+     */
 
         game.getSpriteBatch().end();
 
-
-
-
-
-
-
-
-
-        // Move the character based on key input
-        character.move();
-
         // Set up and begin drawing with the sprite batch for the character
         batch.setProjectionMatrix(camera.combined);
+
         batch.begin();
 
         // Render the character
@@ -150,19 +163,14 @@ public class GameScreen implements Screen {
 
         batch.end();
 
-
-
-
-
-
-
-
+        // Move the character based on key input
+        character.move();
 
     }
 
     @Override
     public void resize(int width, int height) {
-        camera.setToOrtho(false);
+        camera.setToOrtho(false, width, height);
     }
 
     @Override
@@ -179,11 +187,7 @@ public class GameScreen implements Screen {
 
 
 
-
-
         batch = new SpriteBatch();
-
-
 
 
 

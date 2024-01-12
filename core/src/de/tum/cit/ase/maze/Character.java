@@ -1,4 +1,4 @@
-package de.tum.cit.ase.maze;
+ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -84,22 +84,7 @@ public class Character {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             y -= speed;
-        }
-        /*if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            x -= speed;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            x += speed;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            y += speed;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            y -= speed;
-        }
-
-         */
-    }
+        }}
 
     public void render(SpriteBatch batch) {
         TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
@@ -109,3 +94,4 @@ public class Character {
          batch.draw(currentFrame, x,y,width,height);
     }
 }
+

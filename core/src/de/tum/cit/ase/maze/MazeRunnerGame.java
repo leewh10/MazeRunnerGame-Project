@@ -35,6 +35,8 @@ public class MazeRunnerGame extends Game {
     private Animation<TextureRegion> characterLeftAnimation;
     private Animation<TextureRegion> characterRightAnimation;
 
+    private Texture backgroundTexture;
+
 
     /**
      * Constructor for MazeRunnerGame.
@@ -52,6 +54,11 @@ public class MazeRunnerGame extends Game {
     public void create() {
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+
+
+        this.loadBackground(); //Load game background
+
+
         this.loadCharacterAnimation(); // Load character animation
 
         // Play some background music
@@ -62,6 +69,7 @@ public class MazeRunnerGame extends Game {
 
         goToMenu(); // Navigate to the menu screen
     }
+
 
     /**
      * Switches to the menu screen.
@@ -83,6 +91,10 @@ public class MazeRunnerGame extends Game {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
         }
+
+
+
+
     }
 
     /**
@@ -96,19 +108,6 @@ public class MazeRunnerGame extends Game {
         int animationFrames = 4;
 
         // libGDX internal Array instead of ArrayList because of performance
-        Array<TextureRegion> walkFrames = new Array<>(TextureRegion.class);
-
-        // Add all frames to the animation
-        /*for (int col = 0; col < animationFrames; col++) {
-            walkFrames.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
-        }
-
-        characterDownAnimation = new Animation<>(0.1f, walkFrames);
-
-         */
-
-
-        // libGDX internal Array instead of ArrayList because of performance
         Array<TextureRegion> walkFramesUp = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
@@ -116,14 +115,14 @@ public class MazeRunnerGame extends Game {
 
         // Add frames to the respective animations
         for (int col = 0; col < animationFrames; col++) {
-            walkFramesUp.add(new TextureRegion(walkSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight)
-            );
-            walkFramesDown.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight)
-            );
-            walkFramesLeft.add(new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight)
-            );
-            walkFramesRight.add(new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight)
-            );}
+            walkFramesUp.add(
+                    new TextureRegion(walkSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
+            walkFramesDown.add(
+                    new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            walkFramesLeft.add(
+                    new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
+            walkFramesRight.add(
+                    new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));}
 
         characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
         characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
@@ -132,6 +131,33 @@ public class MazeRunnerGame extends Game {
 
 
     }
+
+
+
+
+    public void loadBackground() {
+        backgroundTexture = new Texture(Gdx.files.internal("basictiles.png"));
+
+        int frameWidth = 16;
+        int frameHeight = 32;
+        int animationFrames = 1;
+
+        Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
+
+        for (int col = 0; col < animationFrames; col++) {
+            walkFramesDown.add(
+                    new TextureRegion(backgroundTexture, col * frameWidth, 0, frameWidth, frameHeight));
+        }
+
+        characterUpAnimation = new Animation<>(0.1f, walkFramesDown);
+
+
+    }
+
+
+
+
+
 
     /**
      * Cleans up resources when the game is disposed.
@@ -142,7 +168,19 @@ public class MazeRunnerGame extends Game {
         getScreen().dispose(); // Dispose the current screen
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
+
+
+        backgroundTexture.dispose();
     }
+
+    public void dispose1() {
+
+        spriteBatch.dispose(); // Dispose the spriteBatch
+        skin.dispose(); // Dispose the skin
+
+
+    }
+
 
     // Getter methods
     public Skin getSkin() {
@@ -175,5 +213,10 @@ public class MazeRunnerGame extends Game {
 
     public Animation<TextureRegion> getCharacterRightAnimation() {
         return characterRightAnimation;
+    }
+
+
+    public Texture getBackgroundTexture() {
+        return backgroundTexture;
     }
 }
