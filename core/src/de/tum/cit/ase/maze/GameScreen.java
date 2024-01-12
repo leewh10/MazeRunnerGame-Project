@@ -1,13 +1,16 @@
+
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.utils.ScreenUtils;
-
-import java.util.List;
+        import com.badlogic.gdx.Gdx;
+        import com.badlogic.gdx.Input;
+        import com.badlogic.gdx.Screen;
+        import com.badlogic.gdx.graphics.OrthographicCamera;
+        import com.badlogic.gdx.graphics.Texture;
+        import com.badlogic.gdx.graphics.g2d.Animation;
+        import com.badlogic.gdx.graphics.g2d.BitmapFont;
+        import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+        import com.badlogic.gdx.graphics.g2d.TextureRegion;
+        import com.badlogic.gdx.utils.ScreenUtils;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -18,9 +21,20 @@ public class GameScreen implements Screen {
     private final MazeRunnerGame game;
     private final OrthographicCamera camera;
     private final BitmapFont font;
-    private float sinusInput = 0f;
 
+    private float sinusInput = 0f;
+    private SpriteBatch batch;
     private Character character;
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -39,6 +53,9 @@ public class GameScreen implements Screen {
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
 
+        Animation<TextureRegion> characterAnimation = game.getCharacterDownAnimation();
+
+        this.character = new Character(100, 100, false, 3, characterAnimation);
     }
 
 
@@ -51,12 +68,6 @@ public class GameScreen implements Screen {
             game.goToMenu();
         }
 
-        /**
-         *onnecting the character to animation
-         */
-        draw();
-
-
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
         camera.update(); // Update the camera
@@ -68,32 +79,86 @@ public class GameScreen implements Screen {
 
         // Set up and begin drawing with the sprite batch
         game.getSpriteBatch().setProjectionMatrix(camera.combined);
-
         game.getSpriteBatch().begin(); // Important to call this before drawing anything
 
         // Render the text
+
+
         font.draw(game.getSpriteBatch(), "Press ESC to go to menu", textX, textY);
 
-        // Draw the character next to the text :) / We can reuse sinusInput here
+        TextureRegion characterRegion;
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            characterRegion = game.getCharacterUpAnimation().getKeyFrame(sinusInput, true);
+            character.setY(character.getY() + 5);
+
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            characterRegion = game.getCharacterDownAnimation().getKeyFrame(sinusInput, true);
+            character.setY(character.getY() - 5);
+
+
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            characterRegion = game.getCharacterLeftAnimation().getKeyFrame(sinusInput, true);
+            character.setX(character.getX() - 5);
+
+
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            characterRegion = game.getCharacterRightAnimation().getKeyFrame(sinusInput, true);
+            character.setX(character.getX() + 5);
+
+        } else {
+            // Use a default frame when not moving
+            characterRegion = game.getCharacterDownAnimation().getKeyFrame(0, true);
+
+        }
+
         game.getSpriteBatch().draw(
-                game.getCharacterDownAnimation().getKeyFrame(sinusInput, true),
+                characterRegion,
                 textX - 96,
                 textY - 64,
                 64,
                 128
         );
 
-        game.getSpriteBatch().end(); // Important to call this after drawing everything
-    }
-
-    private void draw() {
-        /**
-         * moves stuff
+        /*game.getSpriteBatch().draw(
+                game.getCharacterDownAnimation().getKeyFrame(sinusInput, true),
+                textX - 96,
+                textY - 64,
+                64,
+                128
+        );
          */
-        game.getSpriteBatch().begin();
-        game.getSpriteBatch().end();
-    }
 
+        game.getSpriteBatch().end();
+
+
+
+
+
+
+
+
+
+        // Move the character based on key input
+        character.move();
+
+        // Set up and begin drawing with the sprite batch for the character
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        // Render the character
+        character.render(batch);
+
+        batch.end();
+
+
+
+
+
+
+
+
+
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -110,6 +175,20 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+
+
+
+
+
+
+        batch = new SpriteBatch();
+
+
+
+
+
+
+
     }
 
     @Override
@@ -118,7 +197,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+
     }
 
     // Additional methods and logic can be added as needed for the game screen
 }
+
