@@ -2,7 +2,6 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -11,8 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-
-import java.util.List;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -35,7 +32,8 @@ public class MazeRunnerGame extends Game {
     private Animation<TextureRegion> characterLeftAnimation;
     private Animation<TextureRegion> characterRightAnimation;
 
-    private Texture backgroundTexture;
+
+    private TextureRegion MapImageRegion;
 
 
     /**
@@ -91,16 +89,13 @@ public class MazeRunnerGame extends Game {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
         }
-
-
-
-
     }
 
     /**
      * Loads the character animation from the character.png file.
      */
     private void loadCharacterAnimation() {
+
         Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
 
         int frameWidth = 16;
@@ -128,35 +123,25 @@ public class MazeRunnerGame extends Game {
         characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
         characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
         characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
-
-
     }
 
 
-
-
+    /**
+     * Loads the background from the character.png file.
+     */
     public void loadBackground() {
-        backgroundTexture = new Texture(Gdx.files.internal("basictiles.png"));
+        Texture background = new Texture(Gdx.files.internal("basictiles.png"));
 
         int frameWidth = 16;
-        int frameHeight = 32;
-        int animationFrames = 1;
+        int frameHeight = 16;
 
-        Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
-
-        for (int col = 0; col < animationFrames; col++) {
-            walkFramesDown.add(
-                    new TextureRegion(backgroundTexture, col * frameWidth, 0, frameWidth, frameHeight));
-        }
-
-        characterUpAnimation = new Animation<>(0.1f, walkFramesDown);
-
-
+        // Create a TextureRegion for the first image
+        MapImageRegion = new TextureRegion(background, 16, 0, frameWidth, frameHeight);
     }
 
-
-
-
+    public TextureRegion getMapImageRegion() {
+        return MapImageRegion;
+    }
 
 
     /**
@@ -169,16 +154,7 @@ public class MazeRunnerGame extends Game {
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
 
-
-        backgroundTexture.dispose();
-    }
-
-    public void dispose1() {
-
-        spriteBatch.dispose(); // Dispose the spriteBatch
-        skin.dispose(); // Dispose the skin
-
-
+        //MapImageRegion.dispose();
     }
 
 
@@ -215,8 +191,4 @@ public class MazeRunnerGame extends Game {
         return characterRightAnimation;
     }
 
-
-    public Texture getBackgroundTexture() {
-        return backgroundTexture;
-    }
 }

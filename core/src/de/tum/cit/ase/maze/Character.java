@@ -86,6 +86,8 @@ public class Character {
             y -= speed;
         }}
 
+
+
     public void render(SpriteBatch batch) {
         TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
          float width = 4*currentFrame.getRegionWidth();
