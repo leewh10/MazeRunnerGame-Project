@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import javax.swing.*;
 
-public class Character {
-    private float x, y;
+public class Character extends GameObject {
+    //private float x, y;
     private boolean hasKey;
     private int lives;
     private Animation<TextureRegion> animation;
@@ -20,8 +20,7 @@ public class Character {
 
     //Constructor
     public Character(float x, float y, boolean hasKey, int lives, Animation<TextureRegion> animation) {
-        this.x = x;
-        this.y = y;
+        super(x,y);
         this.hasKey = hasKey;
         this.lives = lives;
         this.animation=animation;
@@ -29,21 +28,21 @@ public class Character {
     }
 
     //getters and setters
-    public float getX() {
-        return x;
-    }
-
-    public void setX(float x) {
-        this.x = x;
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public void setY(float y) {
-        this.y = y;
-    }
+//    public float getX() {
+//        return x;
+//    }
+//
+//    public void setX(float x) {
+//        this.x = x;
+//    }
+//
+//    public float getY() {
+//        return y;
+//    }
+//
+//    public void setY(float y) {
+//        this.y = y;
+//    }
 
     public Animation<TextureRegion> getAnimation() {
         return animation;

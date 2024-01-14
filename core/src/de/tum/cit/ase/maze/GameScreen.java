@@ -133,19 +133,19 @@ public class GameScreen implements Screen {
         TextureRegion characterRegion;
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
             characterRegion = game.getCharacterUpAnimation().getKeyFrame(sinusInput, true);
-            character.setY(character.getY() + 5);
+            character.setY((int) (character.getY() + 5));
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
             characterRegion = game.getCharacterDownAnimation().getKeyFrame(sinusInput, true);
-            character.setY(character.getY() - 5);
+            character.setY((int) (character.getY() - 5));
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             characterRegion = game.getCharacterLeftAnimation().getKeyFrame(sinusInput, true);
-            character.setX(character.getX() - 5);
+            character.setX((int) (character.getX() - 5));
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
             characterRegion = game.getCharacterRightAnimation().getKeyFrame(sinusInput, true);
-            character.setX(character.getX() + 5);
+            character.setX((int) (character.getX() + 5));
             shouldMove = true;
 
         } else {
