@@ -33,7 +33,14 @@ public class MazeRunnerGame extends Game {
     private Animation<TextureRegion> characterRightAnimation;
 
 
-    private TextureRegion MapImageRegion;
+    private TextureRegion WallImageRegion;
+    private TextureRegion EntryPointImageRegion;
+    private TextureRegion ExitPointImageRegion;
+    private TextureRegion TrapImageRegion;
+    private TextureRegion EnemyImageRegion;
+    private TextureRegion KeyImageRegion;
+
+
 
 
     /**
@@ -126,23 +133,49 @@ public class MazeRunnerGame extends Game {
     }
 
 
-    /**
-     * Loads the background from the character.png file.
-     */
+
     public void loadBackground() {
-        Texture background = new Texture(Gdx.files.internal("basictiles.png"));
+        Texture map = new Texture(Gdx.files.internal("basictiles.png"));
+        Texture extra = new Texture(Gdx.files.internal("mobs.png"));
+
+
 
         int frameWidth = 16;
-        int frameHeight = 16;
+        int frameHeight = 15;
 
         // Create a TextureRegion for the first image
-        MapImageRegion = new TextureRegion(background, 16, 0, frameWidth, frameHeight);
+        WallImageRegion = new TextureRegion(map, 16, 0, frameWidth, frameHeight);
+        EntryPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
+        ExitPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
+        TrapImageRegion = new TextureRegion(map, 16, 96, frameWidth, frameHeight);
+        EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
+        KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
+
     }
 
-    public TextureRegion getMapImageRegion() {
-        return MapImageRegion;
+    public TextureRegion getWallImageRegion() {
+        return WallImageRegion;
     }
 
+    public TextureRegion getEntryPointImageRegion() {
+        return EntryPointImageRegion;
+    }
+
+    public TextureRegion getExitPointImageRegion() {
+        return ExitPointImageRegion;
+    }
+
+    public TextureRegion getTrapImageRegion() {
+        return TrapImageRegion;
+    }
+
+    public TextureRegion getEnemyImageRegion() {
+        return EnemyImageRegion;
+    }
+
+    public TextureRegion getKeyImageRegion() {
+        return KeyImageRegion;
+    }
 
     /**
      * Cleans up resources when the game is disposed.
@@ -153,6 +186,7 @@ public class MazeRunnerGame extends Game {
         getScreen().dispose(); // Dispose the current screen
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
+
 
         //MapImageRegion.dispose();
     }

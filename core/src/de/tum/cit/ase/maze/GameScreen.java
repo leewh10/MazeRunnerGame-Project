@@ -55,7 +55,7 @@ public class GameScreen implements Screen {
         Animation<TextureRegion> characterAnimation = game.getCharacterDownAnimation();
 
         //starting position
-        this.character = new Character(100, 100, false, 3, characterAnimation);
+        this.character = new Character(1, 1, false, 3, characterAnimation);
 
     }
 
@@ -77,11 +77,84 @@ public class GameScreen implements Screen {
         /**
          * creates background by repeating the block
          */
-        for (int j = 0; j < 18; j++) {
+
+
+        /*for (int j = 0; j < 18; j++) {
             for (int i = 0; i < 27; i++) {
-                game.getSpriteBatch().draw(game.getMapImageRegion(), i * 50, j*50, 50, 50);
+                game.getSpriteBatch().draw(game.getWallImageRegion(), i * 50, j*50, 50, 50);
             }
         }
+
+        for (int j = 19; j < 20; j++) {
+            for (int i = 28; i < 29; i++) {
+                game.getSpriteBatch().draw(game.getTrapImageRegion(), i * 50, j*50, 50, 50);
+            }
+        }
+        for (int j = 20; j < 21; j++) {
+            for (int i = 29; i < 30; i++) {
+                game.getSpriteBatch().draw(game.getEntryPointImageRegion(), i * 50, j*50, 50, 50);
+            }
+        }
+        for (int j = 21; j < 22; j++) {
+            for (int i = 30; i < 31; i++) {
+                game.getSpriteBatch().draw(game.getExitPointImageRegion(), i * 50, j*50, 50, 50);
+            }
+        }
+
+         */
+
+        int[][] mazeData = {
+                {3, 0, 2}, {2, 5, 0}, {2, 4, 0}, {2, 0, 0}, {0, 9, 0}, {0, 8, 1}, {0, 7, 0}, {0, 6, 0}, {1, 0, 0},
+                {0, 5, 0}, {0, 4, 0}, {0, 3, 0}, {0, 2, 0}, {0, 1, 0}, {0, 0, 0}, {14, 9, 0}, {14, 8, 0}, {14, 7, 0},
+                {14, 6, 0}, {14, 5, 0}, {14, 4, 0}, {13, 9, 0}, {14, 3, 0}, {14, 2, 0}, {14, 1, 0}, {14, 0, 0}, {12, 9, 0},
+                {13, 0, 0}, {11, 9, 0}, {12, 3, 4}, {11, 7, 4}, {12, 0, 0}, {10, 9, 0}, {11, 0, 0}, {10, 5, 3}, {10, 3, 4},
+                {10, 1, 3}, {10, 0, 0}, {10, 14, 0}, {11, 14, 0}, {11, 13, 4}, {11, 12, 3}, {12, 14, 0}, {12, 12, 0}, {13, 14, 0},
+                {13, 11, 5}, {13, 10, 0}, {14, 14, 0}, {14, 13, 0}, {14, 12, 0}, {14, 11, 0}, {14, 10, 0}, {0, 14, 0}, {0, 13, 0},
+                {0, 12, 0}, {0, 11, 0}, {0, 10, 0}, {1, 14, 0}, {2, 14, 0}, {3, 14, 0}, {3, 10, 3}, {4, 14, 0}, {9, 9, 0},
+                {9, 8, 0}, {9, 7, 0}, {5, 14, 0}, {8, 9, 0}, {8, 8, 0}, {6, 14, 0}, {6, 12, 3}, {9, 0, 2}, {6, 10, 0},
+                {7, 9, 0}, {7, 14, 0}, {8, 2, 4}, {7, 8, 0}, {8, 1, 0}, {8, 0, 0}, {7, 4, 0}, {8, 14, 0}, {7, 3, 0},
+                {6, 9, 0}, {6, 8, 0}, {7, 1, 0}, {7, 0, 0}, {6, 6, 0}, {9, 14, 0}, {9, 11, 0}, {6, 1, 0}, {6, 0, 0},
+                {5, 2, 0}, {4, 7, 0}, {5, 1, 0}, {5, 0, 0}, {3, 8, 3}, {4, 2, 0}, {4, 1, 0}, {4, 0, 0}, {3, 4, 0}
+        };
+
+
+        for (int i = 0; i < mazeData.length; i++) {
+            int x = mazeData[i][0];
+            int y = mazeData[i][1];
+            int value = mazeData[i][2];
+
+            // Calculate the actual position on the screen
+            float mazeX = x * 50;
+            float mazeY = y * 50;
+
+            switch (value) {
+                case 0:
+                    // Wall
+                    game.getSpriteBatch().draw(game.getWallImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 1:
+                    // Entry point
+                    game.getSpriteBatch().draw(game.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 2:
+                    // Exit
+                    game.getSpriteBatch().draw(game.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 3:
+                    // Trap (static obstacle)
+                    game.getSpriteBatch().draw(game.getTrapImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 4:
+                    // Enemy (dynamic obstacle)
+                    game.getSpriteBatch().draw(game.getEnemyImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 5:
+                    // Key
+                    game.getSpriteBatch().draw(game.getKeyImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+            }
+        }
+
         game.getSpriteBatch().end();
 
 
@@ -133,19 +206,19 @@ public class GameScreen implements Screen {
         TextureRegion characterRegion;
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
             characterRegion = game.getCharacterUpAnimation().getKeyFrame(sinusInput, true);
-            character.setY((int) (character.getY() + 5));
+            character.setY((int) character.getY() + 5);
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
             characterRegion = game.getCharacterDownAnimation().getKeyFrame(sinusInput, true);
-            character.setY((int) (character.getY() - 5));
+            character.setY((int) character.getY() - 5);
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             characterRegion = game.getCharacterLeftAnimation().getKeyFrame(sinusInput, true);
-            character.setX((int) (character.getX() - 5));
+            character.setX((int) character.getX() - 5);
             shouldMove = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
             characterRegion = game.getCharacterRightAnimation().getKeyFrame(sinusInput, true);
-            character.setX((int) (character.getX() + 5));
+            character.setX((int) character.getX() + 5);
             shouldMove = true;
 
         } else {
