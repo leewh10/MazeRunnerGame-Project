@@ -13,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import javax.swing.*;
+import java.io.File;
+
 /**
  * The MenuScreen class is responsible for displaying the main menu of the game.
  * It extends the LibGDX Screen class and sets up the UI components for the menu.
@@ -49,6 +52,32 @@ public class MenuScreen implements Screen {
                 game.goToGame(); // Change to the game screen when button is pressed
             }
         });
+
+
+
+
+
+        // Create and add a button to go to the level screen
+        TextButton goToLevel = new TextButton("Go To Level", game.getSkin());
+        table.add(goToLevel).width(300).row();
+        goToLevel.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps"));
+
+                int result = fileChooser.showOpenDialog(null);
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    // Handle the selected file as needed
+                    System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+                }
+            }
+        });
+
+
+
     }
 
     @Override

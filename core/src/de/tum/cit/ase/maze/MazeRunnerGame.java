@@ -25,20 +25,7 @@ public class MazeRunnerGame extends Game {
 
     // UI Skin
     private Skin skin;
-
-    // Character animation downwards
-    private Animation<TextureRegion> characterDownAnimation;
-    private Animation<TextureRegion> characterUpAnimation;
-    private Animation<TextureRegion> characterLeftAnimation;
-    private Animation<TextureRegion> characterRightAnimation;
-
-
-    private TextureRegion WallImageRegion;
-    private TextureRegion EntryPointImageRegion;
-    private TextureRegion ExitPointImageRegion;
-    private TextureRegion TrapImageRegion;
-    private TextureRegion EnemyImageRegion;
-    private TextureRegion KeyImageRegion;
+    private Map map;
 
 
 
@@ -58,13 +45,18 @@ public class MazeRunnerGame extends Game {
     @Override
     public void create() {
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
-        skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+
+        // Load UI skin
+        skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json"));
+
+        setScreen(new GameScreen(this));
+
+        // Load game background
+        Map.loadBackground();
 
 
-        this.loadBackground(); //Load game background
-
-
-        this.loadCharacterAnimation(); // Load character animation
+        // Load character animation
+        Character.loadCharacterAnimation();
 
         // Play some background music
         // Background sound
@@ -72,7 +64,9 @@ public class MazeRunnerGame extends Game {
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
+
         goToMenu(); // Navigate to the menu screen
+
     }
 
 
@@ -98,84 +92,8 @@ public class MazeRunnerGame extends Game {
         }
     }
 
-    /**
-     * Loads the character animation from the character.png file.
-     */
-    private void loadCharacterAnimation() {
-
-        Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
-
-        int frameWidth = 16;
-        int frameHeight = 32;
-        int animationFrames = 4;
-
-        // libGDX internal Array instead of ArrayList because of performance
-        Array<TextureRegion> walkFramesUp = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
-
-        // Add frames to the respective animations
-        for (int col = 0; col < animationFrames; col++) {
-            walkFramesUp.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
-            walkFramesDown.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            walkFramesLeft.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
-            walkFramesRight.add(
-                    new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));}
-
-        characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
-        characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
-        characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
-        characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
-    }
 
 
-
-    public void loadBackground() {
-        Texture map = new Texture(Gdx.files.internal("basictiles.png"));
-        Texture extra = new Texture(Gdx.files.internal("mobs.png"));
-
-
-
-        int frameWidth = 16;
-        int frameHeight = 15;
-
-        // Create a TextureRegion for the first image
-        WallImageRegion = new TextureRegion(map, 16, 0, frameWidth, frameHeight);
-        EntryPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
-        ExitPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
-        TrapImageRegion = new TextureRegion(map, 16, 96, frameWidth, frameHeight);
-        EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
-        KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
-
-    }
-
-    public TextureRegion getWallImageRegion() {
-        return WallImageRegion;
-    }
-
-    public TextureRegion getEntryPointImageRegion() {
-        return EntryPointImageRegion;
-    }
-
-    public TextureRegion getExitPointImageRegion() {
-        return ExitPointImageRegion;
-    }
-
-    public TextureRegion getTrapImageRegion() {
-        return TrapImageRegion;
-    }
-
-    public TextureRegion getEnemyImageRegion() {
-        return EnemyImageRegion;
-    }
-
-    public TextureRegion getKeyImageRegion() {
-        return KeyImageRegion;
-    }
 
     /**
      * Cleans up resources when the game is disposed.
@@ -197,9 +115,6 @@ public class MazeRunnerGame extends Game {
         return skin;
     }
 
-    public Animation<TextureRegion> getCharacterDownAnimation() {
-        return characterDownAnimation;
-    }
 
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
@@ -211,18 +126,6 @@ public class MazeRunnerGame extends Game {
 
     public GameScreen getGameScreen() {
         return gameScreen;
-    }
-
-    public Animation<TextureRegion> getCharacterUpAnimation() {
-        return characterUpAnimation;
-    }
-
-    public Animation<TextureRegion> getCharacterLeftAnimation() {
-        return characterLeftAnimation;
-    }
-
-    public Animation<TextureRegion> getCharacterRightAnimation() {
-        return characterRightAnimation;
     }
 
 }
