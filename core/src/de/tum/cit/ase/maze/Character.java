@@ -10,9 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-import javax.swing.*;
-
-public class Character extends GameObject {
+ public class Character extends GameObject {
     //private float x, y;
     private boolean hasKey;
     private int lives;
@@ -53,35 +51,7 @@ public class Character extends GameObject {
         camera = new OrthographicCamera();
         camera.setToOrtho(true);
         font = game.getSkin().getFont("font");
-    }
 
-    public Animation<TextureRegion> getAnimation() {
-        return animation;
-    }
-
-    public boolean isHasKey() {
-        return hasKey;
-    }
-
-    public void setHasKey(boolean hasKey) {
-        this.hasKey = hasKey;
-    }
-
-    public int getLives() {
-        return lives;
-    }
-
-    public void setLives(int lives) {
-        this.lives = lives;
-    }
-
-    public void update(float delta) {
-        stateTime += delta;
-    }
-
-
-    public float getStateTime() {
-        return stateTime;
     }
 
     /**
@@ -118,24 +88,6 @@ public class Character extends GameObject {
         characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
     }
 
-
-    public static Animation<TextureRegion> getCharacterDownAnimation() {
-        return characterDownAnimation;
-    }
-
-    public static Animation<TextureRegion> getCharacterUpAnimation() {
-        return characterUpAnimation;
-    }
-
-    public static Animation<TextureRegion> getCharacterLeftAnimation() {
-        return characterLeftAnimation;
-    }
-
-    public static Animation<TextureRegion> getCharacterRightAnimation() {
-        return characterRightAnimation;
-    }
-
-
     public void move() {
 
     /**
@@ -165,34 +117,71 @@ public class Character extends GameObject {
     }
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
-        characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-        setY((int) getY() + 5);
-        shouldMove = true;
+            characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+            if (calculateDistanceToWallFromBottom() > 5) {
+                setY((int) getY() + 5);
+            }
+            shouldMove = true;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
+            characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+            if (calculateDistanceToWallFromTop() < 5) {
+                setY((int) getY() - 5);
+            }
+            shouldMove = true;
 
-    } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
-        characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-        setY((int) getY() - 5);
-        shouldMove = true;
-
-    } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-        characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-        setX((int) getX() - 5);
-        shouldMove = true;
-
-    } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-        characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-        setX((int) getX() + 5);
-        shouldMove = true;
-
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
+            characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+            if (calculateDistanceToWallFromRight() < 5) {
+                setX((int) getX() - 5);
+            }
+            shouldMove = true;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+            characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+            if (calculateDistanceToWallFromLeft() > 5) {
+                setX((int) getX() + 5);
+            }
+            shouldMove = true;
         }
+
     }
+
+
+     private float calculateDistanceToWallFromLeft() {
+         return (GameScreen.getWallX() - 100) - getX();
+     }
+     private float calculateDistanceToWallFromRight() {
+         return (50 -GameScreen.getWallX()) - getX();
+     }
+     private float calculateDistanceToWallFromTop() {
+         return (50 - GameScreen.getWallY()) - getY();
+
+     }
+     private float calculateDistanceToWallFromBottom() {
+         return (GameScreen.getWallY() - 50) - getY();
+
+     }
+
+
+
+    public static Animation<TextureRegion> getCharacterDownAnimation() {
+        return characterDownAnimation;
+    }
+
+    public static Animation<TextureRegion> getCharacterUpAnimation() {
+        return characterUpAnimation;
+    }
+
+    public static Animation<TextureRegion> getCharacterLeftAnimation() {
+        return characterLeftAnimation;
+    }
+
+    public static Animation<TextureRegion> getCharacterRightAnimation() {
+        return characterRightAnimation;
+    }
+
 
     public TextureRegion getCharacterRegion() {
         return characterRegion;
-    }
-
-    public boolean isTextVisible() {
-        return isTextVisible;
     }
 
     public boolean isShouldMove() {
@@ -202,10 +191,6 @@ public class Character extends GameObject {
 
     public void setTextVisible(boolean textVisible) {
         isTextVisible = textVisible;
-    }
-
-    public void setShouldMove(boolean shouldMove) {
-        this.shouldMove = shouldMove;
     }
 
     public void setCharacterRegion(TextureRegion characterRegion) {

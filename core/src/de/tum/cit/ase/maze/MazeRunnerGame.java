@@ -25,7 +25,6 @@ public class MazeRunnerGame extends Game {
 
     // UI Skin
     private Skin skin;
-    private Map map;
 
 
 
@@ -92,6 +91,14 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void goToLevelScreen(){
+        this.setScreen(new LevelScreen(this)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
 
 
 
@@ -118,14 +125,6 @@ public class MazeRunnerGame extends Game {
 
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
-    }
-
-    public MenuScreen getMenuScreen() {
-        return menuScreen;
-    }
-
-    public GameScreen getGameScreen() {
-        return gameScreen;
     }
 
 }

@@ -4,10 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
 public class Map {
 
 
@@ -17,7 +13,6 @@ public class Map {
     private static TextureRegion TrapImageRegion;
     private static TextureRegion EnemyImageRegion;
     private static TextureRegion KeyImageRegion;
-    private static TextureRegion BGImageRegion;
     private static TextureRegion FloorImageRegion;
 
 
@@ -37,17 +32,11 @@ public class Map {
         TrapImageRegion = new TextureRegion(map, 16, 96, frameWidth, frameHeight);
         EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
         KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
-        BGImageRegion =  new TextureRegion(map, 16, 16, frameWidth, frameHeight);
-        FloorImageRegion = new TextureRegion(map, 96, 32, frameWidth, frameHeight);
+        FloorImageRegion = new TextureRegion(map, 1000, 1000, frameWidth, frameHeight);
     }
 
     public static TextureRegion getFloorImageRegion() {
         return FloorImageRegion;
-    }
-
-
-    public TextureRegion getBGImageRegion() {
-        return BGImageRegion;
     }
 
     public static TextureRegion getWallImageRegion() {

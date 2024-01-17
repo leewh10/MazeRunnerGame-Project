@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -13,8 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
 
 /**
  * The MenuScreen class is responsible for displaying the main menu of the game.
@@ -33,6 +32,7 @@ public class MenuScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
+
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
@@ -41,7 +41,7 @@ public class MenuScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Welcome to our the NootNootGame!", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Welcome to the NootNootGame!", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
         TextButton goToGameButton = new TextButton("Go To Game", game.getSkin());
@@ -49,35 +49,9 @@ public class MenuScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToGame(); // Change to the game screen when button is pressed
+                game.goToLevelScreen(); // Change to the game screen when button is pressed
             }
         });
-
-
-
-
-
-        // Create and add a button to go to the level screen
-        TextButton goToLevel = new TextButton("Go To Level", game.getSkin());
-        table.add(goToLevel).width(300).row();
-        goToLevel.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps"));
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    // Handle the selected file as needed
-                    System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-                }
-            }
-        });
-
-
-
     }
 
     @Override
