@@ -22,6 +22,7 @@ public class Map {
 
 
 
+
         int frameWidth = 16;
         int frameHeight = 15;
 

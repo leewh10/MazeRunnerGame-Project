@@ -39,6 +39,9 @@ public class GameScreen implements Screen {
 
     private static int[][] mazeData;
     private final BitmapFont font;
+    private Enemy enemy;
+    private float enemyX;
+    private float enemyY;
 
 
 
@@ -71,6 +74,9 @@ public class GameScreen implements Screen {
                 characterAnimation);
         camera.position.set(character.getX(), character.getY(), 0);
         camera.update();
+
+        enemy = new Enemy(getEnemyX(),getEnemyY(),20f,1000,this);
+        Enemy.loadEnemyAnimation();
     }
 
 
@@ -78,7 +84,7 @@ public class GameScreen implements Screen {
 
         Properties properties = new Properties();
 
-        String filePath = "C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps\\level-" + level + ".properties";
+        String filePath = "C:\\Users\\wonhy\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps\\level-" + level + ".properties";
 
         try (FileInputStream input = new FileInputStream(filePath)) {
             properties.load(input);
@@ -156,7 +162,51 @@ public class GameScreen implements Screen {
                     break;
                 case 4:
                     // Enemy (dynamic obstacle)
-                    game.getSpriteBatch().draw(Map.getEnemyImageRegion(), mazeX, mazeY, 50, 50);
+//                    game.getSpriteBatch().draw(Map.getEnemyImageRegion(), mazeX, mazeY, 50, 50);
+//                    enemy.move(delta);
+//                    game.getSpriteBatch().draw(
+//                            enemy.render(delta),
+//                            mazeX,
+//                            mazeY,
+//                            50,
+//                            50
+//                    );
+//                    enemy.setX((int) mazeX);
+//                    enemy.setY((int) mazeY);
+//                    game.getSpriteBatch().draw(
+//                            enemy.render(delta),
+//                            enemy.getX(),
+//                            enemy.getY(),
+//                            50,
+//                            50
+//                    );
+//                    enemy.move(delta);
+//                    game.getSpriteBatch().draw(
+//                            enemy.render(delta),
+//                            getEnemyX(),
+//                            getEnemyY(),
+//                            50,
+//                            50
+//                    );
+//                    enemy.move(delta);
+////
+//                    game.getSpriteBatch().draw(
+//                            enemy.render(delta),
+//                            mazeX,
+//                            mazeY,
+//                            50,
+//                            50
+//                    );
+//                    enemy.move(delta);
+//
+//                    //ENEMY MOVES WITH THE CODE BELOW (DOESN'T START AT THE RIGHT POSITIONS THOUGH)
+                    game.getSpriteBatch().draw(
+                            enemy.render(delta),
+                            enemy.getX() - 96,
+                            enemy.getY() - 64,
+                            50,
+                            50
+                    );
                     break;
                 case 5:
                     // Key
@@ -267,8 +317,29 @@ public class GameScreen implements Screen {
         return wallY;
     }
 
+    public Enemy getEnemy() {
+        return enemy;
+    }
 
+    public void setEnemy(Enemy enemy) {
+        this.enemy = enemy;
+    }
 
+    public float getEnemyX() {
+        return enemyX;
+    }
+
+    public void setEnemyX(float enemyX) {
+        this.enemyX = enemyX;
+    }
+
+    public float getEnemyY() {
+        return enemyY;
+    }
+
+    public void setEnemyY(float enemyY) {
+        this.enemyY = enemyY;
+    }
 
     @Override
     public void resize(int width, int height) {
