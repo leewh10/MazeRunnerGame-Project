@@ -16,10 +16,11 @@ import javax.swing.*;
 import java.io.File;
 
 
-public class VictoryScreen implements Screen {
+public class PauseScreen implements Screen {
     private final Stage stage;
+    private static boolean reset;
 
-    public VictoryScreen(MazeRunnerGame game, GameScreen gameScreen) {
+    public PauseScreen(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -32,14 +33,24 @@ public class VictoryScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("VICTORY", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Game Paused", game.getSkin(), "title")).padBottom(80).row();
+
+        TextButton resumeGameButton = new TextButton("Resume", game.getSkin());
+        table.add(resumeGameButton).width(400).row();
+        resumeGameButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                reset = false;
+                game.goToGame();
+            }
+        });
 
         TextButton restartGameButton = new TextButton("Restart", game.getSkin());
         table.add(restartGameButton).width(400).row();
         restartGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                PauseScreen.setReset(true);
+                reset = true;
                 game.goToGame();
             }
         });
@@ -59,7 +70,7 @@ public class VictoryScreen implements Screen {
                     String path = selectedFile.getAbsolutePath();
 
                     GameScreen.loadMazeDataFromPropertiesFile(path);
-                    PauseScreen.setReset(true);
+                    reset = true;
                     game.goToGame();
                 }
 
@@ -75,6 +86,14 @@ public class VictoryScreen implements Screen {
                 Gdx.app.exit();
             }
         });
+    }
+
+    public static boolean isReset() {
+        return reset;
+    }
+
+    public static void setReset(boolean reset) {
+        PauseScreen.reset = reset;
     }
 
     @Override

@@ -20,7 +20,6 @@ public class Enemy extends GameObject{
     private float speed;
     private boolean movingRight;
     private float oscillationDistance;
-    private float initialX;
     private float sinusInput = 0f;
     private TextureRegion enemyRegion;
 
@@ -45,12 +44,11 @@ public class Enemy extends GameObject{
         this.speed = speed;
         this.movingRight = true;
         this.oscillationDistance = oscillationDistance;
-        this.initialX = gameScreen.getEnemyX();
         this.gameScreen = gameScreen;
         initialise();
     }
 
-    public static void loadEnemyAnimation() {
+    public static void loadEnemyAnimation(int level) {
         Texture enemySheet = new Texture(Gdx.files.internal("mobs.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -64,16 +62,16 @@ public class Enemy extends GameObject{
             enemyRightFrames.add(new TextureRegion(enemySheet, col * frameWidth, 6 * frameWidth, frameWidth, frameHeight));
         }
 
-        enemyStillAnimation = new Animation<>(0.5f, enemyStillFrames);
-        enemyLeftAnimation = new Animation<>(0.5f, enemyLeftFrames);
-        enemyRightAnimation = new Animation<>(0.5f, enemyRightFrames);
+        enemyStillAnimation = new Animation<>(3f, enemyStillFrames);
+        enemyLeftAnimation = new Animation<>(3f, enemyLeftFrames);
+        enemyRightAnimation = new Animation<>(3f, enemyRightFrames);
     }
 
     public void initialise() {
         // Check if the enemy animation is not loaded
         if (enemyStillAnimation == null) {
             // Load the enemy animation frames
-            loadEnemyAnimation();
+            loadEnemyAnimation(gameScreen.getCurrentLevel());
         }
 
         // Set the initial frame of the animation
@@ -86,19 +84,16 @@ public class Enemy extends GameObject{
         // delta = the time elapsed since the last frame or update
         // deltaX = the horizontal distance the enemy should move in the current frame
         // Move the enemy horizontally (right and left)
+
         float deltaX = speed * (movingRight ? 1 : -1);
         x += deltaX * delta;
 
         // Update the enemy state based on movement direction
         currentState = (deltaX > 0) ? MOVING_RIGHT : MOVING_LEFT;
 
-        if (getX() <= gameScreen.getEnemyX() - oscillationDistance || getX() >= gameScreen.getEnemyX() + oscillationDistance) {
+        if (getX() <= gameScreen.getEnemyX()|| getX() >= gameScreen.getEnemyX() + 2 * oscillationDistance) {
             movingRight = !movingRight;
         }
-
-//        if (gameScreen.getEnemyX() <= initialX - oscillationDistance || gameScreen.getEnemyX() >= initialX + oscillationDistance) {
-//            movingRight = !movingRight;
-//        }
     }
 
     public TextureRegion render(float delta) {
@@ -116,44 +111,6 @@ public class Enemy extends GameObject{
         // Get the current frame of the animation at the updated state time
         // The 'true' parameter indicates looping of the animation
         enemyRegion = currentAnimation.getKeyFrame(stateTime,true);
-        return enemyRegion;
-    }
-
-
-    //Getters
-    public static Animation<TextureRegion> getEnemyStillAnimation() {
-        return enemyStillAnimation;
-    }
-
-    public static Animation<TextureRegion> getEnemyLeftAnimation() {
-        return enemyLeftAnimation;
-    }
-
-    public static Animation<TextureRegion> getEnemyRightAnimation() {
-        return enemyRightAnimation;
-    }
-
-    public float getStateTime() {
-        return stateTime;
-    }
-
-    public float getSpeed() {
-        return speed;
-    }
-
-    public boolean isMovingRight() {
-        return movingRight;
-    }
-
-    public float getOscillationDistance() {
-        return oscillationDistance;
-    }
-
-    public float getInitialX() {
-        return initialX;
-    }
-
-    public TextureRegion getEnemyRegion() {
         return enemyRegion;
     }
 

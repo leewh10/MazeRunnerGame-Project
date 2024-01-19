@@ -3,12 +3,8 @@ package de.tum.cit.ase.maze;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
@@ -19,14 +15,13 @@ public class MazeRunnerGame extends Game {
     // Screens
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
+    private PauseScreen pauseScreen;
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
 
     // UI Skin
     private Skin skin;
-
-
 
 
     /**
@@ -48,10 +43,9 @@ public class MazeRunnerGame extends Game {
         // Load UI skin
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json"));
 
-        setScreen(new GameScreen(this));
 
         // Load game background
-        Map.loadBackground();
+        GameMap.loadBackground();
 
 
         // Load character animation
@@ -61,8 +55,7 @@ public class MazeRunnerGame extends Game {
         // Background sound
         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
         backgroundMusic.setLooping(true);
-        backgroundMusic.play();
-
+        //backgroundMusic.play();
 
         goToMenu(); // Navigate to the menu screen
 
@@ -80,23 +73,60 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+
     /**
      * Switches to the game screen.
      */
     public void goToGame() {
-        this.setScreen(new GameScreen(this)); // Set the current screen to GameScreen
+        this.setScreen(new GameScreen(this));
         if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen.dispose();
             menuScreen = null;
         }
     }
 
-    public void goToLevelScreen(){
-        this.setScreen(new LevelScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
+    public void goToGameOverScreen(){
+        this.setScreen(new GameOverScreen(this));
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
         }
+    }
+    public void goToVictoryScreen(){
+        this.setScreen(new VictoryScreen(this, gameScreen));
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+    }
+
+
+    public void goToPauseScreen() {
+        this.setScreen(new PauseScreen(this,gameScreen));
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+    }
+
+    public void resumeGame() {
+        Character.loadCharacterAnimation();
+        Character.resetAnimation();
+
+        if (gameScreen == null) {
+            gameScreen = new GameScreen(this); // Create a new GameScreen instance if not already created
+            this.setScreen(gameScreen); // Set the current screen to the new GameScreen instance
+        }
+
+        if (pauseScreen != null) {
+            pauseScreen.dispose();
+            pauseScreen = null;
+        }
+
+        Character.setCurrentAnimation(Character.getCharacterDownAnimation());
+
+        //Gdx.input.setInputProcessor(gameScreen.stage);
+        goToGame();
     }
 
 
@@ -107,13 +137,15 @@ public class MazeRunnerGame extends Game {
      */
     @Override
     public void dispose() {
-        getScreen().hide(); // Hide the current screen
-        getScreen().dispose(); // Dispose the current screen
+        if (gameScreen != null) {
+            gameScreen.dispose(); // Dispose the game screen if it exists
+            gameScreen = null;
+        }
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
 
+        super.dispose(); // Make sure to call the superclass method
 
-        //MapImageRegion.dispose();
     }
 
 
@@ -126,5 +158,6 @@ public class MazeRunnerGame extends Game {
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
     }
+
 
 }

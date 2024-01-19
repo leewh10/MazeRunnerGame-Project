@@ -10,12 +10,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
+
  public class Character extends GameObject {
-    //private float x, y;
-    private boolean hasKey;
+
+     private  boolean hasKey;
     private int lives;
     private final Animation<TextureRegion> animation;
-    private float stateTime;
+    private static float stateTime;
 
 
 
@@ -33,9 +34,15 @@ import com.badlogic.gdx.utils.Array;
     private final OrthographicCamera camera;
     private final MazeRunnerGame game;
     private final BitmapFont font;
-    private GameScreen gameScreen;
+    private final GameScreen gameScreen;
+    private boolean isKeyPressed;
+
+     private long lastCollisionTime;
+     private static final long COLLISION_COOLDOWN = 3000; // for 3 seconds, the character doesn't lose its lives
 
 
+
+     private static Animation<TextureRegion> currentAnimation;
 
 
     //Constructor
@@ -45,16 +52,27 @@ import com.badlogic.gdx.utils.Array;
         this.hasKey = hasKey;
         this.lives = lives;
         this.animation = animation;
-        this.stateTime = 0f;
+        stateTime = 0f;
         this.gameScreen = gameScreen;
 
         camera = new OrthographicCamera();
         camera.setToOrtho(true);
         font = game.getSkin().getFont("font");
 
+        currentAnimation = getCharacterDownAnimation();
+
     }
 
-    /**
+     public static void resetAnimation() {
+         // Reset the animation to the default animation
+         currentAnimation = getCharacterDownAnimation();
+
+         // Reset the state time to start the animation from the beginning
+         stateTime = 0f;
+     }
+
+
+     /**
      * Loads the character animation from the character.png file.
      */
     public static void loadCharacterAnimation() {
@@ -89,12 +107,14 @@ import com.badlogic.gdx.utils.Array;
     }
 
     public void move() {
+            stateTime += Gdx.graphics.getDeltaTime();
 
-    /**
-     * boolean for the text showing
-     */
+
+        /**
+         * boolean for the text showing
+         */
         if(isTextVisible) {
-        font.draw(game.getSpriteBatch(), "Press ESC to go to menu", gameScreen.getTextX(), gameScreen.getTextY());
+        font.draw(game.getSpriteBatch(), "Press ESC to Pause", gameScreen.getTextX(), gameScreen.getTextY());
     }
 
     /**
@@ -117,52 +137,153 @@ import com.badlogic.gdx.utils.Array;
     }
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
+            currentAnimation = getCharacterUpAnimation();
             characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            if (calculateDistanceToWallFromBottom() > 5) {
+            /*if ((GameScreen.getWallY() - 50 - getY()) > 5) {
                 setY((int) getY() + 5);
             }
+
+             */
+            setY((int) getY() + 5);
+
             shouldMove = true;
+            isKeyPressed = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
             characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            if (calculateDistanceToWallFromTop() < 5) {
+            currentAnimation = getCharacterDownAnimation();
+            if ((50 - GameScreen.getWallY() - getY()) <5) {
                 setY((int) getY() - 5);
             }
+
             shouldMove = true;
+            isKeyPressed = true;
 
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            if (calculateDistanceToWallFromRight() < 5) {
+            currentAnimation = getCharacterLeftAnimation();
+            if ((GameScreen.getWallX() - 100) - getX() > 5) {
                 setX((int) getX() - 5);
             }
+
             shouldMove = true;
+            isKeyPressed = true;
+
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
             characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            if (calculateDistanceToWallFromLeft() > 5) {
+            currentAnimation = getCharacterRightAnimation();
+
+            /*if ((GameScreen.getWallX() - 100 - getX())>5) {
                 setX((int) getX() + 5);
             }
+
+             */
+            setX((int) getX() + 5);
+
             shouldMove = true;
+            isKeyPressed = true;
+
+        }
+        else {
+            isKeyPressed = false;
         }
 
     }
 
+     private boolean isNoCollisionWithWalls(float newX, float newY) {
+         // Iterate over each wall in mazeData
 
-     private float calculateDistanceToWallFromLeft() {
-         return (GameScreen.getWallX() - 100) - getX();
+         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
+             int x = GameScreen.getMazeData()[i][0];
+             int y = GameScreen.getMazeData()[i][1];
+             int variable = GameScreen.getMazeData()[i][2];
+
+             // Check only for walls (variable 0)
+             if (variable == 0) {
+                 // Calculate the actual position of the wall on the screen
+                 float wallX = x * 50;
+                 float wallY = y * 50;
+
+                 // Assuming the character is a rectangle, check for collision
+                 if (newX < wallX + 50 && newX + 64 > wallX &&
+                         newY < wallY + 50 && newY + 128 > wallY) {
+                     return false; // Collision detected with this wall
+                 }
+             }
+         }
+
+         // No collision with any walls
+         return true;
      }
-     private float calculateDistanceToWallFromRight() {
-         return (50 -GameScreen.getWallX()) - getX();
+
+     public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
+         //retrieves the current time in milliseconds.
+         long currentTime = System.currentTimeMillis();
+
+         // Check if enough time has passed since the last collision
+         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {
+             float characterX = getX();
+             float characterY = getY();
+             float characterWidth = 64;
+             float characterHeight = 128;
+
+             float keyWidth = 50;
+             float keyHeight = 50;
+
+             // Check for collision between character and enemy
+             if (characterX < enemyX1 + keyWidth &&
+                     characterX + characterWidth > enemyX1 &&
+                     characterY < enemyY1 + keyHeight &&
+                     characterY + characterHeight > enemyY1) {
+
+                 // Set the last collision time
+                 lastCollisionTime = currentTime;
+                 return true;
+             }
+         }
+         return false;
      }
-     private float calculateDistanceToWallFromTop() {
-         return (50 - GameScreen.getWallY()) - getY();
 
+     public boolean collidesWithKey(float keyX, float keyY) {
+         float characterX = getX();
+         float characterY = getY();
+         float characterWidth = 64;
+         float characterHeight = 128;
+
+         float keyWidth = 50;
+         float keyHeight = 50;
+
+         return characterX < keyX + keyWidth &&
+                 characterX + characterWidth > keyX &&
+                 characterY < keyY + keyHeight &&
+                 characterY + characterHeight > keyY;
      }
-     private float calculateDistanceToWallFromBottom() {
-         return (GameScreen.getWallY() - 50) - getY();
+     public boolean collidesWithTrap(float trapX, float trapY) {
+         //retrieves the current time in milliseconds.
+         long currentTime = System.currentTimeMillis();
 
+         // Check if enough time has passed since the last collision
+         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {
+             float characterX = getX();
+             float characterY = getY();
+             float characterWidth = 64;
+             float characterHeight = 128;
+
+             float trapWidth = 50;
+             float trapHeight = 50;
+
+             // Check for collision between character and enemy
+             if (characterX < trapX + trapWidth &&
+                     characterX + characterWidth > trapX &&
+                     characterY < trapY + trapHeight &&
+                     characterY + characterHeight > trapY) {
+
+                 // Set the last collision time
+                 lastCollisionTime = currentTime;
+                 return true;
+             }
+         }
+         return false;
      }
-
-
-
     public static Animation<TextureRegion> getCharacterDownAnimation() {
         return characterDownAnimation;
     }
@@ -184,12 +305,27 @@ import com.badlogic.gdx.utils.Array;
         return characterRegion;
     }
 
-    public boolean isShouldMove() {
+     public static Animation<TextureRegion> getCurrentAnimation() {
+         return currentAnimation;
+     }
+
+     public int getLives() {
+         return lives;
+     }
+
+     public boolean isHasKey() {
+         return hasKey;
+     }
+
+     public boolean isShouldMove() {
         return shouldMove;
     }
 
+     public boolean isKeyPressed() {
+         return isKeyPressed;
+     }
 
-    public void setTextVisible(boolean textVisible) {
+     public void setTextVisible(boolean textVisible) {
         isTextVisible = textVisible;
     }
 
@@ -197,15 +333,24 @@ import com.badlogic.gdx.utils.Array;
         this.characterRegion = characterRegion;
     }
 
+     public static void setCurrentAnimation(Animation<TextureRegion> currentAnimation) {
+         Character.currentAnimation = currentAnimation;
+     }
 
+     public void setHasKey(boolean hasKey) {
+         this.hasKey = hasKey;
+     }
 
+     public void setLives(int lives) {
+         this.lives = lives;
+     }
 
-    public void render(SpriteBatch batch) {
-        TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
+     public void render(SpriteBatch batch) {
+         TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
          float width = 4*currentFrame.getRegionWidth();
          float height = 4* currentFrame.getRegionHeight();
 
          batch.draw(currentFrame, x,y,width,height);
-    }
+     }
 }
 

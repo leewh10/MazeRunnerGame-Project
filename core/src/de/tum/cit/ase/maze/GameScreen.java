@@ -1,19 +1,16 @@
-
 package de.tum.cit.ase.maze;
 
-        import com.badlogic.gdx.Gdx;
-        import com.badlogic.gdx.Input;
-        import com.badlogic.gdx.Screen;
-        import com.badlogic.gdx.graphics.OrthographicCamera;
-        import com.badlogic.gdx.graphics.g2d.Animation;
-        import com.badlogic.gdx.graphics.g2d.BitmapFont;
-        import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-        import com.badlogic.gdx.graphics.g2d.TextureRegion;
-        import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.ScreenUtils;
 
-        import java.io.FileInputStream;
-        import java.io.IOException;
-        import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -21,30 +18,40 @@ package de.tum.cit.ase.maze;
  */
 public class GameScreen implements Screen {
 
-    private final MazeRunnerGame game;
-    private final OrthographicCamera camera;
+    private static MazeRunnerGame game;
+    private OrthographicCamera camera;
+    public InputProcessor stage;
 
-    private float sinusInput = 0f;
+    private static float sinusInput = 0f;
     private SpriteBatch batch;
     private static Character character;
 
     private float textX;
     private float textY;
 
-    private int entryX;
-    private int entryY;
+    private static int entryX;
+    private static int entryY;
 
     private static int wallX;
     private static int wallY;
 
     private static int[][] mazeData;
-    private final BitmapFont font;
+    private BitmapFont font;
     private Enemy enemy;
     private float enemyX;
     private float enemyY;
 
+    private final int initialLives;
 
+    private int currentLevel;
 
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
+    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -57,34 +64,33 @@ public class GameScreen implements Screen {
         // Create and configure the camera for the game view
         camera = new OrthographicCamera();
         camera.setToOrtho(true);
-        camera.zoom = 0.75f;
+        camera.zoom = 0.80f;
         font = game.getSkin().getFont("font");
 
 
         Animation<TextureRegion> characterAnimation = Character.getCharacterDownAnimation();
 
         // Starting position - use the entry coordinates
+        if (character == null || PauseScreen.isReset()) {
+            character = new Character(this, game, getEntryX() + 100, getEntryY(), false, 3, characterAnimation);
+            camera.position.set(character.getX(), character.getY(), 0);
+            camera.update();
+        }
 
-        character = new Character(this,
-                game,
-                getEntryX(),
-                getEntryY(),
-                false,
-                3,
-                characterAnimation);
         camera.position.set(character.getX(), character.getY(), 0);
         camera.update();
 
-        enemy = new Enemy(getEnemyX(),getEnemyY(),20f,1000,this);
-        Enemy.loadEnemyAnimation();
+        enemy = new Enemy(getEnemyX(),getEnemyY(),5f,50,this);
+        Enemy.loadEnemyAnimation(getCurrentLevel());
+
+        initialLives = character.getLives();
+        GameMap.lifeImageAnimation();
     }
 
 
-    public static void loadMazeDataFromPropertiesFile(int level) {
+    public static void loadMazeDataFromPropertiesFile(String filePath) {
 
         Properties properties = new Properties();
-
-        String filePath = "C:\\Users\\wonhy\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps\\level-" + level + ".properties";
 
         try (FileInputStream input = new FileInputStream(filePath)) {
             properties.load(input);
@@ -108,23 +114,56 @@ public class GameScreen implements Screen {
         }
     }
 
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Screen interface methods with necessary functionality
     @Override
     public void render(float delta) {
+        if(Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
+            camera.zoom += 0.01f;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.COMMA)) {
+            camera.zoom -= 0.01f;
+        }
+
         // Check for escape key press to go back to the menu
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.goToMenu();
+            game.goToPauseScreen();
+        }
+
+        if(character.getLives() <= 0) {
+            game.goToGameOverScreen();
+        }
+
+        /**
+         * checks for the key then allows the character to leave the game;
+         */
+
+        for (int i = 0; i < mazeData.length; i++) {
+            int x = mazeData[i][0];
+            int y = mazeData[i][1];
+            int variable = mazeData[i][2];
+
+            // Calculate the actual position on the screen
+            float exitX = x * 50;
+            float exitY = y * 50;
+
+            if (variable == 2) { // Check if it's an exit
+                if(character.isHasKey()) {
+                    if (character.getX() < exitX + 50 && character.getX() + 64 > exitX &&
+                        character.getY() < exitY  && character.getY() + 30 > exitY) {
+                    game.goToVictoryScreen();
+                    break; // Exit the loop once game over screen is triggered
+                    }
+                }
+            }
         }
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
         game.getSpriteBatch().setProjectionMatrix(camera.combined);
         game.getSpriteBatch().begin();
-
-
-        font.draw(game.getSpriteBatch(), "LIVES", camera.viewportWidth -5, camera.viewportHeight-5);
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,77 +183,63 @@ public class GameScreen implements Screen {
                     // Wall
                     wallX = (int) mazeX;
                     wallY = (int) mazeY;
-                    game.getSpriteBatch().draw(Map.getWallImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(GameMap.getWallImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 1:
                     // Entry point
                     entryX = (int) mazeX;
                     entryY = (int) mazeY;
-                    game.getSpriteBatch().draw(Map.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(GameMap.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 2:
                     // Exit
-                    game.getSpriteBatch().draw(Map.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 3:
                     // Trap (static obstacle)
-                    game.getSpriteBatch().draw(Map.getTrapImageRegion(), mazeX, mazeY, 50, 50);
+                    float trapX = mazeX;
+                    float trapY = mazeY;
+                    if (character.collidesWithTrap(trapX, trapY)) {
+                        character.setLives(character.getLives() - 1);
+                    }
+                    game.getSpriteBatch().draw(GameMap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
+
                     break;
                 case 4:
                     // Enemy (dynamic obstacle)
 //                    game.getSpriteBatch().draw(Map.getEnemyImageRegion(), mazeX, mazeY, 50, 50);
-//                    enemy.move(delta);
-//                    game.getSpriteBatch().draw(
-//                            enemy.render(delta),
-//                            mazeX,
-//                            mazeY,
-//                            50,
-//                            50
-//                    );
-//                    enemy.setX((int) mazeX);
-//                    enemy.setY((int) mazeY);
-//                    game.getSpriteBatch().draw(
-//                            enemy.render(delta),
-//                            enemy.getX(),
-//                            enemy.getY(),
-//                            50,
-//                            50
-//                    );
-//                    enemy.move(delta);
-//                    game.getSpriteBatch().draw(
-//                            enemy.render(delta),
-//                            getEnemyX(),
-//                            getEnemyY(),
-//                            50,
-//                            50
-//                    );
-//                    enemy.move(delta);
-////
-//                    game.getSpriteBatch().draw(
-//                            enemy.render(delta),
-//                            mazeX,
-//                            mazeY,
-//                            50,
-//                            50
-//                    );
-//                    enemy.move(delta);
-//
-//                    //ENEMY MOVES WITH THE CODE BELOW (DOESN'T START AT THE RIGHT POSITIONS THOUGH)
+                    enemy.move(delta);
+                    float enemyX1 = mazeX + enemy.getX();
+                    float enemyY1 = mazeY + enemy.getY();
                     game.getSpriteBatch().draw(
                             enemy.render(delta),
-                            enemy.getX() - 96,
-                            enemy.getY() - 64,
+                            enemyX1,
+                            enemyY1,
                             50,
                             50
                     );
+
+                    if (character.collidesWithEnemy(enemyX1, enemyY1)) {
+                        character.setLives(character.getLives() - 1);
+                    }
                     break;
                 case 5:
                     // Key
-                    game.getSpriteBatch().draw(Map.getKeyImageRegion(), mazeX, mazeY, 50, 50);
+                    float keyX = mazeX;
+                    float keyY = mazeY;
+
+                    // Check for collision between character and key
+                    if (character.collidesWithKey(keyX, keyY)) {
+                        character.setHasKey(true);  // Update character's hasKey status
+                        // Remove key from maze data
+                        removeKeyFromMazeData(keyX, keyY);
+                    } else {
+                        game.getSpriteBatch().draw(GameMap.getKeyImageRegion(), mazeX, mazeY, 50, 50);
+                    }
                     break;
                 case 6:
                     // Floor
-                    game.getSpriteBatch().draw(Map.getFloorImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(GameMap.getFloorImageRegion(), mazeX, mazeY, 50, 50);
                     break;
             }
         }
@@ -240,7 +265,27 @@ public class GameScreen implements Screen {
         game.getSpriteBatch().setProjectionMatrix(camera.combined);
         game.getSpriteBatch().begin(); // Important to call this before drawing anything
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Character's Lives
+         */
+        float lifeTextX = camera.position.x - camera.viewportWidth / 10 - 500;
+        float lifeTextY = camera.position.y + camera.viewportHeight / 10 + 300;
+//        Map.renderLives(game.getSpriteBatch(), delta, camera.position.x + 140, camera.position.y + 70, character.getLives());
+        GameMap.renderLives(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
+        font.draw(game.getSpriteBatch(), "Lives: " + character.getLives(), lifeTextX, lifeTextY);
+
+//        Map.lifeImageAnimation();
+
+        float keyTextX = camera.position.x - camera.viewportWidth / 10 - 550;
+        float keyTextY = camera.position.y + camera.viewportHeight / 10 + 340;
+
+        if (character.isHasKey()) {
+            font.draw(game.getSpriteBatch(), "Key Collected", keyTextX, keyTextY);
+        } else {
+            font.draw(game.getSpriteBatch(), "No Key", keyTextX, keyTextY);
+        }
 
         /**
          * character movement commands
@@ -263,23 +308,44 @@ public class GameScreen implements Screen {
         /**
          * creates the character
          */
-        game.getSpriteBatch().draw(
-                character.getCharacterRegion(), //character.getCharacterDownAnimation().getKeyFrame(sinusInput, true)
-                textX + 50,   // -96
-                textY,   // -64
-                64,
-                128
-        );
+        if(character.isKeyPressed()){
+            game.getSpriteBatch().draw(
+                    //character.getCharacterRegion(), //character.getCharacterDownAnimation().getKeyFrame(sinusInput, true)
+                    Character.getCurrentAnimation().getKeyFrame(sinusInput, true),
+                    textX,   // -96
+                    textY,   // -64
+                    64,
+                    128
+            );
+        }
+        else if (!character.isKeyPressed()){
+            game.getSpriteBatch().draw(
+                    character.getCharacterRegion(),
+                    textX,   // -96
+                    textY,   // -64
+                    64,
+                    128
+            );
+        }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
         game.getSpriteBatch().end();
         batch.setProjectionMatrix(camera.combined);
 
     }
-
-
+    private void removeKeyFromMazeData(float x, float y) {
+        for (int i = 0; i < mazeData.length; i++) {
+            int mazeX = mazeData[i][0] * 50;
+            int mazeY = mazeData[i][1] * 50;
+            if (x == mazeX && y == mazeY && mazeData[i][2] == 5) {
+                mazeData[i][2] = 6;  // Set variable to 0 to remove key from rendering
+                break;
+            }
+        }
+    }
 
     public float getSinusInput() {
         return sinusInput;
@@ -301,11 +367,11 @@ public class GameScreen implements Screen {
         this.textY = textY;
     }
 
-    public float getEntryX() {
+    public static float getEntryX() {
         return entryX;
     }
 
-    public float getEntryY() {
+    public static float getEntryY() {
         return entryY;
     }
 
@@ -341,6 +407,10 @@ public class GameScreen implements Screen {
         this.enemyY = enemyY;
     }
 
+    public static int[][] getMazeData() {
+        return mazeData;
+    }
+
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
@@ -353,6 +423,7 @@ public class GameScreen implements Screen {
     @Override
     public void resume() {
     }
+
 
     @Override
     public void show() {
@@ -376,4 +447,3 @@ public class GameScreen implements Screen {
 
 
 }
-
