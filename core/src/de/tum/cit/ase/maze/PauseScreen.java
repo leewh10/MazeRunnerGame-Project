@@ -51,6 +51,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = true;
+                GameScreen.resetKeyInMazeData();
                 game.goToGame();
             }
         });
@@ -61,7 +62,7 @@ public class PauseScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
+                JFileChooser fileChooser = new JFileChooser("C:\\Users\\wonhy\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
 
                 int result = fileChooser.showOpenDialog(null);
 
@@ -71,6 +72,7 @@ public class PauseScreen implements Screen {
 
                     GameScreen.loadMazeDataFromPropertiesFile(path);
                     reset = true;
+                    GameScreen.resetKeyInMazeData();
                     game.goToGame();
                 }
 

@@ -142,7 +142,6 @@ import com.badlogic.gdx.utils.Array;
             /*if ((GameScreen.getWallY() - 50 - getY()) > 5) {
                 setY((int) getY() + 5);
             }
-
              */
             setY((int) getY() + 5);
 
@@ -151,9 +150,10 @@ import com.badlogic.gdx.utils.Array;
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
             characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
             currentAnimation = getCharacterDownAnimation();
-            if ((50 - GameScreen.getWallY() - getY()) <5) {
-                setY((int) getY() - 5);
-            }
+//            if ((50 - GameScreen.getWallY() - getY()) <5) {
+//                setY((int) getY() - 5);
+//            }
+            setY((int) getY() - 5);
 
             shouldMove = true;
             isKeyPressed = true;
@@ -161,9 +161,10 @@ import com.badlogic.gdx.utils.Array;
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
             currentAnimation = getCharacterLeftAnimation();
-            if ((GameScreen.getWallX() - 100) - getX() > 5) {
-                setX((int) getX() - 5);
-            }
+//            if ((GameScreen.getWallX() - 100) - getX() > 5) {
+//                setX((int) getX() - 5);
+//            }
+            setX((int) getX() - 5);
 
             shouldMove = true;
             isKeyPressed = true;
@@ -175,7 +176,6 @@ import com.badlogic.gdx.utils.Array;
             /*if ((GameScreen.getWallX() - 100 - getX())>5) {
                 setX((int) getX() + 5);
             }
-
              */
             setX((int) getX() + 5);
 
@@ -223,8 +223,8 @@ import com.badlogic.gdx.utils.Array;
          if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {
              float characterX = getX();
              float characterY = getY();
-             float characterWidth = 64;
-             float characterHeight = 128;
+             float characterWidth = 36;
+             float characterHeight = 62;
 
              float keyWidth = 50;
              float keyHeight = 50;
@@ -246,8 +246,8 @@ import com.badlogic.gdx.utils.Array;
      public boolean collidesWithKey(float keyX, float keyY) {
          float characterX = getX();
          float characterY = getY();
-         float characterWidth = 64;
-         float characterHeight = 128;
+         float characterWidth = 36;
+         float characterHeight = 62;
 
          float keyWidth = 50;
          float keyHeight = 50;
@@ -265,8 +265,8 @@ import com.badlogic.gdx.utils.Array;
          if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {
              float characterX = getX();
              float characterY = getY();
-             float characterWidth = 64;
-             float characterHeight = 128;
+             float characterWidth = 36;
+             float characterHeight = 62;
 
              float trapWidth = 50;
              float trapHeight = 50;

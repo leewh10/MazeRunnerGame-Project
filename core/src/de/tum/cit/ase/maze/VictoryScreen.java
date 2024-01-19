@@ -40,6 +40,7 @@ public class VictoryScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(true);
+                GameScreen.resetKeyInMazeData();
                 game.goToGame();
             }
         });
@@ -60,6 +61,7 @@ public class VictoryScreen implements Screen {
 
                     GameScreen.loadMazeDataFromPropertiesFile(path);
                     PauseScreen.setReset(true);
+                    GameScreen.resetKeyInMazeData();
                     game.goToGame();
                 }
 

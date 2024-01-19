@@ -47,6 +47,9 @@ public class MazeRunnerGame extends Game {
         // Load game background
         GameMap.loadBackground();
 
+        // Load character's life animation
+        GameMap.lifeImageAnimation();
+
 
         // Load character animation
         Character.loadCharacterAnimation();

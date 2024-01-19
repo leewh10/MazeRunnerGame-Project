@@ -40,8 +40,10 @@ public class GameScreen implements Screen {
     private Enemy enemy;
     private float enemyX;
     private float enemyY;
+    private long exitTime;
+    private boolean showVictoryScreen = false;
+    private float exitAnimationDuration = 5f; //
 
-    private final int initialLives;
 
     private int currentLevel;
 
@@ -72,7 +74,7 @@ public class GameScreen implements Screen {
 
         // Starting position - use the entry coordinates
         if (character == null || PauseScreen.isReset()) {
-            character = new Character(this, game, getEntryX() + 100, getEntryY(), false, 3, characterAnimation);
+            character = new Character(this, game, getEntryX() + 100, getEntryY(), false, 5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
         }
@@ -83,8 +85,9 @@ public class GameScreen implements Screen {
         enemy = new Enemy(getEnemyX(),getEnemyY(),5f,50,this);
         Enemy.loadEnemyAnimation(getCurrentLevel());
 
-        initialLives = character.getLives();
         GameMap.lifeImageAnimation();
+        GameMap.exitImageAnimation();
+        GameMap.trapImageAnimation();
     }
 
 
@@ -149,15 +152,29 @@ public class GameScreen implements Screen {
             float exitX = x * 50;
             float exitY = y * 50;
 
-            if (variable == 2) { // Check if it's an exit
-                if(character.isHasKey()) {
-                    if (character.getX() < exitX + 50 && character.getX() + 64 > exitX &&
-                        character.getY() < exitY  && character.getY() + 30 > exitY) {
-                    game.goToVictoryScreen();
-                    break; // Exit the loop once game over screen is triggered
-                    }
-                }
-            }
+//            if (variable == 2) { // Check if it's an exit
+//                if(character.isHasKey()) {
+//                    if (character.getX() < exitX + 50 && character.getX() + 64 > exitX &&
+//                        character.getY() < exitY  && character.getY() + 30 > exitY) {
+//                        long currentTime = System.currentTimeMillis();
+//                        if (currentTime - exitTime >= VICTORY_COOLDOWN) {
+//                            game.getSpriteBatch().begin();
+//                            game.getSpriteBatch().draw(
+//                                    GameMap.renderExit(),
+//                                    exitX,
+//                                    exitY,
+//                                    50,
+//                                    50
+//                            );
+//                            exitTime = currentTime;
+//                            game.getSpriteBatch().end();
+//                        } else {
+//                        game.goToVictoryScreen();
+//                        }
+//                    break; // Exit the loop once game over screen is triggered
+//                    }
+//                }
+//            }
         }
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
@@ -192,13 +209,39 @@ public class GameScreen implements Screen {
                     game.getSpriteBatch().draw(GameMap.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 2:
-                    // Exit
-                    game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                    if (character.isHasKey()) {
+                        if (character.getX() < mazeX + 50 && character.getX() + 64 > mazeX &&
+                                character.getY() < mazeY && character.getY() + 30 > mazeY) {
+
+                            final long startTime = System.nanoTime();
+                            final long duration = 50000000L;
+
+                            // Update the stateTime to get the current frame of the animation
+                            GameMap.setExitStateTime(GameMap.getExitStateTime() + Gdx.graphics.getDeltaTime());
+
+                            // Draw the current frame of the door animation
+                            game.getSpriteBatch().draw(GameMap.getExitAnimation().getKeyFrame(GameMap.getExitStateTime(), true),
+                                    mazeX, mazeY, 50, 50);
+
+                            if (System.nanoTime() >= duration + startTime) {
+                                game.goToVictoryScreen();
+                            }
+                        } else {
+                            game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                        }
+                    } else {
+                        // Draw the static exit point image when the character is not at the exit
+                        game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                    }
+
+
                     break;
                 case 3:
                     // Trap (static obstacle)
                     float trapX = mazeX;
                     float trapY = mazeY;
+                    game.getSpriteBatch().draw(GameMap.renderTrap(),mazeX,mazeY,50,50);
+
                     if (character.collidesWithTrap(trapX, trapY)) {
                         character.setLives(character.getLives() - 1);
                     }
@@ -310,7 +353,6 @@ public class GameScreen implements Screen {
          */
         if(character.isKeyPressed()){
             game.getSpriteBatch().draw(
-                    //character.getCharacterRegion(), //character.getCharacterDownAnimation().getKeyFrame(sinusInput, true)
                     Character.getCurrentAnimation().getKeyFrame(sinusInput, true),
                     textX,   // -96
                     textY,   // -64
@@ -320,7 +362,7 @@ public class GameScreen implements Screen {
         }
         else if (!character.isKeyPressed()){
             game.getSpriteBatch().draw(
-                    character.getCharacterRegion(),
+                    Character.getCurrentAnimation().getKeyFrame(3, true),
                     textX,   // -96
                     textY,   // -64
                     64,
@@ -338,14 +380,22 @@ public class GameScreen implements Screen {
     }
     private void removeKeyFromMazeData(float x, float y) {
         for (int i = 0; i < mazeData.length; i++) {
-            int mazeX = mazeData[i][0] * 50;
-            int mazeY = mazeData[i][1] * 50;
-            if (x == mazeX && y == mazeY && mazeData[i][2] == 5) {
-                mazeData[i][2] = 6;  // Set variable to 0 to remove key from rendering
+            if (mazeData[i][2] == 5) {
+                mazeData[i][2] = 7;  // Set variable to 0 to remove key from rendering
                 break;
             }
         }
     }
+
+    public static void resetKeyInMazeData() {
+        for (int i = 0; i < mazeData.length; i++) {
+            if (mazeData[i][2] == 7) {
+                mazeData[i][2] = 5; // Reset key value to 5
+                break;
+            }
+        }
+    }
+
 
     public float getSinusInput() {
         return sinusInput;

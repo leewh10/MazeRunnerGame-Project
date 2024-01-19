@@ -16,18 +16,21 @@ public class GameMap {
     private static TextureRegion EnemyImageRegion;
     private static TextureRegion KeyImageRegion;
     private static TextureRegion FloorImageRegion;
+    private static TextureRegion ExitRegion;
+
 
     //Life Image
     private static Animation<TextureRegion> lifeAnimation;
+    private static Animation<TextureRegion> exitAnimation;
+    private static Animation<TextureRegion> trapAnimation;
     private static float lifeStateTime;
+    private static float exitStateTime;
+    private static float trapStateTime;
 
 
     public static void loadBackground() {
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));
         Texture extra = new Texture(Gdx.files.internal("mobs.png"));
-
-
-
 
         int frameWidth = 16;
         int frameHeight = 15;
@@ -36,7 +39,6 @@ public class GameMap {
         WallImageRegion = new TextureRegion(map, 16, 0, frameWidth, frameHeight);
         EntryPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
-        TrapImageRegion = new TextureRegion(map, 16, 96, frameWidth, frameHeight);
         EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
         KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
         FloorImageRegion = new TextureRegion(map, 1000, 1000, frameWidth, frameHeight);
@@ -70,7 +72,42 @@ public class GameMap {
             spriteBatch.draw(currentLifeFrame, lifeX + i * spacing, lifeY, lifeWidth, lifeHeight);
         }
     }
+    public static void exitImageAnimation() {
+        Texture exit = new Texture(Gdx.files.internal("things.png"));
+        int frameWidth = 16;
+        int frameHeight = 16;
+        int animationFrames = 4;
 
+        Array<TextureRegion> exitFrames = new Array<>(TextureRegion.class);
+        for (int row = 0; row < animationFrames; row++) {
+            exitFrames.add(new TextureRegion(exit, 0,row * frameHeight, frameWidth, frameHeight));
+        }
+        exitAnimation = new Animation<>(0.3f, exitFrames);
+    }
+
+    public static TextureRegion renderExit() {
+        exitStateTime += Gdx.graphics.getDeltaTime();
+        ExitRegion = exitAnimation.getKeyFrame(exitStateTime,true);
+        return ExitRegion;
+    }
+
+    public static void trapImageAnimation() {
+        Texture trap = new Texture(Gdx.files.internal("objects.png"));
+        int frameWidth = 16;
+        int frameHeight = 16;
+        int animationFrames = 7;
+
+        Array<TextureRegion> trapFrames = new Array<>(TextureRegion.class);
+        for (int col = 4; col < animationFrames; col++) {
+            trapFrames.add(new TextureRegion(trap, col * frameWidth,3 * frameHeight, frameWidth, frameHeight));
+        }
+        trapAnimation = new Animation<>(0.5f, trapFrames);
+    }
+    public static TextureRegion renderTrap() {
+        trapStateTime += Gdx.graphics.getDeltaTime();
+        TrapImageRegion = trapAnimation.getKeyFrame(trapStateTime,true);
+        return TrapImageRegion;
+    }
 
     public static TextureRegion getFloorImageRegion() {
         return FloorImageRegion;
@@ -107,5 +144,35 @@ public class GameMap {
     public static float getLifeStateTime() {
         return lifeStateTime;
     }
+    public static Animation<TextureRegion> getExitAnimation() {
+        return exitAnimation;
+    }
 
+    public static TextureRegion getExitRegion() {
+        return ExitRegion;
+    }
+
+    public static float getExitStateTime() {
+        return exitStateTime;
+    }
+
+    public static void setExitStateTime(float exitStateTime) {
+        GameMap.exitStateTime = exitStateTime;
+    }
+
+    public static Animation<TextureRegion> getTrapAnimation() {
+        return trapAnimation;
+    }
+
+    public static void setTrapAnimation(Animation<TextureRegion> trapAnimation) {
+        GameMap.trapAnimation = trapAnimation;
+    }
+
+    public static float getTrapStateTime() {
+        return trapStateTime;
+    }
+
+    public static void setTrapStateTime(float trapStateTime) {
+        GameMap.trapStateTime = trapStateTime;
+    }
 }
