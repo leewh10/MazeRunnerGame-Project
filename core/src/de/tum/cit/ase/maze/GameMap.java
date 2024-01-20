@@ -41,7 +41,7 @@ public class GameMap {
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
         EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
         KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
-        FloorImageRegion = new TextureRegion(map, 1000, 1000, frameWidth, frameHeight);
+        FloorImageRegion = new TextureRegion(map, 16, 16, frameWidth, frameHeight);
     }
 
     public static void lifeImageAnimation() {
@@ -101,7 +101,7 @@ public class GameMap {
         for (int col = 4; col < animationFrames; col++) {
             trapFrames.add(new TextureRegion(trap, col * frameWidth,3 * frameHeight, frameWidth, frameHeight));
         }
-        trapAnimation = new Animation<>(0.5f, trapFrames);
+        trapAnimation = new Animation<>(0.8f, trapFrames);
     }
     public static TextureRegion renderTrap() {
         trapStateTime += Gdx.graphics.getDeltaTime();

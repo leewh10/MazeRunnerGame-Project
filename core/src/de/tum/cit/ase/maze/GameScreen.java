@@ -1,6 +1,7 @@
 package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -51,9 +52,6 @@ public class GameScreen implements Screen {
         return currentLevel;
     }
 
-    public void setCurrentLevel(int currentLevel) {
-        this.currentLevel = currentLevel;
-    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -74,7 +72,7 @@ public class GameScreen implements Screen {
 
         // Starting position - use the entry coordinates
         if (character == null || PauseScreen.isReset()) {
-            character = new Character(this, game, getEntryX() + 100, getEntryY(), false, 5, characterAnimation);
+            character = new Character(this, game, getEntryX(), getEntryY(), false, 5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
         }
@@ -118,6 +116,8 @@ public class GameScreen implements Screen {
     }
 
 
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Screen interface methods with necessary functionality
@@ -131,51 +131,21 @@ public class GameScreen implements Screen {
         }
 
         // Check for escape key press to go back to the menu
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToPauseScreen();
         }
 
         if(character.getLives() <= 0) {
             game.goToGameOverScreen();
+            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("SpongeBobFail.mp3"));
+            backgroundMusic.setLooping(false);
+            backgroundMusic.play();
         }
 
         /**
          * checks for the key then allows the character to leave the game;
          */
 
-        for (int i = 0; i < mazeData.length; i++) {
-            int x = mazeData[i][0];
-            int y = mazeData[i][1];
-            int variable = mazeData[i][2];
-
-            // Calculate the actual position on the screen
-            float exitX = x * 50;
-            float exitY = y * 50;
-
-//            if (variable == 2) { // Check if it's an exit
-//                if(character.isHasKey()) {
-//                    if (character.getX() < exitX + 50 && character.getX() + 64 > exitX &&
-//                        character.getY() < exitY  && character.getY() + 30 > exitY) {
-//                        long currentTime = System.currentTimeMillis();
-//                        if (currentTime - exitTime >= VICTORY_COOLDOWN) {
-//                            game.getSpriteBatch().begin();
-//                            game.getSpriteBatch().draw(
-//                                    GameMap.renderExit(),
-//                                    exitX,
-//                                    exitY,
-//                                    50,
-//                                    50
-//                            );
-//                            exitTime = currentTime;
-//                            game.getSpriteBatch().end();
-//                        } else {
-//                        game.goToVictoryScreen();
-//                        }
-//                    break; // Exit the loop once game over screen is triggered
-//                    }
-//                }
-//            }
-        }
 
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
@@ -210,30 +180,30 @@ public class GameScreen implements Screen {
                     break;
                 case 2:
                     if (character.isHasKey()) {
-                        if (character.getX() < mazeX + 50 && character.getX() + 64 > mazeX &&
-                                character.getY() < mazeY && character.getY() + 30 > mazeY) {
+                        if (character.getX() < mazeX + 25
+                                && character.getX() + 36 > mazeX
+                                && character.getY() < mazeY + 25
+                                && character.getY() + 31 > mazeY) {
 
-                            final long startTime = System.nanoTime();
-                            final long duration = 50000000L;
+                            game.goToVictoryScreen();
 
-                            // Update the stateTime to get the current frame of the animation
-                            GameMap.setExitStateTime(GameMap.getExitStateTime() + Gdx.graphics.getDeltaTime());
-
-                            // Draw the current frame of the door animation
-                            game.getSpriteBatch().draw(GameMap.getExitAnimation().getKeyFrame(GameMap.getExitStateTime(), true),
-                                    mazeX, mazeY, 50, 50);
-
-                            if (System.nanoTime() >= duration + startTime) {
-                                game.goToVictoryScreen();
-                            }
+                        } else if (character.getX() < mazeX + 250 && character.getX() + 36 > mazeX - 200 &&
+                                character.getY() < mazeY + 250 && character.getY() + 31 > mazeY - 200) {
+                            game.getSpriteBatch().draw(
+                                    GameMap.renderExit(),
+                                    mazeX,
+                                    mazeY,
+                                    50,
+                                    50
+                            );
                         } else {
-                            game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
-                        }
-                    } else {
                         // Draw the static exit point image when the character is not at the exit
                         game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
                     }
-
+                    }else {
+                        // Draw the static exit point image when the character is not at the exit
+                        game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                    }
 
                     break;
                 case 3:
@@ -243,26 +213,34 @@ public class GameScreen implements Screen {
                     game.getSpriteBatch().draw(GameMap.renderTrap(),mazeX,mazeY,50,50);
 
                     if (character.collidesWithTrap(trapX, trapY)) {
+                        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
+                        backgroundMusic.setLooping(false);
+                        backgroundMusic.play();
                         character.setLives(character.getLives() - 1);
+
                     }
                     game.getSpriteBatch().draw(GameMap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
 
                     break;
                 case 4:
                     // Enemy (dynamic obstacle)
-//                    game.getSpriteBatch().draw(Map.getEnemyImageRegion(), mazeX, mazeY, 50, 50);
                     enemy.move(delta);
                     float enemyX1 = mazeX + enemy.getX();
                     float enemyY1 = mazeY + enemy.getY();
-                    game.getSpriteBatch().draw(
-                            enemy.render(delta),
-                            enemyX1,
-                            enemyY1,
-                            50,
-                            50
-                    );
+
+                        game.getSpriteBatch().draw(
+                                enemy.render(delta),
+                                enemyX1,
+                                enemyY1,
+                                50,
+                                50
+                        );
+
 
                     if (character.collidesWithEnemy(enemyX1, enemyY1)) {
+                        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
+                        backgroundMusic.setLooping(false);
+                        backgroundMusic.play();
                         character.setLives(character.getLives() - 1);
                     }
                     break;
@@ -280,9 +258,7 @@ public class GameScreen implements Screen {
                         game.getSpriteBatch().draw(GameMap.getKeyImageRegion(), mazeX, mazeY, 50, 50);
                     }
                     break;
-                case 6:
-                    // Floor
-                    game.getSpriteBatch().draw(GameMap.getFloorImageRegion(), mazeX, mazeY, 50, 50);
+                default:
                     break;
             }
         }
@@ -337,7 +313,7 @@ public class GameScreen implements Screen {
 
         if (!character.isShouldMove()){
             // Use a default frame when not moving, but before game starts
-            character.setX(entryX);
+            character.setX(entryX + 100);
             character.setY(entryY);
             character.setCharacterRegion(Character.getCharacterDownAnimation().getKeyFrame(sinusInput, true));
             character.setTextVisible(true);
@@ -478,7 +454,6 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         batch = new SpriteBatch();
-
     }
 
     @Override

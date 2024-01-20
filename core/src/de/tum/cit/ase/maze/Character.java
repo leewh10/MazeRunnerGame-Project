@@ -2,6 +2,7 @@
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -39,6 +40,7 @@ import com.badlogic.gdx.utils.Array;
 
      private long lastCollisionTime;
      private static final long COLLISION_COOLDOWN = 3000; // for 3 seconds, the character doesn't lose its lives
+     private boolean doneCooling;
 
 
 
@@ -104,6 +106,7 @@ import com.badlogic.gdx.utils.Array;
         characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
         characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
         characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
+
     }
 
     public void move() {
@@ -114,7 +117,7 @@ import com.badlogic.gdx.utils.Array;
          * boolean for the text showing
          */
         if(isTextVisible) {
-        font.draw(game.getSpriteBatch(), "Press ESC to Pause", gameScreen.getTextX(), gameScreen.getTextY());
+        font.draw(game.getSpriteBatch(), "Press SPACE to Pause", gameScreen.getTextX(), gameScreen.getTextY());
     }
 
     /**
@@ -139,49 +142,59 @@ import com.badlogic.gdx.utils.Array;
         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
             currentAnimation = getCharacterUpAnimation();
             characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            /*if ((GameScreen.getWallY() - 50 - getY()) > 5) {
+            if (isCollisionWithWallsUp()) {
+                setY((int) getY());
+            }
+            else{
+
                 setY((int) getY() + 5);
             }
-             */
-            setY((int) getY() + 5);
 
             shouldMove = true;
             isKeyPressed = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
             characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
             currentAnimation = getCharacterDownAnimation();
-//            if ((50 - GameScreen.getWallY() - getY()) <5) {
-//                setY((int) getY() - 5);
-//            }
-            setY((int) getY() - 5);
+
+            if (isCollisionWithWallsDown()) {
+                setY((int) getY());
+            }
+            else{
+
+                setY((int) getY() - 5);
+            }
 
             shouldMove = true;
             isKeyPressed = true;
-
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
             characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
             currentAnimation = getCharacterLeftAnimation();
-//            if ((GameScreen.getWallX() - 100) - getX() > 5) {
-//                setX((int) getX() - 5);
-//            }
-            setX((int) getX() - 5);
+
+            if (isCollisionWithWallsLeft()) {
+                setX((int) getX());
+            }
+            else{
+
+                setX((int) getX() - 5);
+            }
 
             shouldMove = true;
             isKeyPressed = true;
-
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
             characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
             currentAnimation = getCharacterRightAnimation();
 
-            /*if ((GameScreen.getWallX() - 100 - getX())>5) {
+
+            if (isCollisionWithWallsRight()) {
+                setX((int) getX());
+            }
+            else{
+
                 setX((int) getX() + 5);
             }
-             */
-            setX((int) getX() + 5);
 
             shouldMove = true;
             isKeyPressed = true;
-
         }
         else {
             isKeyPressed = false;
@@ -189,31 +202,58 @@ import com.badlogic.gdx.utils.Array;
 
     }
 
-     private boolean isNoCollisionWithWalls(float newX, float newY) {
-         // Iterate over each wall in mazeData
-
+     private boolean isCollisionWithWallsLeft() {
          for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int x = GameScreen.getMazeData()[i][0];
-             int y = GameScreen.getMazeData()[i][1];
+             int wallX = GameScreen.getMazeData()[i][0];
+             int wallY = GameScreen.getMazeData()[i][1];
              int variable = GameScreen.getMazeData()[i][2];
 
-             // Check only for walls (variable 0)
-             if (variable == 0) {
-                 // Calculate the actual position of the wall on the screen
-                 float wallX = x * 50;
-                 float wallY = y * 50;
-
-                 // Assuming the character is a rectangle, check for collision
-                 if (newX < wallX + 50 && newX + 64 > wallX &&
-                         newY < wallY + 50 && newY + 128 > wallY) {
-                     return false; // Collision detected with this wall
-                 }
+             if (getX() > wallX && getX() - 5 <= wallX + 50 && getY() + 62 > wallY && getY() < wallY + 50) {
+                 return false; // Collision with this wall, return false
              }
          }
-
-         // No collision with any walls
-         return true;
+         return true; // No collision with any walls
      }
+
+     private boolean isCollisionWithWallsUp() {
+         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
+             int wallX = GameScreen.getMazeData()[i][0];
+             int wallY = GameScreen.getMazeData()[i][1];
+             int variable = GameScreen.getMazeData()[i][2];
+
+             if (getY() + 5 >= wallY && getY() <= wallY + 50 && getX() + 36 > wallX && getX() < wallX + 50) {
+                 return false; // Collision with this wall, return false
+             }
+         }
+         return true; // No collision with any walls
+     }
+
+     private boolean isCollisionWithWallsDown() {
+         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
+             int wallX = GameScreen.getMazeData()[i][0];
+             int wallY = GameScreen.getMazeData()[i][1];
+             int variable = GameScreen.getMazeData()[i][2];
+
+             if (getY() - 5 <= wallY + 50 && getY() + 62 >= wallY && getX() + 36 > wallX && getX() < wallX + 50) {
+                 return false; // Collision with this wall, return false
+             }
+         }
+         return true; // No collision with any walls
+     }
+
+     private boolean isCollisionWithWallsRight() {
+         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
+             int wallX = GameScreen.getMazeData()[i][0];
+             int wallY = GameScreen.getMazeData()[i][1];
+             int variable = GameScreen.getMazeData()[i][2];
+
+             if (getX() + 5 <= wallX + 50 && getX() + 36 >= wallX && getY() + 62 > wallY && getY() < wallY + 50) {
+                 return false; // Collision with this wall, return false
+             }
+         }
+         return true; // No collision with any walls
+     }
+
 
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
          //retrieves the current time in milliseconds.
@@ -237,10 +277,12 @@ import com.badlogic.gdx.utils.Array;
 
                  // Set the last collision time
                  lastCollisionTime = currentTime;
+                 doneCooling = true;
                  return true;
              }
          }
          return false;
+
      }
 
      public boolean collidesWithKey(float keyX, float keyY) {
@@ -274,11 +316,12 @@ import com.badlogic.gdx.utils.Array;
              // Check for collision between character and enemy
              if (characterX < trapX + trapWidth &&
                      characterX + characterWidth > trapX &&
-                     characterY < trapY + trapHeight &&
+                     characterY + 25< trapY + trapHeight &&
                      characterY + characterHeight > trapY) {
 
                  // Set the last collision time
                  lastCollisionTime = currentTime;
+                 doneCooling = true;
                  return true;
              }
          }
@@ -343,6 +386,10 @@ import com.badlogic.gdx.utils.Array;
 
      public void setLives(int lives) {
          this.lives = lives;
+     }
+
+     public boolean isDoneCooling() {
+         return doneCooling;
      }
 
      public void render(SpriteBatch batch) {

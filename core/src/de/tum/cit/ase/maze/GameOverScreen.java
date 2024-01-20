@@ -39,6 +39,7 @@ public class GameOverScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(true);
+                GameScreen.resetKeyInMazeData();
                 game.goToGame();
             }
         });

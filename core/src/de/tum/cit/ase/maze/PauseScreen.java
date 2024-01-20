@@ -2,6 +2,7 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -32,6 +33,7 @@ public class PauseScreen implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
+
         // Add a label as a title
         table.add(new Label("Game Paused", game.getSkin(), "title")).padBottom(80).row();
 
@@ -56,13 +58,14 @@ public class PauseScreen implements Screen {
             }
         });
 
+
         // Create and add a button to go to the game screen
         TextButton goToGameButton = new TextButton("Load New Map", game.getSkin());
         table.add(goToGameButton).width(400).row();
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\wonhy\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
+                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
 
                 int result = fileChooser.showOpenDialog(null);
 
