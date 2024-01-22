@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.io.FileInputStream;
@@ -45,12 +47,19 @@ public class GameScreen implements Screen {
     private boolean showVictoryScreen = false;
     private float exitAnimationDuration = 5f; //
 
+    private static int maxX;
+    private static int maxY;
 
-    private int currentLevel;
+    /**
+     * Screen Shaking
+     */
+    private boolean isScreenShaking = false;
+    // how much time has passed during the screen shaking
+    private float screenShakeTime = 0f;
+    private float screenShakeDuration = 0.5f;
+    private float screenShakeIntensity = 2f;
+    private Vector2 originalCameraPosition = new Vector2();  // Store the original camera position for restoration
 
-    public int getCurrentLevel() {
-        return currentLevel;
-    }
 
 
     /**
@@ -81,11 +90,12 @@ public class GameScreen implements Screen {
         camera.update();
 
         enemy = new Enemy(getEnemyX(),getEnemyY(),5f,50,this);
-        Enemy.loadEnemyAnimation(getCurrentLevel());
+        Enemy.loadEnemyAnimation();
 
         GameMap.lifeImageAnimation();
         GameMap.exitImageAnimation();
         GameMap.trapImageAnimation();
+        GameMap.keyImageAnimation();
     }
 
 
@@ -97,8 +107,8 @@ public class GameScreen implements Screen {
             properties.load(input);
 
             // Assuming you have a fixed-size maze, adjust as needed
-            int rows = 300;
-            int cols = 300;
+            int rows = 1000;
+            int cols = 1000;
             mazeData = new int[rows * cols][3];
 
             // Populate mazeData array from properties
@@ -113,8 +123,25 @@ public class GameScreen implements Screen {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+        for (int[] point : mazeData) {
+            int x = point[0];
+            int y = point[1];
+
+            // Update max values
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
     }
 
+    public static int getMaxX() {
+        return maxX;
+    }
+
+    public static int getMaxY() {
+        return maxY;
+    }
 
 
 
@@ -179,13 +206,22 @@ public class GameScreen implements Screen {
                     game.getSpriteBatch().draw(GameMap.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 2:
+                    // Exit point
                     if (character.isHasKey()) {
-                        if (character.getX() < mazeX + 25
-                                && character.getX() + 36 > mazeX
-                                && character.getY() < mazeY + 25
-                                && character.getY() + 31 > mazeY) {
+                        if (character.getX() < mazeX + 50 && character.getX() + 36 > mazeX - 0 &&
+                                character.getY() < mazeY + 50 && character.getY() + 31 > mazeY - 0) {
+                            game.getSpriteBatch().draw(
+                                    GameMap.renderExit(),
+                                    mazeX,
+                                    mazeY,
+                                    50,
+                                    50
+                                );
+                                {
 
                             game.goToVictoryScreen();
+
+                                }
 
                         } else if (character.getX() < mazeX + 250 && character.getX() + 36 > mazeX - 200 &&
                                 character.getY() < mazeY + 250 && character.getY() + 31 > mazeY - 200) {
@@ -206,6 +242,7 @@ public class GameScreen implements Screen {
                     }
 
                     break;
+
                 case 3:
                     // Trap (static obstacle)
                     float trapX = mazeX;
@@ -217,10 +254,9 @@ public class GameScreen implements Screen {
                         backgroundMusic.setLooping(false);
                         backgroundMusic.play();
                         character.setLives(character.getLives() - 1);
-
+                        shakeTheScreen();
                     }
                     game.getSpriteBatch().draw(GameMap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
-
                     break;
                 case 4:
                     // Enemy (dynamic obstacle)
@@ -242,6 +278,7 @@ public class GameScreen implements Screen {
                         backgroundMusic.setLooping(false);
                         backgroundMusic.play();
                         character.setLives(character.getLives() - 1);
+                        shakeTheScreen();
                     }
                     break;
                 case 5:
@@ -249,6 +286,7 @@ public class GameScreen implements Screen {
                     float keyX = mazeX;
                     float keyY = mazeY;
 
+                    game.getSpriteBatch().draw(GameMap.renderKey(),mazeX, mazeY, 40, 40);
                     // Check for collision between character and key
                     if (character.collidesWithKey(keyX, keyY)) {
                         character.setHasKey(true);  // Update character's hasKey status
@@ -264,7 +302,12 @@ public class GameScreen implements Screen {
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+        /**
+         * * render screen shake
+         * */
+        if (isScreenShaking) {
+            applyScreenShakeEffect(delta);
+        }
         game.getSpriteBatch().end();
         camera.update(); // Update the camera position
 
@@ -305,6 +348,13 @@ public class GameScreen implements Screen {
         } else {
             font.draw(game.getSpriteBatch(), "No Key", keyTextX, keyTextY);
         }
+
+        /**
+         * collision image
+         */
+        float collisionX = camera.position.x - 10;
+        float collisionY = camera.position.y;
+        character.renderCollision(game.getSpriteBatch(),collisionX,collisionY);
 
         /**
          * character movement commands
@@ -371,7 +421,40 @@ public class GameScreen implements Screen {
             }
         }
     }
+    /**
+     * methods for shaking the screen.
+     * @return
+     */
+    private void shakeTheScreen() {
+        isScreenShaking = true;
+        screenShakeTime = 0f;
+        //stores the original camera position in originalCameraPosition
+        originalCameraPosition.set(camera.position.x, camera.position.y);
+    }
 
+    private void applyScreenShakeEffect(float delta) {
+        if (isScreenShaking) {
+            // increments screenShakeTime by the time elapsed since the last frame which is 'delta'
+            screenShakeTime += delta;
+
+            //If the total shake time exceeds the defined duration (screenShakeDuration), it stops the screen shake.
+            if (screenShakeTime >= screenShakeDuration) {
+                isScreenShaking = false;
+                // brings back the original camera position
+                camera.position.x = originalCameraPosition.x;
+                camera.position.y = originalCameraPosition.y;
+            } else {
+                // generates random values 'shakeAmountX' and shakeAmountY' within screenShakeIntensity
+                float shakeAmountX = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
+                float shakeAmountY = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
+
+                camera.position.x += shakeAmountX;
+                camera.position.y += shakeAmountY;
+
+                camera.update();
+            }
+        }
+    }
 
     public float getSinusInput() {
         return sinusInput;
