@@ -48,7 +48,7 @@ public class Enemy extends GameObject{
         initialise();
     }
 
-    public static void loadEnemyAnimation(int level) {
+    public static void loadEnemyAnimation() {
         Texture enemySheet = new Texture(Gdx.files.internal("mobs.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -71,7 +71,7 @@ public class Enemy extends GameObject{
         // Check if the enemy animation is not loaded
         if (enemyStillAnimation == null) {
             // Load the enemy animation frames
-            loadEnemyAnimation(gameScreen.getCurrentLevel());
+            loadEnemyAnimation();
         }
 
         // Set the initial frame of the animation
