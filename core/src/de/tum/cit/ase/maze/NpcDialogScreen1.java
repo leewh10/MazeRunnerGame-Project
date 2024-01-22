@@ -2,9 +2,12 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -16,10 +19,10 @@ import javax.swing.*;
 import java.io.File;
 
 
-public class VictoryScreen implements Screen {
+public class NpcDialogScreen1 implements Screen {
     private final Stage stage;
 
-    public VictoryScreen(MazeRunnerGame game, GameScreen gameScreen) {
+    public NpcDialogScreen1(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -31,55 +34,23 @@ public class VictoryScreen implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
-        // Add a label as a title
-        table.add(new Label("VICTORY", game.getSkin(), "title")).padBottom(80).row();
+        Image angelImage = new Image(GuardianAngel.getAngelImageRegion());
+        table.add(angelImage).width(300).height(420).padBottom(80).row();
 
-        TextButton restartGameButton = new TextButton("Restart", game.getSkin());
-        table.add(restartGameButton).width(400).row();
-        restartGameButton.addListener(new ChangeListener() {
+        table.add(new Label("Hello! I'm Stephanette Kruschette! I'm your Guardian Angel!", game.getSkin(),"bold")).padBottom(80).row();
+        table.add(new Label("To help you on your journey, I bless you with one HEART!", game.getSkin(),"bold")).padBottom(80).row();
+
+        TextButton resumeGameButton = new TextButton("Continue", game.getSkin());
+        table.add(resumeGameButton).width(400).row();
+        resumeGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                PauseScreen.setReset(true);
-                GameScreen.resetKeyInMazeData();
-                GameScreen.resetTreasureInMazeData();
                 game.goToGame();
             }
         });
 
-        // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Load New Map", game.getSkin());
-        table.add(goToGameButton).width(400).row();
-        goToGameButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String path = selectedFile.getAbsolutePath();
-
-                    GameScreen.loadMazeDataFromPropertiesFile(path);
-                    PauseScreen.setReset(true);
-                    GameScreen.resetKeyInMazeData();
-                    GameScreen.resetTreasureInMazeData();
-                    game.goToGame();
-                }
-
-            }
-        });
-
-        // Create and add a button to go to the game screen
-        TextButton exitButton = new TextButton("Exit Game", game.getSkin());
-        table.add(exitButton).width(400).row();
-        exitButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
-            }
-        });
     }
+
 
     @Override
     public void render(float delta) {

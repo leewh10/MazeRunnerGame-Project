@@ -28,7 +28,6 @@ import com.badlogic.gdx.utils.Array;
     private static Animation<TextureRegion> characterLeftAnimation;
     private static Animation<TextureRegion> characterRightAnimation;
 
-
     private TextureRegion characterRegion;
 
     private boolean isTextVisible;
@@ -38,17 +37,23 @@ import com.badlogic.gdx.utils.Array;
     private final BitmapFont font;
     private final GameScreen gameScreen;
     private boolean isKeyPressed;
+    private boolean isTreasureOpened;
 
      private long lastCollisionTime;
      private static final long COLLISION_COOLDOWN = 3000; // for 3 seconds, the character doesn't lose its lives
+     private static final long COLLISION_COOLDOWN1 = 1000;
+
      private boolean doneCooling;
 
 
      private static Animation<TextureRegion> currentAnimation;
      private static TextureRegion collisionImageRegion;
+     private static TextureRegion heartImageRegion;
+     private static TextureRegion keyImageRegion;
 
 
-    //Constructor
+
+     //Constructor
     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, int lives, Animation<TextureRegion> animation) {
         super(x, y);
         this.game = game; // Store the game instance
@@ -92,6 +97,9 @@ import com.badlogic.gdx.utils.Array;
         Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
 
+        //Array<TextureRegion> walkFramesFightRight = new Array<>(TextureRegion.class);
+
+
         // Add frames to the respective animations
         for (int col = 0; col < animationFrames; col++) {
             walkFramesUp.add(
@@ -101,16 +109,23 @@ import com.badlogic.gdx.utils.Array;
             walkFramesLeft.add(
                     new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
             walkFramesRight.add(
-                    new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));}
+                    new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
+
+        }
+        /* walkFramesFightRight.add(
+                    new TextureRegion(walkSheet, 8 , 6* frameHeight, 15, frameHeight));
+        characterFightRightAnimation = new Animation<>(0.1f, walkFramesFightRight);
+
+         */
+
 
         characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
         characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
         characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
         characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
-
     }
 
-    public void move() {
+     public void move() {
             stateTime += Gdx.graphics.getDeltaTime();
 
 
@@ -147,11 +162,13 @@ import com.badlogic.gdx.utils.Array;
             float newY = MathUtils.clamp(getY() + 5, 30, GameScreen.getMaxY()*2 + 50);
 
             if (isCollisionWithWallsUp()) {
-                setY((int) newY);
+                setY((int) getY() +5);
+
             }
             else{
 
-                setY((int) newY);
+                setY((int) getY() +5);
+
             }
 
 
@@ -164,11 +181,11 @@ import com.badlogic.gdx.utils.Array;
             float newY = MathUtils.clamp(getY() - 5, 30, GameScreen.getMaxY()*2 + 50);
 
             if (isCollisionWithWallsDown()) {
-                setY((int) newY);
+                setY((int) getY() -5);
             }
             else{
 
-                setY((int) newY);
+                setY((int) getY() - 5);
             }
             shouldMove = true;
             isKeyPressed = true;
@@ -205,6 +222,7 @@ import com.badlogic.gdx.utils.Array;
             shouldMove = true;
             isKeyPressed = true;
         }
+
         else {
             isKeyPressed = false;
         }
@@ -357,10 +375,32 @@ import com.badlogic.gdx.utils.Array;
          float keyWidth = 50;
          float keyHeight = 50;
 
-         return characterX < keyX + keyWidth &&
+         if(characterX < keyX + keyWidth &&
                  characterX + characterWidth > keyX &&
                  characterY < keyY + keyHeight &&
-                 characterY + characterHeight > keyY;
+                 characterY + characterHeight > keyY) {
+             loadKeyImage();
+             return true;
+         }
+         return false;
+     }
+     public boolean collidesWithTreasure(float treasureX, float treasureY) {
+         float characterX = getX();
+         float characterY = getY();
+         float characterWidth = 36;
+         float characterHeight = 62;
+
+         float treasureWidth = 50;
+         float treasureHeight = 50;
+
+         if(characterX < treasureX + treasureWidth &&
+                 characterX + characterWidth > treasureX &&
+                 characterY < treasureY + treasureHeight &&
+                 characterY + characterHeight > treasureY) {
+             loadHeartImage();
+             return true;
+         }
+         return false;
      }
      public boolean collidesWithTrap(float trapX, float trapY) {
          //retrieves the current time in milliseconds.
@@ -403,6 +443,28 @@ import com.badlogic.gdx.utils.Array;
          lastCollisionTime = System.currentTimeMillis();
      }
 
+     private void loadHeartImage() {
+         Texture heartMark = new Texture(Gdx.files.internal("objects.png"));
+
+         int frameWidth = 16;
+         int frameHeight = 16;
+
+         heartImageRegion = new TextureRegion(heartMark, 0,3 * frameHeight, frameWidth, frameHeight);
+         // Set the time when the cooldown image is set
+         lastCollisionTime = System.currentTimeMillis();
+     }
+     private void loadKeyImage() {
+         Texture keyMark = new Texture(Gdx.files.internal("key-gold.png"));
+
+         int frameWidth = 16;
+         int frameHeight = 16;
+
+         keyImageRegion = new TextureRegion(keyMark, 0,frameHeight, frameWidth, frameHeight);
+
+         lastCollisionTime = System.currentTimeMillis();
+     }
+
+
      public void renderCollision(SpriteBatch batch, float viewportWidth, float viewportHeight) {
          float collisionMarkWidth = 40;
          float collisionMarkHeight = 40;
@@ -417,6 +479,38 @@ import com.badlogic.gdx.utils.Array;
          if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN) {
              // Reset the cooldown image
              collisionImageRegion = null;
+         }
+     }
+     public void renderTreasureHeart(SpriteBatch batch, float viewportWidth, float viewportHeight) {
+         float heartMarkWidth = 40;
+         float heartMarkHeight = 40;
+
+         float heartImageX = viewportWidth + 20;
+         float heartImageY = viewportHeight + 100;
+
+         if (heartImageRegion != null) {
+             batch.draw(heartImageRegion,heartImageX,heartImageY,heartMarkWidth,heartMarkHeight);
+         }
+
+         if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN1) {
+             // Reset the cooldown image
+             heartImageRegion = null;
+         }
+     }
+     public void renderKeyImage(SpriteBatch batch, float viewportWidth, float viewportHeight) {
+         float keyMarkWidth = 30;
+         float keyMarkHeight = 30;
+
+         float keyImageX = viewportWidth + 20;
+         float keyImageY = viewportHeight + 100;
+
+         if (keyImageRegion != null) {
+             batch.draw(keyImageRegion,keyImageX,keyImageY,keyMarkWidth,keyMarkHeight);
+         }
+
+         if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN1) {
+             // Reset the cooldown image
+             keyImageRegion = null;
          }
      }
     public static Animation<TextureRegion> getCharacterDownAnimation() {
@@ -435,8 +529,15 @@ import com.badlogic.gdx.utils.Array;
         return characterRightAnimation;
     }
 
+     public boolean isTreasureOpened() {
+         return isTreasureOpened;
+     }
 
-    public TextureRegion getCharacterRegion() {
+     public void setTreasureOpened(boolean treasureOpened) {
+         isTreasureOpened = treasureOpened;
+     }
+
+     public TextureRegion getCharacterRegion() {
         return characterRegion;
     }
 

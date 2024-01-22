@@ -40,6 +40,7 @@ public class GameOverScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(true);
                 GameScreen.resetKeyInMazeData();
+                GameScreen.resetTreasureInMazeData();
                 game.goToGame();
             }
         });
@@ -60,6 +61,8 @@ public class GameOverScreen implements Screen {
 
                     GameScreen.loadMazeDataFromPropertiesFile(path);
                     PauseScreen.setReset(true);
+                    GameScreen.resetKeyInMazeData();
+                    GameScreen.resetTreasureInMazeData();
                     game.goToGame();
                 }
             }
