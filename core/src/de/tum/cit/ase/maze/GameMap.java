@@ -12,28 +12,33 @@ public class GameMap {
     private static TextureRegion WallImageRegion;
     private static TextureRegion EntryPointImageRegion;
     private static TextureRegion ExitPointImageRegion;
+    private static TextureRegion TreasurePointImageRegion;
     private static TextureRegion TrapImageRegion;
     private static TextureRegion EnemyImageRegion;
     private static TextureRegion KeyImageRegion;
-    private static TextureRegion FloorImageRegion;
     private static TextureRegion ExitRegion;
+    private static TextureRegion treasureRegion;
+
 
 
     //Life Image
+    private static Animation<TextureRegion> keyAnimation;
     private static Animation<TextureRegion> lifeAnimation;
     private static Animation<TextureRegion> exitAnimation;
     private static Animation<TextureRegion> trapAnimation;
+    private static Animation<TextureRegion> treasureAnimation;
+
     private static float lifeStateTime;
     private static float exitStateTime;
     private static float trapStateTime;
-
-    private static Animation<TextureRegion> keyAnimation;
-
+    private static float treasureStateTime;
     private static float keyStateTime;
 
     public static void loadBackground() {
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));
         Texture extra = new Texture(Gdx.files.internal("mobs.png"));
+        Texture things = new Texture(Gdx.files.internal("things.png"));
+
 
         int frameWidth = 16;
         int frameHeight = 15;
@@ -43,8 +48,8 @@ public class GameMap {
         EntryPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
         EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
-        KeyImageRegion = new TextureRegion(extra, 0, 0, frameWidth, frameHeight);
-        FloorImageRegion = new TextureRegion(map, 16, 16, frameWidth, frameHeight);
+        TreasurePointImageRegion = new TextureRegion(things, 6*16,0 , frameWidth, frameHeight);
+
     }
 
     public static void keyImageAnimation() {
@@ -66,6 +71,7 @@ public class GameMap {
         KeyImageRegion = keyAnimation.getKeyFrame(keyStateTime,true);
         return KeyImageRegion;
     }
+
 
     public static void lifeImageAnimation() {
         Texture life = new Texture(Gdx.files.internal("objects.png"));
@@ -93,6 +99,20 @@ public class GameMap {
         for (int i = 0; i < characterLives; i++) {
             TextureRegion currentLifeFrame = GameMap.getLifeAnimation().getKeyFrame(lifeStateTime, true);
             spriteBatch.draw(currentLifeFrame, lifeX + i * spacing, lifeY, lifeWidth, lifeHeight);
+        }
+    }
+    public static void renderKeys(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
+        float keyWidth = 30;
+        float keyHeight = 30;
+
+        float keyX = viewportWidth + 20;
+        float keyY = viewportHeight + 80;
+
+        keyStateTime += Gdx.graphics.getDeltaTime(); // Update animation time
+
+        if(characterKey) {
+            TextureRegion currentKeyFrame = GameMap.getKeyAnimation().getKeyFrame(keyStateTime, true);
+            spriteBatch.draw(currentKeyFrame, keyX + 65, keyY - 10, keyWidth, keyHeight);
         }
     }
     public static void exitImageAnimation() {
@@ -132,8 +152,29 @@ public class GameMap {
         return TrapImageRegion;
     }
 
-    public static TextureRegion getFloorImageRegion() {
-        return FloorImageRegion;
+    public static void treasureImageAnimation() {
+        Texture exit = new Texture(Gdx.files.internal("things.png"));
+        int frameWidth = 16;
+        int frameHeight = 16;
+        int animationFrames = 4;
+
+        Array<TextureRegion> treasureFrames = new Array<>(TextureRegion.class);
+        for (int row = 0; row < animationFrames; row++) {
+            treasureFrames.add(new TextureRegion(exit, 6*frameWidth,row * frameHeight, frameWidth, frameHeight));
+        }
+        treasureAnimation = new Animation<>(0.3f, treasureFrames);
+    }
+
+    public static TextureRegion renderTreasure() {
+        treasureStateTime += Gdx.graphics.getDeltaTime();
+        treasureRegion = treasureAnimation.getKeyFrame(treasureStateTime,true);
+        return treasureRegion;
+    }
+
+
+
+    public static TextureRegion getTreasureRegion() {
+        return treasureRegion;
     }
 
     public static TextureRegion getWallImageRegion() {
@@ -152,12 +193,20 @@ public class GameMap {
         return TrapImageRegion;
     }
 
+    public static TextureRegion getTreasurePointImageRegion() {
+        return TreasurePointImageRegion;
+    }
+
     public static TextureRegion getEnemyImageRegion() {
         return EnemyImageRegion;
     }
 
     public static TextureRegion getKeyImageRegion() {
         return KeyImageRegion;
+    }
+
+    public static Animation<TextureRegion> getKeyAnimation() {
+        return keyAnimation;
     }
 
     public static Animation<TextureRegion> getLifeAnimation() {

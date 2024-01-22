@@ -43,9 +43,6 @@ public class GameScreen implements Screen {
     private Enemy enemy;
     private float enemyX;
     private float enemyY;
-    private long exitTime;
-    private boolean showVictoryScreen = false;
-    private float exitAnimationDuration = 5f; //
 
     private static int maxX;
     private static int maxY;
@@ -96,6 +93,7 @@ public class GameScreen implements Screen {
         GameMap.exitImageAnimation();
         GameMap.trapImageAnimation();
         GameMap.keyImageAnimation();
+        GameMap.treasureImageAnimation();
     }
 
 
@@ -115,7 +113,7 @@ public class GameScreen implements Screen {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
                     String key = i + "," + j;  // The key format should be i,j
-                    int value = Integer.parseInt(properties.getProperty(key, "6"));
+                    int value = Integer.parseInt(properties.getProperty(key, "20"));
                     mazeData[i * cols + j] = new int[]{i, j, value};
                 }
             }
@@ -158,8 +156,11 @@ public class GameScreen implements Screen {
         }
 
         // Check for escape key press to go back to the menu
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToPauseScreen();
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            game.goToNpcDialogScreen1();
         }
 
         if(character.getLives() <= 0) {
@@ -286,14 +287,33 @@ public class GameScreen implements Screen {
                     float keyX = mazeX;
                     float keyY = mazeY;
 
-                    game.getSpriteBatch().draw(GameMap.renderKey(),mazeX, mazeY, 40, 40);
+                    if(character.isTreasureOpened()) {game.getSpriteBatch().draw(GameMap.renderKey(),mazeX, mazeY, 40, 40);
                     // Check for collision between character and key
-                    if (character.collidesWithKey(keyX, keyY)) {
-                        character.setHasKey(true);  // Update character's hasKey status
-                        // Remove key from maze data
-                        removeKeyFromMazeData(keyX, keyY);
-                    } else {
-                        game.getSpriteBatch().draw(GameMap.getKeyImageRegion(), mazeX, mazeY, 50, 50);
+                        if (character.collidesWithKey(keyX, keyY)) {
+                            character.setHasKey(true);  // Update character's hasKey status
+                            // Remove key from maze data
+                            removeKeyFromMazeData(keyX, keyY);
+                        }
+                    }
+                    else {}
+
+                    break;
+                case 6:
+                    //Treasure
+                    if (character.getX() < mazeX + 100 && character.getX() + 36 > mazeX - 50 &&
+                            character.getY() < mazeY + 100 && character.getY() + 31 > mazeY - 50) {
+                        game.getSpriteBatch().draw(GameMap.renderTreasure(),mazeX, mazeY, 60, 60);
+                        if (character.collidesWithTreasure(mazeX, mazeY)) {
+                            character.setTreasureOpened(true);
+                            removeTreasureFromMazeData(mazeX, mazeY);
+                            character.setLives(character.getLives() + 1);
+
+                        }
+                        else {
+                        }
+                    }
+                    else {
+                        game.getSpriteBatch().draw(GameMap.getTreasurePointImageRegion(), mazeX, mazeY, 60, 60);
                     }
                     break;
                 default:
@@ -334,11 +354,14 @@ public class GameScreen implements Screen {
          */
         float lifeTextX = camera.position.x - camera.viewportWidth / 10 - 500;
         float lifeTextY = camera.position.y + camera.viewportHeight / 10 + 300;
-//        Map.renderLives(game.getSpriteBatch(), delta, camera.position.x + 140, camera.position.y + 70, character.getLives());
         GameMap.renderLives(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
         font.draw(game.getSpriteBatch(), "Lives: " + character.getLives(), lifeTextX, lifeTextY);
 
-//        Map.lifeImageAnimation();
+        /**
+         * Character's Key
+         */
+        GameMap.renderKeys(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
+
 
         float keyTextX = camera.position.x - camera.viewportWidth / 10 - 550;
         float keyTextY = camera.position.y + camera.viewportHeight / 10 + 340;
@@ -355,6 +378,20 @@ public class GameScreen implements Screen {
         float collisionX = camera.position.x - 10;
         float collisionY = camera.position.y;
         character.renderCollision(game.getSpriteBatch(),collisionX,collisionY);
+
+        /**
+         * heart image
+         */
+        float heartX = camera.position.x - 50;
+        float heartY = camera.position.y;
+        character.renderTreasureHeart(game.getSpriteBatch(),heartX,heartY);
+
+        /**
+         * key image
+         */
+        float keyX = camera.position.x - 50;
+        float keyY = camera.position.y;
+        character.renderKeyImage(game.getSpriteBatch(),keyX,keyY);
 
         /**
          * character movement commands
@@ -407,16 +444,31 @@ public class GameScreen implements Screen {
     private void removeKeyFromMazeData(float x, float y) {
         for (int i = 0; i < mazeData.length; i++) {
             if (mazeData[i][2] == 5) {
-                mazeData[i][2] = 7;  // Set variable to 0 to remove key from rendering
+                mazeData[i][2] = 15;  // Set variable to 0 to remove key from rendering
                 break;
             }
         }
     }
-
+    private void removeTreasureFromMazeData(float x, float y) {
+        for (int i = 0; i < mazeData.length; i++) {
+            if (mazeData[i][2] == 6) {
+                mazeData[i][2] = 16;  // Set variable to 0 to remove key from rendering
+                break;
+            }
+        }
+    }
     public static void resetKeyInMazeData() {
         for (int i = 0; i < mazeData.length; i++) {
-            if (mazeData[i][2] == 7) {
+            if (mazeData[i][2] == 15) {
                 mazeData[i][2] = 5; // Reset key value to 5
+                break;
+            }
+        }
+    }
+    public static void resetTreasureInMazeData() {
+        for (int i = 0; i < mazeData.length; i++) {
+            if (mazeData[i][2] == 16) {
+                mazeData[i][2] = 6; // Reset key value to 5
                 break;
             }
         }

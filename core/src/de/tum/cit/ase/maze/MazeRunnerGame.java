@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
+import java.time.temporal.ChronoField;
+
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
  * It manages the screens and global resources like SpriteBatch and Skin.
@@ -53,7 +55,6 @@ public class MazeRunnerGame extends Game {
 
         // Load character animation
         Character.loadCharacterAnimation();
-
         // Play some background music
         // Background sound
 
@@ -108,6 +109,13 @@ public class MazeRunnerGame extends Game {
 
     public void goToPauseScreen() {
         this.setScreen(new PauseScreen(this,gameScreen));
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+    }
+    public void goToNpcDialogScreen1() {
+        this.setScreen(new NpcDialogScreen1(this,gameScreen));
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;

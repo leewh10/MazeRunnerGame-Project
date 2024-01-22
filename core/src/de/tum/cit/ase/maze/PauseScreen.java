@@ -53,6 +53,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = true;
+                GameScreen.resetTreasureInMazeData();
                 GameScreen.resetKeyInMazeData();
                 game.goToGame();
             }
@@ -75,6 +76,7 @@ public class PauseScreen implements Screen {
 
                     GameScreen.loadMazeDataFromPropertiesFile(path);
                     reset = true;
+                    GameScreen.resetTreasureInMazeData();
                     GameScreen.resetKeyInMazeData();
                     game.goToGame();
                 }
