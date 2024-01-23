@@ -15,29 +15,28 @@ import com.badlogic.gdx.utils.Array;
 
  public class Character extends GameObject {
 
-     private  boolean hasKey;
-    private int lives;
-    private final Animation<TextureRegion> animation;
-    private static float stateTime;
+     private boolean hasKey;
+     private int lives;
+     private final Animation<TextureRegion> animation;
+     private static float stateTime;
 
 
+     // Character animation downwards
+     private static Animation<TextureRegion> characterDownAnimation;
+     private static Animation<TextureRegion> characterUpAnimation;
+     private static Animation<TextureRegion> characterLeftAnimation;
+     private static Animation<TextureRegion> characterRightAnimation;
 
-    // Character animation downwards
-    private static Animation<TextureRegion> characterDownAnimation;
-    private static Animation<TextureRegion> characterUpAnimation;
-    private static Animation<TextureRegion> characterLeftAnimation;
-    private static Animation<TextureRegion> characterRightAnimation;
+     private TextureRegion characterRegion;
 
-    private TextureRegion characterRegion;
-
-    private boolean isTextVisible;
-    private boolean shouldMove;
-    private final OrthographicCamera camera;
-    private final MazeRunnerGame game;
-    private final BitmapFont font;
-    private final GameScreen gameScreen;
-    private boolean isKeyPressed;
-    private boolean isTreasureOpened;
+     private boolean isTextVisible;
+     private boolean shouldMove;
+     private final OrthographicCamera camera;
+     private final MazeRunnerGame game;
+     private final BitmapFont font;
+     private final GameScreen gameScreen;
+     private boolean isKeyPressed;
+     private boolean isTreasureOpened;
 
      private long lastCollisionTime;
      private static final long COLLISION_COOLDOWN = 3000; // for 3 seconds, the character doesn't lose its lives
@@ -48,28 +47,28 @@ import com.badlogic.gdx.utils.Array;
 
      private static Animation<TextureRegion> currentAnimation;
      private static TextureRegion collisionImageRegion;
+     private static TextureRegion angelMeetingImageRegion;
      private static TextureRegion heartImageRegion;
      private static TextureRegion keyImageRegion;
 
 
-
      //Constructor
-    public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, int lives, Animation<TextureRegion> animation) {
-        super(x, y);
-        this.game = game; // Store the game instance
-        this.hasKey = hasKey;
-        this.lives = lives;
-        this.animation = animation;
-        stateTime = 0f;
-        this.gameScreen = gameScreen;
+     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, int lives, Animation<TextureRegion> animation) {
+         super(x, y);
+         this.game = game; // Store the game instance
+         this.hasKey = hasKey;
+         this.lives = lives;
+         this.animation = animation;
+         stateTime = 0f;
+         this.gameScreen = gameScreen;
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(true);
-        font = game.getSkin().getFont("font");
+         camera = new OrthographicCamera();
+         camera.setToOrtho(true);
+         font = game.getSkin().getFont("font");
 
-        currentAnimation = getCharacterDownAnimation();
+         currentAnimation = getCharacterDownAnimation();
 
-    }
+     }
 
      public static void resetAnimation() {
          // Reset the animation to the default animation
@@ -81,37 +80,37 @@ import com.badlogic.gdx.utils.Array;
 
 
      /**
-     * Loads the character animation from the character.png file.
-     */
-    public static void loadCharacterAnimation() {
+      * Loads the character animation from the character.png file.
+      */
+     public static void loadCharacterAnimation() {
 
-        Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
+         Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
 
-        int frameWidth = 16;
-        int frameHeight = 32;
-        int animationFrames = 4;
+         int frameWidth = 16;
+         int frameHeight = 32;
+         int animationFrames = 4;
 
-        // libGDX internal Array instead of ArrayList because of performance
-        Array<TextureRegion> walkFramesUp = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
+         // libGDX internal Array instead of ArrayList because of performance
+         Array<TextureRegion> walkFramesUp = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
 
-        //Array<TextureRegion> walkFramesFightRight = new Array<>(TextureRegion.class);
+         //Array<TextureRegion> walkFramesFightRight = new Array<>(TextureRegion.class);
 
 
-        // Add frames to the respective animations
-        for (int col = 0; col < animationFrames; col++) {
-            walkFramesUp.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
-            walkFramesDown.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            walkFramesLeft.add(
-                    new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
-            walkFramesRight.add(
-                    new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
+         // Add frames to the respective animations
+         for (int col = 0; col < animationFrames; col++) {
+             walkFramesUp.add(
+                     new TextureRegion(walkSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
+             walkFramesDown.add(
+                     new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
+             walkFramesLeft.add(
+                     new TextureRegion(walkSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
+             walkFramesRight.add(
+                     new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
 
-        }
+         }
         /* walkFramesFightRight.add(
                     new TextureRegion(walkSheet, 8 , 6* frameHeight, 15, frameHeight));
         characterFightRightAnimation = new Animation<>(0.1f, walkFramesFightRight);
@@ -119,115 +118,109 @@ import com.badlogic.gdx.utils.Array;
          */
 
 
-        characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
-        characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
-        characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
-        characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
-    }
+         characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
+         characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
+         characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
+         characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
+     }
 
      public void move() {
-            stateTime += Gdx.graphics.getDeltaTime();
+         stateTime += Gdx.graphics.getDeltaTime();
 
 
-        /**
-         * boolean for the text showing
-         */
-        if(isTextVisible) {
-        font.draw(game.getSpriteBatch(), "Press SPACE to Pause", gameScreen.getTextX(), gameScreen.getTextY());
-    }
+         /**
+          * boolean for the text showing
+          */
+         if (isTextVisible) {
+             font.draw(game.getSpriteBatch(), "Press SPACE to Pause", gameScreen.getTextX(), gameScreen.getTextY());
+         }
 
-    /**
-     * All key controls to move the character
-     */
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)
-            || Gdx.input.isKeyPressed(Input.Keys.W)
-            || Gdx.input.isKeyPressed(Input.Keys.DOWN)
-            || Gdx.input.isKeyPressed(Input.Keys.S)
-            || Gdx.input.isKeyPressed(Input.Keys.LEFT)
-            || Gdx.input.isKeyPressed(Input.Keys.A)
-            || Gdx.input.isKeyPressed(Input.Keys.RIGHT)
-            || Gdx.input.isKeyPressed(Input.Keys.D)) {
+         /**
+          * All key controls to move the character
+          */
+         if (Gdx.input.isKeyPressed(Input.Keys.UP)
+                 || Gdx.input.isKeyPressed(Input.Keys.W)
+                 || Gdx.input.isKeyPressed(Input.Keys.DOWN)
+                 || Gdx.input.isKeyPressed(Input.Keys.S)
+                 || Gdx.input.isKeyPressed(Input.Keys.LEFT)
+                 || Gdx.input.isKeyPressed(Input.Keys.A)
+                 || Gdx.input.isKeyPressed(Input.Keys.RIGHT)
+                 || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
-            gameScreen.setTextX(camera.position.x);
-            gameScreen.setTextY(camera.position.y);
-        isTextVisible = false;
-    } else {
-        isTextVisible = true;
-    }
+             gameScreen.setTextX(camera.position.x);
+             gameScreen.setTextY(camera.position.y);
+             isTextVisible = false;
+         } else {
+             isTextVisible = true;
+         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
-            currentAnimation = getCharacterUpAnimation();
-            characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+         if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
+             currentAnimation = getCharacterUpAnimation();
+             characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
 
-            float newY = MathUtils.clamp(getY() + 5, 30, GameScreen.getMaxY()*2 + 50);
+             float newY = MathUtils.clamp(getY() + 5, 30, GameScreen.getMaxY() * 2 + 50);
 
-            if (isCollisionWithWallsUp()) {
-                setY((int) getY() +5);
+             if (isCollisionWithWallsUp()) {
+                 setY((int) getY() + 5);
 
-            }
-            else{
+             } else {
 
-                setY((int) getY() +5);
+                 setY((int) getY() + 5);
 
-            }
+             }
 
 
-            shouldMove = true;
-            isKeyPressed = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
-            characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            currentAnimation = getCharacterDownAnimation();
+             shouldMove = true;
+             isKeyPressed = true;
+         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
+             characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+             currentAnimation = getCharacterDownAnimation();
 
-            float newY = MathUtils.clamp(getY() - 5, 30, GameScreen.getMaxY()*2 + 50);
+             float newY = MathUtils.clamp(getY() - 5, 30, GameScreen.getMaxY() * 2 + 50);
 
-            if (isCollisionWithWallsDown()) {
-                setY((int) getY() -5);
-            }
-            else{
+             if (isCollisionWithWallsDown()) {
+                 setY((int) getY() - 5);
+             } else {
 
-                setY((int) getY() - 5);
-            }
-            shouldMove = true;
-            isKeyPressed = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-            characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            currentAnimation = getCharacterLeftAnimation();
+                 setY((int) getY() - 5);
+             }
+             shouldMove = true;
+             isKeyPressed = true;
+         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
+             characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+             currentAnimation = getCharacterLeftAnimation();
 
-            float newX = MathUtils.clamp(getX() - 5, 40, GameScreen.getMaxX()*2 + 50);
+             float newX = MathUtils.clamp(getX() - 5, 40, GameScreen.getMaxX() * 2 + 50);
 
-            if (isCollisionWithWallsLeft()) {
-                setX((int) newX);
-            }
-            else{
+             if (isCollisionWithWallsLeft()) {
+                 setX((int) newX);
+             } else {
 
-                setX((int) newX);
-            }
+                 setX((int) newX);
+             }
 
-            shouldMove = true;
-            isKeyPressed = true;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-            characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-            currentAnimation = getCharacterRightAnimation();
+             shouldMove = true;
+             isKeyPressed = true;
+         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+             characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+             currentAnimation = getCharacterRightAnimation();
 
-            float newX = MathUtils.clamp(getX() + 5, 40, GameScreen.getMaxX()*2 + 50);
+             float newX = MathUtils.clamp(getX() + 5, 40, GameScreen.getMaxX() * 2 + 50);
 
-            if (isCollisionWithWallsRight()) {
-                setX((int) newX);
-            }
-            else{
+             if (isCollisionWithWallsRight()) {
+                 setX((int) newX);
+             } else {
 
-                setX((int) newX);
-            }
+                 setX((int) newX);
+             }
 
-            shouldMove = true;
-            isKeyPressed = true;
-        }
+             shouldMove = true;
+             isKeyPressed = true;
+         } else {
+             isKeyPressed = false;
+         }
 
-        else {
-            isKeyPressed = false;
-        }
-
-    }
+     }
 
      public int findMaxWallX() {
          int maxWallX = 0; // Initialize to the smallest possible integer value
@@ -282,7 +275,7 @@ import com.badlogic.gdx.utils.Array;
              float characterWidth = 36;
              float characterHeight = 62;
 
-             if(variable == 0) {
+             if (variable == 0) {
                  if (getX() > wallX && getX() - 5 <= wallX + 50 && getY() + 62 > wallY && getY() < wallY + 50) {
                      return false; // Collision with this wall, return false
                  }
@@ -316,9 +309,6 @@ import com.badlogic.gdx.utils.Array;
          }
          return true; // No collision with any walls
      }
-
-
-
 
 
      private boolean isCollisionWithWalls(float newX, float newY) {
@@ -375,7 +365,7 @@ import com.badlogic.gdx.utils.Array;
          float keyWidth = 50;
          float keyHeight = 50;
 
-         if(characterX < keyX + keyWidth &&
+         if (characterX < keyX + keyWidth &&
                  characterX + characterWidth > keyX &&
                  characterY < keyY + keyHeight &&
                  characterY + characterHeight > keyY) {
@@ -384,6 +374,52 @@ import com.badlogic.gdx.utils.Array;
          }
          return false;
      }
+
+
+     public boolean seesTheAngel(float angelX, float angelY) {
+         long currentTime = System.currentTimeMillis();
+         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN1) {
+
+             float characterX = getX();
+             float characterY = getY();
+             float characterWidth = 36;
+             float characterHeight = 62;
+
+             float angelWidth = 50;
+             float angelHeight = 50;
+
+
+             if (characterX < angelX + angelWidth + 100 &&
+                     characterX + characterWidth + 100 > angelX &&
+                     characterY < angelY + angelHeight + 100 &&
+                     characterY + characterHeight + 100 > angelY) {
+                 loadAngelMeetingImage();
+                 return true;
+             }
+         }
+             return false;
+     }
+
+     public boolean collidesWithAngel(float angelX, float angelY) {
+         float characterX = getX();
+         float characterY = getY();
+         float characterWidth = 36;
+         float characterHeight = 62;
+
+         float angelWidth = 50;
+         float angelHeight = 50;
+
+
+         if (characterX < angelX + angelWidth + 20 &&
+                  characterX + characterWidth + 20 > angelX &&
+                  characterY < angelY + angelHeight + 20 &&
+                  characterY + characterHeight + 20 > angelY) {
+             loadAngelMeetingImage();
+             return true;
+         }
+         return false;
+     }
+
      public boolean collidesWithTreasure(float treasureX, float treasureY) {
          float characterX = getX();
          float characterY = getY();
@@ -443,6 +479,16 @@ import com.badlogic.gdx.utils.Array;
          lastCollisionTime = System.currentTimeMillis();
      }
 
+     private void loadAngelMeetingImage() {
+         Texture angelMeetingMark = new Texture(Gdx.files.internal("objects.png"));
+
+         int frameWidth = 16;
+         int frameHeight = 16;
+
+         angelMeetingImageRegion = new TextureRegion(angelMeetingMark,3 * frameWidth,8 * frameHeight,frameWidth,frameHeight);
+         lastCollisionTime = System.currentTimeMillis();
+     }
+
      private void loadHeartImage() {
          Texture heartMark = new Texture(Gdx.files.internal("objects.png"));
 
@@ -479,6 +525,23 @@ import com.badlogic.gdx.utils.Array;
          if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN) {
              // Reset the cooldown image
              collisionImageRegion = null;
+         }
+     }
+
+     public void renderAngelMeeting(SpriteBatch batch, float viewportWidth, float viewportHeight) {
+        float angelMeetingMarkWidth = 40;
+        float angelMeetingMarkHeight = 40;
+
+        float angelMeetingImageX = viewportWidth + 20;
+        float angelMeetingImageY = viewportHeight + 100;
+
+        if (angelMeetingImageRegion != null) {
+            batch.draw(angelMeetingImageRegion,angelMeetingImageX,angelMeetingImageY,angelMeetingMarkWidth,angelMeetingMarkHeight);
+        }
+
+         if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN1) {
+             // Reset the cooldown image
+             angelMeetingImageRegion = null;
          }
      }
      public void renderTreasureHeart(SpriteBatch batch, float viewportWidth, float viewportHeight) {

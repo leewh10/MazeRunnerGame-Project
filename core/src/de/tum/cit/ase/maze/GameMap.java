@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 
 public class GameMap {
 
-    private static TextureRegion WallImageRegion;
     private static TextureRegion EntryPointImageRegion;
     private static TextureRegion ExitPointImageRegion;
     private static TextureRegion TreasurePointImageRegion;
@@ -44,7 +43,6 @@ public class GameMap {
         int frameHeight = 15;
 
         // Create a TextureRegion for the first image
-        WallImageRegion = new TextureRegion(map, 16, 0, frameWidth, frameHeight);
         EntryPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
         EnemyImageRegion = new TextureRegion(extra, 96, 64, frameWidth, frameHeight);
@@ -177,9 +175,6 @@ public class GameMap {
         return treasureRegion;
     }
 
-    public static TextureRegion getWallImageRegion() {
-        return WallImageRegion;
-    }
 
     public static TextureRegion getEntryPointImageRegion() {
         return EntryPointImageRegion;

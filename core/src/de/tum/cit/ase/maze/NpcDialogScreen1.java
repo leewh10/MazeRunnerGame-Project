@@ -22,6 +22,7 @@ import java.io.File;
 public class NpcDialogScreen1 implements Screen {
     private final Stage stage;
 
+
     public NpcDialogScreen1(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -34,11 +35,11 @@ public class NpcDialogScreen1 implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
-        Image angelImage = new Image(GuardianAngel.getAngelImageRegion());
+        Image angelImage = new Image(GuardianAngel.getDefaultAngelImageRegion());
         table.add(angelImage).width(300).height(420).padBottom(80).row();
 
         table.add(new Label("Hello! I'm Stephanette Kruschette! I'm your Guardian Angel!", game.getSkin(),"bold")).padBottom(80).row();
-        table.add(new Label("To help you on your journey, I bless you with one HEART!", game.getSkin(),"bold")).padBottom(80).row();
+        table.add(new Label("To help you on your journey, I bless you with one HEART!!", game.getSkin(),"bold")).padBottom(80).row();
 
         TextButton resumeGameButton = new TextButton("Continue", game.getSkin());
         table.add(resumeGameButton).width(400).row();

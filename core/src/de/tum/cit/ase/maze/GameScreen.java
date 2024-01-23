@@ -57,7 +57,17 @@ public class GameScreen implements Screen {
     private float screenShakeIntensity = 2f;
     private Vector2 originalCameraPosition = new Vector2();  // Store the original camera position for restoration
 
+    private GuardianAngel angel;
+    private float angelX;
+    private float angelY;
 
+    public float getAngelX() {
+        return angelX;
+    }
+
+    public float getAngelY() {
+        return angelY;
+    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -88,6 +98,9 @@ public class GameScreen implements Screen {
 
         enemy = new Enemy(getEnemyX(),getEnemyY(),5f,50,this);
         Enemy.loadEnemyAnimation();
+
+        angel = new GuardianAngel(getAngelX(),getAngelY(),20f, 80,this);
+        GuardianAngel.loadAngelAnimation();
 
         GameMap.lifeImageAnimation();
         GameMap.exitImageAnimation();
@@ -198,7 +211,7 @@ public class GameScreen implements Screen {
                     // Wall
                     wallX = (int) mazeX;
                     wallY = (int) mazeY;
-                    game.getSpriteBatch().draw(GameMap.getWallImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(Wall.getWallImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 1:
                     // Entry point
@@ -316,6 +329,25 @@ public class GameScreen implements Screen {
                         game.getSpriteBatch().draw(GameMap.getTreasurePointImageRegion(), mazeX, mazeY, 60, 60);
                     }
                     break;
+                case 7:
+                    // Guardian Angel
+                    float angelX = mazeX + angel.getX();
+                    float angelY = mazeY + angel.getY();
+//                    angel.moveLeftRight(delta);
+//                    angel.moveUpDown(delta);
+                    angel.moveUpDown(delta);
+                    game.getSpriteBatch().draw(
+                            angel.render(delta),
+                            angelX,
+                            angelY,
+                            55,
+                            55
+                    );
+                    if (character.seesTheAngel(angelX, angelY)) {
+                        if (character.collidesWithAngel(angelX, angelY)) {
+                            game.goToNpcDialogScreen1();
+                        }
+                    }
                 default:
                     break;
             }
@@ -378,6 +410,14 @@ public class GameScreen implements Screen {
         float collisionX = camera.position.x - 10;
         float collisionY = camera.position.y;
         character.renderCollision(game.getSpriteBatch(),collisionX,collisionY);
+
+        /**
+         * angel meeting image
+         */
+        float angelMeetingX = camera.position.x - 10;
+        float angelMeetingY = camera.position.y;
+        character.renderAngelMeeting(game.getSpriteBatch(),angelMeetingX,angelMeetingY);
+
 
         /**
          * heart image
