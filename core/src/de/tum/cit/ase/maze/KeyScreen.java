@@ -2,31 +2,29 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
-
-
-public class NpcDialogScreen1 implements Screen {
+public class KeyScreen implements Screen {
     private final Stage stage;
+    private final Image keyImage;
+    private final MazeRunnerGame game;
 
+    public KeyScreen(MazeRunnerGame game) {
+        this.game = game;  // Store the MazeRunnerGame instance
 
-    public NpcDialogScreen1(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
-
 
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -35,21 +33,27 @@ public class NpcDialogScreen1 implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
-        Image angelImage = new Image(GuardianAngel.getDefaultAngelImageRegion());
-        table.add(angelImage).width(300).height(420).padBottom(80).row();
+        Key.getKeyAnimation();
 
-        table.add(new Label("Hello! I'm Stephanette Kruschette! I'm your Guardian Angel!", game.getSkin(),"bold")).padBottom(80).row();
-        table.add(new Label("To help you on your journey, I bless you with one LIFE!!", game.getSkin(),"bold")).padBottom(80).row();
+        keyImage = new Image();
 
-        TextButton resumeGameButton = new TextButton("(kindly) Get a LIFE!", game.getSkin());
+        Label.LabelStyle labelStyle = new Label.LabelStyle(game.getSkin().get("bold", Label.LabelStyle.class));
+        labelStyle.font.getData().setScale(2f);
+        Label label = new Label("Collect this KEY to escape the maze!", labelStyle);
+        table.add(label).padBottom(80).row();
+
+        // Add the Image widget to the table
+        table.add(keyImage).width(600).height(600).padBottom(80).row();
+
+        TextButton resumeGameButton = new TextButton("Continue", game.getSkin());
         table.add(resumeGameButton).width(400).row();
         resumeGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToHeartScreen();
+                PauseScreen.setReset(false);
+                game.goToGame();
             }
         });
-
     }
 
 
@@ -58,7 +62,17 @@ public class NpcDialogScreen1 implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         stage.draw(); // Draw the stage
+
+        // Get the TextureRegion from Heart
+        TextureRegion keyTextureRegion = Key.renderKey();
+
+        // Convert TextureRegion to Drawable
+        Drawable drawable = new TextureRegionDrawable(keyTextureRegion);
+
+        // Set the drawable to the Image widget
+        keyImage.setDrawable(drawable);
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -67,22 +81,19 @@ public class NpcDialogScreen1 implements Screen {
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed
+        // Dispose of the stage when the screen is disposed
         stage.dispose();
     }
 

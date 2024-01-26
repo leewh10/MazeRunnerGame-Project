@@ -40,8 +40,7 @@ public class VictoryScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(true);
-                GameScreen.resetKeyInMazeData();
-                GameScreen.resetTreasureInMazeData();
+                GameScreen.reset();
                 game.goToGame();
             }
         });
@@ -52,22 +51,8 @@ public class VictoryScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String path = selectedFile.getAbsolutePath();
-
-                    GameScreen.loadMazeDataFromPropertiesFile(path);
-                    PauseScreen.setReset(true);
-                    GameScreen.resetKeyInMazeData();
-                    GameScreen.resetTreasureInMazeData();
-                    game.goToGame();
+                game.openFileChooser();
                 }
-
-            }
         });
 
         // Create and add a button to go to the game screen

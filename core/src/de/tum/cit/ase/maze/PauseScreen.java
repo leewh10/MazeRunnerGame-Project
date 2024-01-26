@@ -7,14 +7,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
 
 
 public class PauseScreen implements Screen {
@@ -22,6 +22,7 @@ public class PauseScreen implements Screen {
     private static boolean reset;
 
     public PauseScreen(MazeRunnerGame game, GameScreen gameScreen) {
+
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -36,6 +37,7 @@ public class PauseScreen implements Screen {
 
         // Add a label as a title
         table.add(new Label("Game Paused", game.getSkin(), "title")).padBottom(80).row();
+
 
         TextButton resumeGameButton = new TextButton("Resume", game.getSkin());
         table.add(resumeGameButton).width(400).row();
@@ -53,8 +55,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = true;
-                GameScreen.resetTreasureInMazeData();
-                GameScreen.resetKeyInMazeData();
+                GameScreen.reset();
                 game.goToGame();
             }
         });
@@ -66,21 +67,9 @@ public class PauseScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String path = selectedFile.getAbsolutePath();
-
-                    GameScreen.loadMazeDataFromPropertiesFile(path);
-                    reset = true;
-                    GameScreen.resetTreasureInMazeData();
-                    GameScreen.resetKeyInMazeData();
-                    game.goToGame();
-                }
-
+                reset = true;
+                GameScreen.reset();
+                game.openFileChooser();
             }
         });
 
@@ -91,6 +80,16 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.exit();
+            }
+        });
+
+
+        TextButton goToInstructionButton = new TextButton("How to Play", game.getSkin());
+        table.add(goToInstructionButton).width(400).row();
+        goToInstructionButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToInstructionScreen();
             }
         });
     }
@@ -140,6 +139,7 @@ public class PauseScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+
     }
 
 }

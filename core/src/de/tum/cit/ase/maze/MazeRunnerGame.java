@@ -2,13 +2,15 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-
-import java.time.temporal.ChronoField;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -19,12 +21,20 @@ public class MazeRunnerGame extends Game {
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private PauseScreen pauseScreen;
+    private VictoryScreen victoryScreen;
+    private GameOverScreen gameOverScreen;
+    private NpcDialogScreen1 npcDialogScreen1;
+    private HeartScreen heartScreen;
+    private InstructionScreen instructionScreen;
+    private KeyScreen keyScreen;
+    private InstructionScreen treasureScreen;
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
 
     // UI Skin
     private Skin skin;
+    private NativeFileChooser fileChooser;
 
 
     /**
@@ -34,6 +44,34 @@ public class MazeRunnerGame extends Game {
      */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
+        this.fileChooser = fileChooser;
+    }
+
+    public void openFileChooser() {
+        var fileChooserConfig = new NativeFileChooserConfiguration();
+        fileChooserConfig.title = "Load Map";
+        fileChooserConfig.intent = NativeFileChooserIntent.OPEN;
+        fileChooserConfig.nameFilter = (file,name) -> name.endsWith("properties");
+        fileChooserConfig.directory = Gdx.files.local("maps");
+
+        fileChooser.chooseFile(fileChooserConfig, new NativeFileChooserCallback() {
+            @Override
+            public void onFileChosen(FileHandle fileHandle) {
+                String path = fileHandle.path();
+                GameScreen.loadMazeDataFromPropertiesFile(path);
+                goToGame();
+            }
+
+            @Override
+            public void onCancellation() {
+
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                System.err.println("Error picking maze file: " + exception.getMessage());
+            }
+        });
     }
 
     /**
@@ -49,10 +87,13 @@ public class MazeRunnerGame extends Game {
 
         // Load game background
         Wall.loadWall();
-        GameMap.loadBackground();
-
-        // Load character's life animation
-        GameMap.lifeImageAnimation();
+        Entry.loadEntry();
+        Exit.loadExit();
+        Treasure.loadTreasure();
+        Life.lifeImageAnimation();
+        Lever.loadLever();
+        Enemy.loadEnemy();
+        GuardianAngel.loadAngel();
 
 
         // Load character animation
@@ -70,80 +111,160 @@ public class MazeRunnerGame extends Game {
     }
 
 
+
     /**
      * Switches to the menu screen.
      */
     public void goToMenu() {
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+
         this.setScreen(new MenuScreen(this)); // Set the current screen to MenuScreen
-        if (gameScreen != null) {
-            gameScreen.dispose(); // Dispose the game screen if it exists
-            gameScreen = null;
-        }
+
     }
 
 
     /**
      * Switches to the game screen.
      */
-    public void goToGame() {
-        this.setScreen(new GameScreen(this));
-        if (menuScreen != null) {
-            menuScreen.dispose();
-            menuScreen = null;
+    public void disposeAndSetNull(Screen screen) {
+        if (screen != null) {
+            screen.dispose();
+            screen = null;
         }
     }
 
+    public void goToGame() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+
+        // Set the game screen
+        this.setScreen(new GameScreen(this));
+    }
+
+    public void goToInstructionScreen() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+
+        // Set the game screen
+        this.setScreen(new InstructionScreen(this));
+    }
+
     public void goToGameOverScreen(){
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
+
         this.setScreen(new GameOverScreen(this));
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
-        }
     }
     public void goToVictoryScreen(){
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
+
         this.setScreen(new VictoryScreen(this, gameScreen));
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
-        }
     }
 
 
     public void goToPauseScreen() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
+
         this.setScreen(new PauseScreen(this,gameScreen));
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
-        }
+
     }
     public void goToNpcDialogScreen1() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
+
         this.setScreen(new NpcDialogScreen1(this,gameScreen));
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
-        }
     }
 
-    public void resumeGame() {
-        Character.loadCharacterAnimation();
-        Character.resetAnimation();
+    public void goToHeartScreen() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
 
-        if (gameScreen == null) {
-            gameScreen = new GameScreen(this); // Create a new GameScreen instance if not already created
-            this.setScreen(gameScreen); // Set the current screen to the new GameScreen instance
-        }
-
-        if (pauseScreen != null) {
-            pauseScreen.dispose();
-            pauseScreen = null;
-        }
-
-        Character.setCurrentAnimation(Character.getCharacterDownAnimation());
-
-        //Gdx.input.setInputProcessor(gameScreen.stage);
-        goToGame();
+        this.setScreen(new HeartScreen(this));
     }
+    public void goToTreasureScreen() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(gameScreen);
 
+        this.setScreen(new TreasureScreen(this));
+    }
+    public void goToKeyScreen() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
+
+        this.setScreen(new KeyScreen(this));
+    }
 
 
 
@@ -152,15 +273,19 @@ public class MazeRunnerGame extends Game {
      */
     @Override
     public void dispose() {
-        if (gameScreen != null) {
-            gameScreen.dispose(); // Dispose the game screen if it exists
-            gameScreen = null;
-        }
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(gameScreen);
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
-
         super.dispose(); // Make sure to call the superclass method
-
     }
 
 

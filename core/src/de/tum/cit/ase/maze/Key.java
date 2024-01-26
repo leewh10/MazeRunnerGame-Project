@@ -1,17 +1,56 @@
 package de.tum.cit.ase.maze;
-/**
- * Represents Keys in the maze.
- * Character should have keys in order to open the exit. Without keys, the character cannot exit the maze.
- * If the character tries to open the exit without the key, the wall should work as a wall.
- */
-public class Key extends GameObject{
-    /**
-     * Constructor for Key.
-     *
-     * @param x The initial x-coordinate of the Key.
-     * @param y The initial y-coordinate of the Key.
-     */
-    public Key(float x, float y) {
-        super(x, y);
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
+
+public class Key{
+    private static TextureRegion KeyImageRegion;
+    private static Animation<TextureRegion> keyAnimation;
+    private static float keyStateTime;
+    public static void keyImageAnimation() {
+        Texture key = new Texture(Gdx.files.internal("key-gold.png"));
+
+        int frameWidth = 16;
+        int frameHeight = 16;
+        int animationFrames = 4;
+
+        Array<TextureRegion> keyFrames = new Array<>(TextureRegion.class);
+        for (int col = 0; col < animationFrames; col++) {
+            keyFrames.add(new TextureRegion(key, col * frameWidth,frameHeight, frameWidth, frameHeight));
+        }
+        keyAnimation = new Animation<>(0.2f, keyFrames);
+    }
+    public static TextureRegion renderKey() {
+        keyStateTime += Gdx.graphics.getDeltaTime();
+        KeyImageRegion = keyAnimation.getKeyFrame(keyStateTime,true);
+        return KeyImageRegion;
+    }
+
+    public static void renderKeys(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
+        float keyWidth = 30;
+        float keyHeight = 30;
+
+        float keyX = viewportWidth + 20;
+        float keyY = viewportHeight + 80;
+
+        keyStateTime += Gdx.graphics.getDeltaTime(); // Update animation time
+
+        if(characterKey) {
+            TextureRegion currentKeyFrame = Key.getKeyAnimation().getKeyFrame(keyStateTime, true);
+            spriteBatch.draw(currentKeyFrame, keyX + 65, keyY - 10, keyWidth, keyHeight);
+        }
+    }
+
+
+    public static TextureRegion getKeyImageRegion() {
+        return KeyImageRegion;
+    }
+
+    public static Animation<TextureRegion> getKeyAnimation() {
+        return keyAnimation;
     }
 }

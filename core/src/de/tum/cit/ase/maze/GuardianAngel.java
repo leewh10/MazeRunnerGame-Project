@@ -183,7 +183,7 @@ public class GuardianAngel extends GameObject{
 
 
     // Initialize the texture region in a static block
-    static {
+    public static void loadAngel(){
         Texture angel = new Texture(Gdx.files.internal("angel-f-001.png"));
 
         int frameWidth = 48;
@@ -208,5 +208,6 @@ public class GuardianAngel extends GameObject{
     public static TextureRegion getDefaultAngelImageRegion() {
         return defaultAngelImageRegion;
     }
+
 
 }

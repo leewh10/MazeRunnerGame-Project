@@ -46,28 +46,24 @@ public class MenuScreen implements Screen {
         // Add a label as a title
         table.add(new Label("Welcome to the NootNootGame!", game.getSkin(), "title")).padBottom(80).row();
 
+        // Create and add a button to go to the game screen
         TextButton goToGameButton = new TextButton("Load Map", game.getSkin());
-        table.add(goToGameButton).width(300).row();
+        table.add(goToGameButton).width(400).row();
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                JFileChooser fileChooser = new JFileChooser("C:\\Users\\eshal\\IdeaProjects\\itp2324itp2324projectwork-fri2mu1nootnoot\\maps");
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String path = selectedFile.getAbsolutePath();
-
-                    // Assuming GameScreen has a static method loadMazeDataFromPropertiesFile
-                    GameScreen.loadMazeDataFromPropertiesFile(path);
-
-                    // Assuming game has a method goToGame
-                    game.goToGame();
-                }
+                game.openFileChooser();
             }
         });
 
+        TextButton goToInstructionButton = new TextButton("How to Play", game.getSkin());
+        table.add(goToInstructionButton).width(400).row();
+        goToInstructionButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToInstructionScreen();
+            }
+        });
     }
 
     @Override

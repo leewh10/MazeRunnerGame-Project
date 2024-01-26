@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 
      private boolean hasKey;
      private int lives;
+     private int enemiesKilled;
      private final Animation<TextureRegion> animation;
      private static float stateTime;
 
@@ -26,11 +27,16 @@ import com.badlogic.gdx.utils.Array;
      private static Animation<TextureRegion> characterUpAnimation;
      private static Animation<TextureRegion> characterLeftAnimation;
      private static Animation<TextureRegion> characterRightAnimation;
+     private static Animation<TextureRegion> characterFightRightAnimation;
+     private static Animation<TextureRegion> characterFightLeftAnimation;
+     private static Animation<TextureRegion> characterFightUpAnimation;
+     private static Animation<TextureRegion> characterFightDownAnimation;
 
      private TextureRegion characterRegion;
 
      private boolean isTextVisible;
      private boolean shouldMove;
+     private boolean isLeverPulled;
      private final OrthographicCamera camera;
      private final MazeRunnerGame game;
      private final BitmapFont font;
@@ -52,8 +58,10 @@ import com.badlogic.gdx.utils.Array;
      private static TextureRegion keyImageRegion;
 
 
+
+
      //Constructor
-     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, int lives, Animation<TextureRegion> animation) {
+     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, boolean isLeverPulled, boolean isTreasureOpened, int lives,  Animation<TextureRegion> animation) {
          super(x, y);
          this.game = game; // Store the game instance
          this.hasKey = hasKey;
@@ -61,6 +69,8 @@ import com.badlogic.gdx.utils.Array;
          this.animation = animation;
          stateTime = 0f;
          this.gameScreen = gameScreen;
+         this.isLeverPulled = isLeverPulled;
+         this.isTreasureOpened=isTreasureOpened;
 
          camera = new OrthographicCamera();
          camera.setToOrtho(true);
@@ -96,7 +106,10 @@ import com.badlogic.gdx.utils.Array;
          Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
          Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
 
-         //Array<TextureRegion> walkFramesFightRight = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesFightRight = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesFightLeft = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesFightUp = new Array<>(TextureRegion.class);
+         Array<TextureRegion> walkFramesFightDown = new Array<>(TextureRegion.class);
 
 
          // Add frames to the respective animations
@@ -110,12 +123,52 @@ import com.badlogic.gdx.utils.Array;
              walkFramesRight.add(
                      new TextureRegion(walkSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
 
-         }
-        /* walkFramesFightRight.add(
-                    new TextureRegion(walkSheet, 8 , 6* frameHeight, 15, frameHeight));
-        characterFightRightAnimation = new Animation<>(0.1f, walkFramesFightRight);
 
-         */
+             walkFramesFightRight.add(
+                    new TextureRegion(walkSheet, 8, 6* frameHeight, frameWidth, frameHeight));
+             walkFramesFightRight.add(
+                     new TextureRegion(walkSheet, 40, 6* frameHeight, frameWidth, frameHeight));
+             walkFramesFightRight.add(
+                     new TextureRegion(walkSheet, 72, 6* frameHeight, frameWidth, frameHeight));
+             walkFramesFightRight.add(
+                     new TextureRegion(walkSheet, 104, 6* frameHeight, frameWidth, frameHeight));
+
+
+             walkFramesFightLeft.add(
+                     new TextureRegion(walkSheet, 8, 7* frameHeight, frameWidth, frameHeight));
+             walkFramesFightLeft.add(
+                     new TextureRegion(walkSheet, 40, 7* frameHeight, frameWidth, frameHeight));
+             walkFramesFightLeft.add(
+                     new TextureRegion(walkSheet, 72, 7* frameHeight, frameWidth, frameHeight));
+             walkFramesFightLeft.add(
+                     new TextureRegion(walkSheet, 104, 7* frameHeight, frameWidth, frameHeight));
+
+
+             walkFramesFightUp.add(
+                     new TextureRegion(walkSheet, 8, 5* frameHeight, frameWidth, frameHeight));
+             walkFramesFightUp.add(
+                     new TextureRegion(walkSheet, 40, 5* frameHeight, frameWidth, frameHeight));
+             walkFramesFightUp.add(
+                     new TextureRegion(walkSheet, 72, 5* frameHeight, frameWidth, frameHeight));
+             walkFramesFightUp.add(
+                     new TextureRegion(walkSheet, 104, 5* frameHeight, frameWidth, frameHeight));
+
+             walkFramesFightDown.add(
+                     new TextureRegion(walkSheet, 40, 4* frameHeight, frameWidth, frameHeight));
+             walkFramesFightDown.add(
+                     new TextureRegion(walkSheet, 40, 4* frameHeight, frameWidth, frameHeight));
+             walkFramesFightDown.add(
+                     new TextureRegion(walkSheet, 72, 4* frameHeight, frameWidth, frameHeight));
+             walkFramesFightDown.add(
+                     new TextureRegion(walkSheet, 104, 4* frameHeight, frameWidth, frameHeight));
+     }
+
+
+
+         characterFightRightAnimation = new Animation<>(0.1f, walkFramesFightRight);
+         characterFightLeftAnimation = new Animation<>(0.1f, walkFramesFightLeft);
+         characterFightUpAnimation = new Animation<>(0.1f, walkFramesFightUp);
+         characterFightDownAnimation = new Animation<>(0.1f, walkFramesFightDown);
 
 
          characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
@@ -123,6 +176,8 @@ import com.badlogic.gdx.utils.Array;
          characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
          characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
      }
+
+
 
      public void move() {
          stateTime += Gdx.graphics.getDeltaTime();
@@ -132,7 +187,7 @@ import com.badlogic.gdx.utils.Array;
           * boolean for the text showing
           */
          if (isTextVisible) {
-             font.draw(game.getSpriteBatch(), "Press SPACE to Pause", gameScreen.getTextX(), gameScreen.getTextY());
+             font.draw(game.getSpriteBatch(), "Press ESC to Pause", gameScreen.getTextX(), gameScreen.getTextY());
          }
 
          /**
@@ -155,175 +210,133 @@ import com.badlogic.gdx.utils.Array;
          }
 
          if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
-             currentAnimation = getCharacterUpAnimation();
-             characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-
-             float newY = MathUtils.clamp(getY() + 5, 30, GameScreen.getMaxY() * 2 + 50);
-
-             if (isCollisionWithWallsUp()) {
-                 setY((int) getY() + 5);
-
-             } else {
-
-                 setY((int) getY() + 5);
-
+             if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                 characterRegion = getCharacterFightUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterFightUpAnimation();
+             }
+             else{
+                 currentAnimation = getCharacterUpAnimation();
+                 characterRegion = getCharacterUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
              }
 
-
+             if (!collidesWithWall(getX(), getY() + 5, GameScreen.getMazeArray())) {
+                 setY((int) (getY() + 5));
+             }
              shouldMove = true;
              isKeyPressed = true;
+
+
          } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
-             characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-             currentAnimation = getCharacterDownAnimation();
-
-             float newY = MathUtils.clamp(getY() - 5, 30, GameScreen.getMaxY() * 2 + 50);
-
-             if (isCollisionWithWallsDown()) {
-                 setY((int) getY() - 5);
-             } else {
-
-                 setY((int) getY() - 5);
+             if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                 characterRegion = getCharacterFightDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterFightDownAnimation();
              }
+             else{
+                 characterRegion = getCharacterDownAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterDownAnimation();
+             }
+             if (!collidesWithWall(getX(), getY() - 5, GameScreen.getMazeArray())) {
+                 setY((int) (getY() - 5));
+             }
+
              shouldMove = true;
              isKeyPressed = true;
+
+
          } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-             characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-             currentAnimation = getCharacterLeftAnimation();
-
-             float newX = MathUtils.clamp(getX() - 5, 40, GameScreen.getMaxX() * 2 + 50);
-
-             if (isCollisionWithWallsLeft()) {
-                 setX((int) newX);
-             } else {
-
-                 setX((int) newX);
+             if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                 characterRegion = getCharacterFightLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterFightLeftAnimation();
              }
+             else{
+                 characterRegion = getCharacterLeftAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterLeftAnimation();
+             }
+             if (!collidesWithWall(getX() - 5, getY(), GameScreen.getMazeArray())) {
+                 setX((int) (getX() - 5));
+             }
+
 
              shouldMove = true;
              isKeyPressed = true;
          } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-             characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
-             currentAnimation = getCharacterRightAnimation();
+             if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                 characterRegion = getCharacterFightRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterFightRightAnimation();
+             }
+             else{
+                 characterRegion = getCharacterRightAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
+                 currentAnimation = getCharacterRightAnimation();
+             }
 
-             float newX = MathUtils.clamp(getX() + 5, 40, GameScreen.getMaxX() * 2 + 50);
-
-             if (isCollisionWithWallsRight()) {
-                 setX((int) newX);
-             } else {
-
-                 setX((int) newX);
+             if (!collidesWithWall(getX() + 5, getY(), GameScreen.getMazeArray())) {
+                 setX((int) (getX() + 5));
              }
 
              shouldMove = true;
              isKeyPressed = true;
+
          } else {
              isKeyPressed = false;
          }
 
      }
 
-     public int findMaxWallX() {
-         int maxWallX = 0; // Initialize to the smallest possible integer value
+     private long leverPullTime;
 
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
 
-             // Update maxWallX if the current wallX is greater
-             if (wallX > maxWallX) {
-                 maxWallX = wallX;
-             }
-         }
-
-         return maxWallX;
+     public long getLeverPullTime() {
+         return leverPullTime;
      }
 
-     public int findMaxWallY() {
-         int maxWallY = 0; // Initialize to the smallest possible integer value
-
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallY = GameScreen.getMazeData()[i][1];
-
-             // Update maxWallY if the current wallY is greater
-             if (wallY > maxWallY) {
-                 maxWallY = wallY;
-             }
-         }
-
-         return maxWallY;
+     public void setLeverPullTime(long leverPullTime) {
+         this.leverPullTime = leverPullTime;
      }
 
-     private boolean isCollisionWithWallsLeft() {
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
-             int wallY = GameScreen.getMazeData()[i][1];
-             int variable = GameScreen.getMazeData()[i][2];
+     public boolean collidesWithWall(float newX, float newY, int[][] mazeArray) {
+         // Allowing the character to go through the wall a little bit to avoid getting stuck
+         float collisionMarginTopRight = 0.8f * 50;
+         float collisionMarginBottomLeft = 0.3f * 50;
 
-             if (getX() > wallX && getX() - 5 <= wallX + 50 && getY() + 62 > wallY && getY() < wallY + 50) {
-                 return false; // Collision with this wall, return false
-             }
+         // Adjust the newX and newY with the collisionMarginTopRight
+         float characterX = newX + collisionMarginBottomLeft;
+         float characterY = newY + collisionMarginBottomLeft;
+         float adjustedX = newX + collisionMarginTopRight;
+         float adjustedY = newY + collisionMarginTopRight;
+
+         // Calculate the cell coordinates for adjusted position
+         int cellXForBottomLeft = (int) (characterX / 50);
+         int cellYForBottomLeft = (int) (characterY / 50);
+         int cellXForTopRight = (int) (adjustedX / 50);
+         int cellYForTopRight = (int) (adjustedY / 50);
+
+
+         if (cellXForTopRight < 0 || cellXForTopRight >= mazeArray.length || cellYForTopRight < 0 || cellYForTopRight >= mazeArray[0].length) {
+             return true;
          }
-         return true; // No collision with any walls
-     }
-
-     private boolean isCollisionWithWallsUp() {
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
-             int wallY = GameScreen.getMazeData()[i][1];
-             int variable = GameScreen.getMazeData()[i][2];
-             float characterX = getX();
-             float characterY = getY();
-             float characterWidth = 36;
-             float characterHeight = 62;
-
-             if (variable == 0) {
-                 if (getX() > wallX && getX() - 5 <= wallX + 50 && getY() + 62 > wallY && getY() < wallY + 50) {
-                     return false; // Collision with this wall, return false
-                 }
-             }
+         if (cellXForBottomLeft < 0 || cellXForBottomLeft >= mazeArray.length || cellYForBottomLeft < 0 || cellYForBottomLeft >= mazeArray[0].length) {
+             return true;
          }
-         return true; // No collision with any walls
+
+         boolean collisionTop = mazeArray[cellXForTopRight][cellYForTopRight] == 0; //
+         boolean collisionBottom = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 0;
+         boolean collisionLeft = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 0;
+         boolean collisionRight = mazeArray[cellXForTopRight][cellYForTopRight] == 0;
+
+         boolean collisionTopShadow = mazeArray[cellXForTopRight][cellYForTopRight] == 8; //
+         boolean collisionBottomShadow = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 8;
+         boolean collisionLeftShadow = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 8;
+         boolean collisionRightShadow = mazeArray[cellXForTopRight][cellYForTopRight] == 8;
+
+         boolean collisionTopMove = mazeArray[cellXForTopRight][cellYForTopRight] == 10; //
+         boolean collisionBottomMove = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 10;
+         boolean collisionLeftMove = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 10;
+         boolean collisionRightMove = mazeArray[cellXForTopRight][cellYForTopRight] == 10;
+
+         return collisionTop || collisionBottom || collisionLeft || collisionRight
+                 || collisionBottomShadow || collisionLeftShadow || collisionRightShadow|| collisionTopShadow
+                 || collisionBottomMove || collisionLeftMove || collisionRightMove|| collisionTopMove;
      }
-
-     private boolean isCollisionWithWallsDown() {
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
-             int wallY = GameScreen.getMazeData()[i][1];
-             int variable = GameScreen.getMazeData()[i][2];
-
-             if (getY() - 5 <= wallY + 50 && getY() + 62 >= wallY && getX() + 36 > wallX && getX() < wallX + 50) {
-                 return false; // Collision with this wall, return false
-             }
-         }
-         return true; // No collision with any walls
-     }
-
-     private boolean isCollisionWithWallsRight() {
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
-             int wallY = GameScreen.getMazeData()[i][1];
-             int variable = GameScreen.getMazeData()[i][2];
-
-             if (getX() + 5 <= wallX + 50 && getX() + 36 >= wallX && getY() + 62 > wallY && getY() < wallY + 50) {
-                 return false; // Collision with this wall, return false
-             }
-         }
-         return true; // No collision with any walls
-     }
-
-
-     private boolean isCollisionWithWalls(float newX, float newY) {
-         for (int i = 0; i < GameScreen.getMazeData().length; i++) {
-             int wallX = GameScreen.getMazeData()[i][0];
-             int wallY = GameScreen.getMazeData()[i][1];
-             int variable = GameScreen.getMazeData()[i][2];
-
-             if (variable == 0 && newX < wallX + 50 && newX + 36 > wallX && newY < wallY + 150 && newY + 62 > wallY) {
-                 return true; // Collision with wall, return true
-             }
-         }
-         return false; // No collision with walls
-     }
-
 
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
          //retrieves the current time in milliseconds.
@@ -344,11 +357,12 @@ import com.badlogic.gdx.utils.Array;
                      characterX + characterWidth > enemyX1 &&
                      characterY < enemyY1 + keyHeight &&
                      characterY + characterHeight > enemyY1) {
-
                  // Set the last collision time
-                 lastCollisionTime = currentTime;
-                 loadCollisionImage();
-                 doneCooling = true;
+
+                 if(!Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                     lastCollisionTime = currentTime;
+                     loadCollisionImage();
+                 }
                  return true;
              }
          }
@@ -365,14 +379,10 @@ import com.badlogic.gdx.utils.Array;
          float keyWidth = 50;
          float keyHeight = 50;
 
-         if (characterX < keyX + keyWidth &&
+         return characterX < keyX + keyWidth &&
                  characterX + characterWidth > keyX &&
                  characterY < keyY + keyHeight &&
-                 characterY + characterHeight > keyY) {
-             loadKeyImage();
-             return true;
-         }
-         return false;
+                 characterY + characterHeight > keyY;
      }
 
 
@@ -420,6 +430,14 @@ import com.badlogic.gdx.utils.Array;
          return false;
      }
 
+     public boolean collidesWithLever(float leverX, float leverY) {
+         float characterX = getX();
+         float characterY = getY();
+
+         return characterX < leverX + 50 && characterX + 36 > leverX  &&
+                 characterY <leverY + 50 && characterY + 31 > leverY;
+     }
+
      public boolean collidesWithTreasure(float treasureX, float treasureY) {
          float characterX = getX();
          float characterY = getY();
@@ -433,7 +451,6 @@ import com.badlogic.gdx.utils.Array;
                  characterX + characterWidth > treasureX &&
                  characterY < treasureY + treasureHeight &&
                  characterY + characterHeight > treasureY) {
-             loadHeartImage();
              return true;
          }
          return false;
@@ -489,27 +506,6 @@ import com.badlogic.gdx.utils.Array;
          lastCollisionTime = System.currentTimeMillis();
      }
 
-     private void loadHeartImage() {
-         Texture heartMark = new Texture(Gdx.files.internal("objects.png"));
-
-         int frameWidth = 16;
-         int frameHeight = 16;
-
-         heartImageRegion = new TextureRegion(heartMark, 0,3 * frameHeight, frameWidth, frameHeight);
-         // Set the time when the cooldown image is set
-         lastCollisionTime = System.currentTimeMillis();
-     }
-     private void loadKeyImage() {
-         Texture keyMark = new Texture(Gdx.files.internal("key-gold.png"));
-
-         int frameWidth = 16;
-         int frameHeight = 16;
-
-         keyImageRegion = new TextureRegion(keyMark, 0,frameHeight, frameWidth, frameHeight);
-
-         lastCollisionTime = System.currentTimeMillis();
-     }
-
 
      public void renderCollision(SpriteBatch batch, float viewportWidth, float viewportHeight) {
          float collisionMarkWidth = 40;
@@ -544,22 +540,7 @@ import com.badlogic.gdx.utils.Array;
              angelMeetingImageRegion = null;
          }
      }
-     public void renderTreasureHeart(SpriteBatch batch, float viewportWidth, float viewportHeight) {
-         float heartMarkWidth = 40;
-         float heartMarkHeight = 40;
 
-         float heartImageX = viewportWidth + 20;
-         float heartImageY = viewportHeight + 100;
-
-         if (heartImageRegion != null) {
-             batch.draw(heartImageRegion,heartImageX,heartImageY,heartMarkWidth,heartMarkHeight);
-         }
-
-         if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN1) {
-             // Reset the cooldown image
-             heartImageRegion = null;
-         }
-     }
      public void renderKeyImage(SpriteBatch batch, float viewportWidth, float viewportHeight) {
          float keyMarkWidth = 30;
          float keyMarkHeight = 30;
@@ -576,6 +557,8 @@ import com.badlogic.gdx.utils.Array;
              keyImageRegion = null;
          }
      }
+
+
     public static Animation<TextureRegion> getCharacterDownAnimation() {
         return characterDownAnimation;
     }
@@ -591,6 +574,30 @@ import com.badlogic.gdx.utils.Array;
     public static Animation<TextureRegion> getCharacterRightAnimation() {
         return characterRightAnimation;
     }
+
+     public static Animation<TextureRegion> getCharacterFightRightAnimation() {
+         return characterFightRightAnimation;
+     }
+
+     public static Animation<TextureRegion> getCharacterFightLeftAnimation() {
+         return characterFightLeftAnimation;
+     }
+
+     public static Animation<TextureRegion> getCharacterFightUpAnimation() {
+         return characterFightUpAnimation;
+     }
+
+     public static Animation<TextureRegion> getCharacterFightDownAnimation() {
+         return characterFightDownAnimation;
+     }
+
+     public int getEnemiesKilled() {
+         return enemiesKilled;
+     }
+
+     public void setEnemiesKilled(int enemiesKilled) {
+         this.enemiesKilled = enemiesKilled;
+     }
 
      public boolean isTreasureOpened() {
          return isTreasureOpened;
@@ -622,6 +629,14 @@ import com.badlogic.gdx.utils.Array;
 
      public boolean isKeyPressed() {
          return isKeyPressed;
+     }
+
+     public boolean isLeverPulled() {
+         return isLeverPulled;
+     }
+
+     public void setLeverPulled(boolean leverPulled) {
+         isLeverPulled = leverPulled;
      }
 
      public void setTextVisible(boolean textVisible) {

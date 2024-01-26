@@ -11,9 +11,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -23,8 +25,6 @@ public class GameScreen implements Screen {
 
     private static MazeRunnerGame game;
     private OrthographicCamera camera;
-    public InputProcessor stage;
-
     private static float sinusInput = 0f;
     private SpriteBatch batch;
     private static Character character;
@@ -37,12 +37,17 @@ public class GameScreen implements Screen {
 
     private static int wallX;
     private static int wallY;
-
-    private static int[][] mazeData;
+    private static int leverX;
+    private static int leverY;
+    private static int keyX;
+    private static int keyY;
+    private static int wallMoveableX;
+    private static int wallMoveableY;
+    private static int[][] mazeArray;
     private BitmapFont font;
     private Enemy enemy;
-    private float enemyX;
-    private float enemyY;
+    private float enemyX1;
+    private float enemyY1;
 
     private static int maxX;
     private static int maxY;
@@ -83,12 +88,11 @@ public class GameScreen implements Screen {
         camera.zoom = 0.80f;
         font = game.getSkin().getFont("font");
 
-
         Animation<TextureRegion> characterAnimation = Character.getCharacterDownAnimation();
 
         // Starting position - use the entry coordinates
         if (character == null || PauseScreen.isReset()) {
-            character = new Character(this, game, getEntryX(), getEntryY(), false, 5, characterAnimation);
+            character = new Character(this, game, getEntryX(), getEntryY(), false, false, false, 5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
         }
@@ -96,55 +100,97 @@ public class GameScreen implements Screen {
         camera.position.set(character.getX(), character.getY(), 0);
         camera.update();
 
-        enemy = new Enemy(getEnemyX(),getEnemyY(),5f,50,this);
+        enemy = new Enemy(getEnemyX1(), getEnemyY1(), 5f, 50, this);
         Enemy.loadEnemyAnimation();
 
-        angel = new GuardianAngel(getAngelX(),getAngelY(),20f, 80,this);
+        angel = new GuardianAngel(getAngelX(), getAngelY(), 20f, 80, this);
         GuardianAngel.loadAngelAnimation();
 
-        GameMap.lifeImageAnimation();
-        GameMap.exitImageAnimation();
-        GameMap.trapImageAnimation();
-        GameMap.keyImageAnimation();
-        GameMap.treasureImageAnimation();
+        Tree.loadWall();
+        Life.lifeImageAnimation();
+        Exit.exitImageAnimation();
+        Trap.trapImageAnimation();
+        Key.keyImageAnimation();
+        Treasure.treasureImageAnimation();
+        Wall.wallBreakingImageAnimation();
+        Lamps.lampImageAnimation();
     }
 
-
     public static void loadMazeDataFromPropertiesFile(String filePath) {
+        try {
+            Map<MapCoordinates, Integer> mapData = new HashMap<>();
 
-        Properties properties = new Properties();
+            /**
+             *  Read the file line by line.
+             */
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Split the line into two parts using "=" as a delimiter
+                    String[] parts = line.split("=");
 
-        try (FileInputStream input = new FileInputStream(filePath)) {
-            properties.load(input);
+                    // Extract the coordinates from the first part using "," as a delimiter
+                    String[] coordinates = parts[0].split(",");
+                    int x = Integer.parseInt(coordinates[0]);
+                    int y = Integer.parseInt(coordinates[1]);
 
-            // Assuming you have a fixed-size maze, adjust as needed
-            int rows = 1000;
-            int cols = 1000;
-            mazeData = new int[rows * cols][3];
+                    // Parse the value from the second part of the line
+                    int value = Integer.parseInt(parts[1]);
 
-            // Populate mazeData array from properties
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    String key = i + "," + j;  // The key format should be i,j
-                    int value = Integer.parseInt(properties.getProperty(key, "20"));
-                    mazeData[i * cols + j] = new int[]{i, j, value};
+                    // Create a new MapCoordinates object with the parsed coordinates
+                    MapCoordinates coordinatesObject = new MapCoordinates(x, y);
+
+                    // Put the MapCoordinates object and the parsed value into the mapData map
+                    mapData.put(coordinatesObject, value);
                 }
             }
 
+            maxX = mapData.keySet().stream().mapToInt(MapCoordinates::getX).max().orElse(0);
+            maxY = mapData.keySet().stream().mapToInt(MapCoordinates::getY).max().orElse(0);
+
+            /**
+             * Initialize the mazeArray with maxX and maxY
+             */
+            mazeArray = new int[maxX + 1][maxY + 1];
+
+            /**
+             * we have to choose wall for this. so we need to add floor in the switch-case statement.
+             */
+            int defaultValue = -1; // (We have to choose Floor for this)
+            // Populate the mazeArray with values from the mapData, using defaultValue for unspecified cells
+            for (int i = 0; i <= maxX; i++) {
+                for (int j = 0; j <= maxY; j++) {
+                    mazeArray[i][j] = mapData.getOrDefault(new MapCoordinates(i, j), defaultValue);
+                }
+            }
+
+            /**
+             * Populate the mazeArray with values from the mapData
+             */
+            mapData.forEach((coordinates, value) -> mazeArray[coordinates.getX()][coordinates.getY()] = value);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private static class MapCoordinates {
+        private final int x;
+        private final int y;
 
-        for (int[] point : mazeData) {
-            int x = point[0];
-            int y = point[1];
+        public MapCoordinates(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
 
-            // Update max values
-            maxX = Math.max(maxX, x);
-            maxY = Math.max(maxY, y);
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
         }
     }
+
 
     public static int getMaxX() {
         return maxX;
@@ -153,7 +199,6 @@ public class GameScreen implements Screen {
     public static int getMaxY() {
         return maxY;
     }
-
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,9 +216,6 @@ public class GameScreen implements Screen {
         // Check for escape key press to go back to the menu
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToPauseScreen();
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            game.goToNpcDialogScreen1();
         }
 
         if(character.getLives() <= 0) {
@@ -195,12 +237,9 @@ public class GameScreen implements Screen {
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        for (int i = 0; i < mazeData.length; i++) {
-            int x = mazeData[i][0];
-            int y = mazeData[i][1];
-            int variable = mazeData[i][2];
-
+        for (int x = 0; x <= maxX; x++) {
+            for (int y = 0; y <= maxY; y++) {
+                int variable = mazeArray[x][y];
 
             // Calculate the actual position on the screen
             float mazeX = x * 50;
@@ -217,7 +256,7 @@ public class GameScreen implements Screen {
                     // Entry point
                     entryX = (int) mazeX;
                     entryY = (int) mazeY;
-                    game.getSpriteBatch().draw(GameMap.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(Entry.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 2:
                     // Exit point
@@ -225,34 +264,34 @@ public class GameScreen implements Screen {
                         if (character.getX() < mazeX + 50 && character.getX() + 36 > mazeX - 0 &&
                                 character.getY() < mazeY + 50 && character.getY() + 31 > mazeY - 0) {
                             game.getSpriteBatch().draw(
-                                    GameMap.renderExit(),
+                                    Exit.renderExit(),
                                     mazeX,
                                     mazeY,
                                     50,
                                     50
-                                );
-                                {
+                            );
+                            {
 
-                            game.goToVictoryScreen();
+                                game.goToVictoryScreen();
 
-                                }
+                            }
 
                         } else if (character.getX() < mazeX + 250 && character.getX() + 36 > mazeX - 200 &&
                                 character.getY() < mazeY + 250 && character.getY() + 31 > mazeY - 200) {
                             game.getSpriteBatch().draw(
-                                    GameMap.renderExit(),
+                                    Exit.renderExit(),
                                     mazeX,
                                     mazeY,
                                     50,
                                     50
                             );
                         } else {
-                        // Draw the static exit point image when the character is not at the exit
-                        game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
-                    }
+                            // Draw the static exit point image when the character is not at the exit
+                            game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                        }
                     }else {
                         // Draw the static exit point image when the character is not at the exit
-                        game.getSpriteBatch().draw(GameMap.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                        game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
                     }
 
                     break;
@@ -261,7 +300,7 @@ public class GameScreen implements Screen {
                     // Trap (static obstacle)
                     float trapX = mazeX;
                     float trapY = mazeY;
-                    game.getSpriteBatch().draw(GameMap.renderTrap(),mazeX,mazeY,50,50);
+                    game.getSpriteBatch().draw(Trap.renderTrap(),mazeX,mazeY,50,50);
 
                     if (character.collidesWithTrap(trapX, trapY)) {
                         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
@@ -270,7 +309,7 @@ public class GameScreen implements Screen {
                         character.setLives(character.getLives() - 1);
                         shakeTheScreen();
                     }
-                    game.getSpriteBatch().draw(GameMap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(Trap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 4:
                     // Enemy (dynamic obstacle)
@@ -278,64 +317,62 @@ public class GameScreen implements Screen {
                     float enemyX1 = mazeX + enemy.getX();
                     float enemyY1 = mazeY + enemy.getY();
 
-                        game.getSpriteBatch().draw(
-                                enemy.render(delta),
-                                enemyX1,
-                                enemyY1,
-                                50,
-                                50
-                        );
+                    game.getSpriteBatch().draw(
+                            enemy.render(delta),
+                            enemyX1,
+                            enemyY1,
+                            50,
+                            50
+                    );
 
 
                     if (character.collidesWithEnemy(enemyX1, enemyY1)) {
-                        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
-                        backgroundMusic.setLooping(false);
-                        backgroundMusic.play();
-                        character.setLives(character.getLives() - 1);
-                        shakeTheScreen();
+                        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                            removeEnemyFromMazeData(enemyX1,enemyY1);
+                        }
+                        else{
+                            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
+                            backgroundMusic.setLooping(false);
+                            backgroundMusic.play();
+                            character.setLives(character.getLives() - 1);
+                            shakeTheScreen();
+                        }
                     }
                     break;
                 case 5:
                     // Key
-                    float keyX = mazeX;
-                    float keyY = mazeY;
+                    keyX = (int) mazeX;
+                    keyY = (int) mazeY;
 
-                    if(character.isTreasureOpened()) {game.getSpriteBatch().draw(GameMap.renderKey(),mazeX, mazeY, 40, 40);
-                    // Check for collision between character and key
+                    if(character.isTreasureOpened()) {
+                        game.getSpriteBatch().draw(Key.renderKey(),mazeX, mazeY, 60, 60);
                         if (character.collidesWithKey(keyX, keyY)) {
-                            character.setHasKey(true);  // Update character's hasKey status
-                            // Remove key from maze data
+                            character.setHasKey(true);
                             removeKeyFromMazeData(keyX, keyY);
                         }
                     }
-                    else {}
 
                     break;
                 case 6:
                     //Treasure
                     if (character.getX() < mazeX + 100 && character.getX() + 36 > mazeX - 50 &&
                             character.getY() < mazeY + 100 && character.getY() + 31 > mazeY - 50) {
-                        game.getSpriteBatch().draw(GameMap.renderTreasure(),mazeX, mazeY, 60, 60);
+                        game.getSpriteBatch().draw(Treasure.renderTreasure(),mazeX, mazeY, 60, 60);
                         if (character.collidesWithTreasure(mazeX, mazeY)) {
                             character.setTreasureOpened(true);
+                            character.setHasKey(false);
+                            game.goToTreasureScreen();
                             removeTreasureFromMazeData(mazeX, mazeY);
-                            character.setLives(character.getLives() + 1);
-
-                        }
-                        else {
                         }
                     }
                     else {
-                        game.getSpriteBatch().draw(GameMap.getTreasurePointImageRegion(), mazeX, mazeY, 60, 60);
+                        game.getSpriteBatch().draw(Treasure.getTreasurePointImageRegion(), mazeX, mazeY, 60, 60);
                     }
                     break;
                 case 7:
                     // Guardian Angel
                     float angelX = mazeX + angel.getX();
                     float angelY = mazeY + angel.getY();
-//                    angel.moveLeftRight(delta);
-//                    angel.moveUpDown(delta);
-                    angel.moveUpDown(delta);
                     game.getSpriteBatch().draw(
                             angel.render(delta),
                             angelX,
@@ -346,11 +383,70 @@ public class GameScreen implements Screen {
                     if (character.seesTheAngel(angelX, angelY)) {
                         if (character.collidesWithAngel(angelX, angelY)) {
                             game.goToNpcDialogScreen1();
+                            removeAngelFromMazeData(angelX, angelY);
                         }
                     }
+                    break;
+                case 8:
+                    // WallShadow
+                    wallX = (int) mazeX;
+                    wallY = (int) mazeY;
+                    game.getSpriteBatch().draw(Wall.getWallShadowImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 9:
+                    //Lamps
+                    game.getSpriteBatch().draw(Lamps.renderLamp(), mazeX, mazeY, 50, 50);
+                    break;
+                case 10:
+                    // WallMoveable
+                    wallMoveableX = (int) mazeX;
+                    wallMoveableY = (int) mazeY;
+                    game.getSpriteBatch().draw(Wall.getMoveableWallImageRegion(), mazeX, mazeY, 50, 50);
+                    if (character.getX() < leverX + 50 && character.getX() + 36 > leverX  &&
+                            character.getY() <leverY + 50 && character.getY() + 31 > leverY) {
+                        removeWallMoveableFromMazeData(mazeX, mazeY);
+                    }
+
+                    break;
+                case 11:
+                    //Lever
+                    leverX = (int) mazeX;
+                    leverY = (int) mazeY;
+                    if (character.collidesWithLever(mazeX,mazeY)) {
+                        game.getSpriteBatch().draw(
+                                Lever.renderLever(),
+                                mazeX,
+                                mazeY,
+                                50,
+                                50
+                        );
+                        character.setLeverPulled(true);
+                    }
+                    if (!character.collidesWithLever(mazeX,mazeY) && !character.isLeverPulled()) {
+                        game.getSpriteBatch().draw(Lever.getLeverPointImageRegion(), mazeX, mazeY, 50, 50);
+                    }
+                    else if (!character.collidesWithLever(mazeX,mazeY) && character.isLeverPulled()) {
+                        game.getSpriteBatch().draw(Lever.getLeverEndPointImageRegion(), mazeX, mazeY, 50, 50);
+                    }
+                    break;
+                case 12:
+                    //Tree top
+                    game.getSpriteBatch().draw(Tree.getTreeTopImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 13:
+                    //Tree
+                    game.getSpriteBatch().draw(Tree.getTreeImageRegion(), mazeX, mazeY, 50, 50);
+                    break;
+                case 20:
+                    //Moveable Wall dissapearing
+                    if (character.isLeverPulled()) {
+                        game.getSpriteBatch().draw(Wall.renderWallBreaking(), mazeX, mazeY, 50, 50);
+                    }
+                    break;
                 default:
                     break;
             }
+        }
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -386,13 +482,13 @@ public class GameScreen implements Screen {
          */
         float lifeTextX = camera.position.x - camera.viewportWidth / 10 - 500;
         float lifeTextY = camera.position.y + camera.viewportHeight / 10 + 300;
-        GameMap.renderLives(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
+        Life.renderLives(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
         font.draw(game.getSpriteBatch(), "Lives: " + character.getLives(), lifeTextX, lifeTextY);
 
         /**
          * Character's Key
          */
-        GameMap.renderKeys(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
+        Key.renderKeys(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
 
 
         float keyTextX = camera.position.x - camera.viewportWidth / 10 - 550;
@@ -419,12 +515,6 @@ public class GameScreen implements Screen {
         character.renderAngelMeeting(game.getSpriteBatch(),angelMeetingX,angelMeetingY);
 
 
-        /**
-         * heart image
-         */
-        float heartX = camera.position.x - 50;
-        float heartY = camera.position.y;
-        character.renderTreasureHeart(game.getSpriteBatch(),heartX,heartY);
 
         /**
          * key image
@@ -443,6 +533,7 @@ public class GameScreen implements Screen {
             character.setX(entryX + 100);
             character.setY(entryY);
             character.setCharacterRegion(Character.getCharacterDownAnimation().getKeyFrame(sinusInput, true));
+            character.setLeverPulled(false);
             character.setTextVisible(true);
         }
         else{
@@ -475,44 +566,114 @@ public class GameScreen implements Screen {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
         game.getSpriteBatch().end();
         batch.setProjectionMatrix(camera.combined);
 
     }
+
     private void removeKeyFromMazeData(float x, float y) {
-        for (int i = 0; i < mazeData.length; i++) {
-            if (mazeData[i][2] == 5) {
-                mazeData[i][2] = 15;  // Set variable to 0 to remove key from rendering
-                break;
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 5) {
+                    mazeArray[i][j] = 15;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
             }
         }
     }
+    private void removeAngelFromMazeData(float x, float y) {
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 7) {
+                    mazeArray[i][j] = 17;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+    }
+    private void removeWallMoveableFromMazeData(float x, float y) {
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 10) {
+                    mazeArray[i][j] = 20;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+    }
+
     private void removeTreasureFromMazeData(float x, float y) {
-        for (int i = 0; i < mazeData.length; i++) {
-            if (mazeData[i][2] == 6) {
-                mazeData[i][2] = 16;  // Set variable to 0 to remove key from rendering
+        for (int i = 0; i <= maxX; i++) {
+         for (int j = 0; j <= maxY; j++) {
+            if (mazeArray[i][j] == 6) {
+                mazeArray[i][j] = 16;  // Set variable to 0 to remove key from rendering
                 break;
             }
         }
+     }
     }
-    public static void resetKeyInMazeData() {
-        for (int i = 0; i < mazeData.length; i++) {
-            if (mazeData[i][2] == 15) {
-                mazeData[i][2] = 5; // Reset key value to 5
-                break;
+    private void removeEnemyFromMazeData(float x, float y) {
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                      if (mazeArray[i][j] == 4 && i == (int) (x / 50) && j == (int) (y / 50)) {
+                    mazeArray[i][j] = 14;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
             }
         }
     }
-    public static void resetTreasureInMazeData() {
-        for (int i = 0; i < mazeData.length; i++) {
-            if (mazeData[i][2] == 16) {
-                mazeData[i][2] = 6; // Reset key value to 5
-                break;
+
+    public static void reset() {
+        Wall.setWallBreakingStateTime(0);
+        //Key
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 15) {
+                    mazeArray[i][j] = 5;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+
+
+        //Angel
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 17) {
+                    mazeArray[i][j] = 7;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+        //Treasure
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 16) {
+                    mazeArray[i][j] = 6;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+        //Moveable Wall
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 20) {
+                    mazeArray[i][j] = 10;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
+            }
+        }
+        //Enemy
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 14) {
+                    mazeArray[i][j] = 4;  // Set variable to 0 to remove key from rendering
+                    break;
+                }
             }
         }
     }
+
     /**
      * methods for shaking the screen.
      * @return
@@ -576,42 +737,16 @@ public class GameScreen implements Screen {
         return entryY;
     }
 
-    public static int getWallX() {
-        return wallX;
+    public float getEnemyX1() {
+        return enemyX1;
     }
 
-    public static int getWallY() {
-        return wallY;
+    public float getEnemyY1() {
+        return enemyY1;
     }
-
-    public Enemy getEnemy() {
-        return enemy;
+    public static int[][] getMazeArray() {
+        return mazeArray;
     }
-
-    public void setEnemy(Enemy enemy) {
-        this.enemy = enemy;
-    }
-
-    public float getEnemyX() {
-        return enemyX;
-    }
-
-    public void setEnemyX(float enemyX) {
-        this.enemyX = enemyX;
-    }
-
-    public float getEnemyY() {
-        return enemyY;
-    }
-
-    public void setEnemyY(float enemyY) {
-        this.enemyY = enemyY;
-    }
-
-    public static int[][] getMazeData() {
-        return mazeData;
-    }
-
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
@@ -624,7 +759,6 @@ public class GameScreen implements Screen {
     @Override
     public void resume() {
     }
-
 
     @Override
     public void show() {
