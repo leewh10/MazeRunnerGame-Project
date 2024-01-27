@@ -1,15 +1,13 @@
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -20,9 +18,14 @@ public class TreasureScreen implements Screen {
     private final Image treasureImage;
     private final MazeRunnerGame game;
     private float elapsedTime;
+    private static Music backgroundMusic;
 
     public TreasureScreen(MazeRunnerGame game) {
         this.game = game;  // Store the MazeRunnerGame instance
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Treasure.mp3"));
+        backgroundMusic.setLooping(false);
+        backgroundMusic.play();
 
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -34,7 +37,7 @@ public class TreasureScreen implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
-        Treasure.loadTreasure();
+        Treasure.load();
 
         treasureImage = new Image();
 
@@ -50,7 +53,7 @@ public class TreasureScreen implements Screen {
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         stage.draw(); // Draw the stage
 
-        TextureRegion treasureTextureRegion = Treasure.renderTreasure();
+        TextureRegion treasureTextureRegion = Treasure.renderTexture();
 
         // Convert TextureRegion to Drawable
         Drawable drawable = new TextureRegionDrawable(treasureTextureRegion);
@@ -66,6 +69,14 @@ public class TreasureScreen implements Screen {
             PauseScreen.setReset(false);
             game.goToKeyScreen();
         }
+    }
+
+    public static Music getBackgroundMusic() {
+        return backgroundMusic;
+    }
+
+    public static void setBackgroundMusic(Music backgroundMusic) {
+        TreasureScreen.backgroundMusic = backgroundMusic;
     }
 
     @Override

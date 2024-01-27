@@ -6,13 +6,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Exit {
+public class Exit extends MapObject{
     private static TextureRegion ExitPointImageRegion;
     private static TextureRegion ExitRegion;
     private static Animation<TextureRegion> exitAnimation;
     private static float exitStateTime;
 
-    public static void loadExit() {
+    public static void load() {
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));
 
         int frameWidth = 16;
@@ -21,7 +21,7 @@ public class Exit {
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
     }
 
-    public static void exitImageAnimation() {
+    public static void animation() {
         Texture exit = new Texture(Gdx.files.internal("things.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -33,7 +33,7 @@ public class Exit {
         }
         exitAnimation = new Animation<>(0.3f, exitFrames);
     }
-    public static TextureRegion renderExit() {
+    public static TextureRegion renderTexture() {
         exitStateTime += Gdx.graphics.getDeltaTime();
         ExitRegion = exitAnimation.getKeyFrame(exitStateTime,true);
         return ExitRegion;

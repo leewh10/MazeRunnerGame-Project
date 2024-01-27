@@ -1,6 +1,5 @@
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,7 +19,7 @@ public class KeyScreen implements Screen {
     private final Image keyImage;
     private final MazeRunnerGame game;
 
-    public KeyScreen(MazeRunnerGame game) {
+    public KeyScreen(MazeRunnerGame game){
         this.game = game;  // Store the MazeRunnerGame instance
 
         var camera = new OrthographicCamera();
@@ -51,6 +50,7 @@ public class KeyScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(false);
+                TreasureScreen.getBackgroundMusic().stop();
                 game.goToGame();
             }
         });
@@ -64,7 +64,7 @@ public class KeyScreen implements Screen {
         stage.draw(); // Draw the stage
 
         // Get the TextureRegion from Heart
-        TextureRegion keyTextureRegion = Key.renderKey();
+        TextureRegion keyTextureRegion = Key.renderTexture();
 
         // Convert TextureRegion to Drawable
         Drawable drawable = new TextureRegionDrawable(keyTextureRegion);

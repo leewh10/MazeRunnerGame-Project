@@ -2,22 +2,21 @@
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 
  public class Character extends GameObject {
 
      private boolean hasKey;
+     private static boolean isCollidedTree;
      private int lives;
-     private int enemiesKilled;
+     private static int enemiesKilled;
      private final Animation<TextureRegion> animation;
      private static float stateTime;
 
@@ -80,19 +79,11 @@ import com.badlogic.gdx.utils.Array;
 
      }
 
-     public static void resetAnimation() {
-         // Reset the animation to the default animation
-         currentAnimation = getCharacterDownAnimation();
-
-         // Reset the state time to start the animation from the beginning
-         stateTime = 0f;
-     }
-
 
      /**
       * Loads the character animation from the character.png file.
       */
-     public static void loadCharacterAnimation() {
+     public static void loadAnimation() {
 
          Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
 
@@ -181,7 +172,6 @@ import com.badlogic.gdx.utils.Array;
 
      public void move() {
          stateTime += Gdx.graphics.getDeltaTime();
-
 
          /**
           * boolean for the text showing
@@ -333,9 +323,21 @@ import com.badlogic.gdx.utils.Array;
          boolean collisionLeftMove = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 10;
          boolean collisionRightMove = mazeArray[cellXForTopRight][cellYForTopRight] == 10;
 
+         boolean collisionTopExit = mazeArray[cellXForTopRight][cellYForTopRight] == 2; //
+         boolean collisionBottomExit = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 2;
+         boolean collisionLeftExit = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 2;
+         boolean collisionRightExit = mazeArray[cellXForTopRight][cellYForTopRight] == 2;
+
+         boolean collisionTopEntry = mazeArray[cellXForTopRight][cellYForTopRight] == 1; //
+         boolean collisionBottomEntry = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 1;
+         boolean collisionLeftEntry = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 1;
+         boolean collisionRightEntry = mazeArray[cellXForTopRight][cellYForTopRight] == 1;
+
          return collisionTop || collisionBottom || collisionLeft || collisionRight
                  || collisionBottomShadow || collisionLeftShadow || collisionRightShadow|| collisionTopShadow
-                 || collisionBottomMove || collisionLeftMove || collisionRightMove|| collisionTopMove;
+                 || collisionBottomMove || collisionLeftMove || collisionRightMove|| collisionTopMove
+                 || collisionBottomExit || collisionLeftExit || collisionRightExit|| collisionTopExit
+                 || collisionBottomEntry || collisionLeftEntry || collisionRightEntry|| collisionTopEntry;
      }
 
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
@@ -436,6 +438,14 @@ import com.badlogic.gdx.utils.Array;
 
          return characterX < leverX + 50 && characterX + 36 > leverX  &&
                  characterY <leverY + 50 && characterY + 31 > leverY;
+     }
+
+     public boolean collidesWithTree(float treeX, float treeY) {
+         float characterX = getX();
+         float characterY = getY();
+
+         return characterX < treeX + 50 && characterX + 36 > treeX  &&
+                 characterY < treeY + 50 && characterY + 31 > treeY;
      }
 
      public boolean collidesWithTreasure(float treasureX, float treasureY) {
@@ -567,7 +577,15 @@ import com.badlogic.gdx.utils.Array;
         return characterUpAnimation;
     }
 
-    public static Animation<TextureRegion> getCharacterLeftAnimation() {
+     public static boolean isCollidedTree() {
+         return isCollidedTree;
+     }
+
+     public static void setCollidedTree(boolean collidedTree) {
+         isCollidedTree = collidedTree;
+     }
+
+     public static Animation<TextureRegion> getCharacterLeftAnimation() {
         return characterLeftAnimation;
     }
 
@@ -591,12 +609,12 @@ import com.badlogic.gdx.utils.Array;
          return characterFightDownAnimation;
      }
 
-     public int getEnemiesKilled() {
+     public static int getEnemiesKilled() {
          return enemiesKilled;
      }
 
-     public void setEnemiesKilled(int enemiesKilled) {
-         this.enemiesKilled = enemiesKilled;
+     public static void setEnemiesKilled(int enemiesKilled) {
+         Character.enemiesKilled = enemiesKilled;
      }
 
      public boolean isTreasureOpened() {

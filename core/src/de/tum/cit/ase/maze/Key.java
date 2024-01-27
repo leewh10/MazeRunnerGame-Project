@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Key{
+public class Key extends MapObject{
     private static TextureRegion KeyImageRegion;
     private static Animation<TextureRegion> keyAnimation;
     private static float keyStateTime;
-    public static void keyImageAnimation() {
+    public static void animation() {
         Texture key = new Texture(Gdx.files.internal("key-gold.png"));
 
         int frameWidth = 16;
@@ -24,17 +24,17 @@ public class Key{
         }
         keyAnimation = new Animation<>(0.2f, keyFrames);
     }
-    public static TextureRegion renderKey() {
+    public static TextureRegion renderTexture() {
         keyStateTime += Gdx.graphics.getDeltaTime();
         KeyImageRegion = keyAnimation.getKeyFrame(keyStateTime,true);
         return KeyImageRegion;
     }
 
-    public static void renderKeys(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
+    public static void render(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
         float keyWidth = 30;
         float keyHeight = 30;
 
-        float keyX = viewportWidth + 20;
+        float keyX = viewportWidth + 10;
         float keyY = viewportHeight + 80;
 
         keyStateTime += Gdx.graphics.getDeltaTime(); // Update animation time

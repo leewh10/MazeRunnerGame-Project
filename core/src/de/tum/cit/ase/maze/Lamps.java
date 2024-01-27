@@ -3,15 +3,14 @@ package de.tum.cit.ase.maze;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-    public class Lamps{
+    public class Lamps extends MapObject{
         private static TextureRegion LampImageRegion;
         private static Animation<TextureRegion> lampAnimation;
         private static float lampStateTime;
-        public static void lampImageAnimation() {
+        public static void animation() {
             Texture lamp = new Texture(Gdx.files.internal("basictiles.png"));
 
             int frameWidth = 16;
@@ -25,7 +24,7 @@ import com.badlogic.gdx.utils.Array;
             lampAnimation = new Animation<>(0.2f, lampFrames);
         }
 
-        public static TextureRegion renderLamp() {
+        public static TextureRegion renderTexture() {
             lampStateTime += Gdx.graphics.getDeltaTime();
             LampImageRegion = lampAnimation.getKeyFrame(lampStateTime,true);
             return LampImageRegion;

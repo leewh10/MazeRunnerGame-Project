@@ -6,12 +6,12 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Treasure {
+public class Treasure extends MapObject{
     private static TextureRegion TreasurePointImageRegion;
     private static TextureRegion treasureRegion;
     private static Animation<TextureRegion> treasureAnimation;
     private static float treasureStateTime;
-    public static void loadTreasure() {
+    public static void load() {
         Texture things = new Texture(Gdx.files.internal("things.png"));
 
         int frameWidth = 16;
@@ -19,7 +19,7 @@ public class Treasure {
 
         TreasurePointImageRegion = new TextureRegion(things, 6*16,0 , frameWidth, frameHeight);
     }
-    public static void treasureImageAnimation() {
+    public static void animation() {
         Texture treasure = new Texture(Gdx.files.internal("things.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -31,7 +31,7 @@ public class Treasure {
         }
         treasureAnimation = new Animation<>(0.3f, treasureFrames);
     }
-    public static TextureRegion renderTreasure() {
+    public static TextureRegion renderTexture() {
         treasureStateTime += Gdx.graphics.getDeltaTime();
         treasureRegion = treasureAnimation.getKeyFrame(treasureStateTime,true);
         return treasureRegion;

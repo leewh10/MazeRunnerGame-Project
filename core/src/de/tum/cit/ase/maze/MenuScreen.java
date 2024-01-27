@@ -52,6 +52,8 @@ public class MenuScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                PauseScreen.setReset(true);
+                GameScreen.setPaused(false);
                 game.openFileChooser();
             }
         });
@@ -61,6 +63,7 @@ public class MenuScreen implements Screen {
         goToInstructionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                PauseScreen.setReset(true);
                 game.goToInstructionScreen();
             }
         });

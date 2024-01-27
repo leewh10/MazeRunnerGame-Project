@@ -6,12 +6,12 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Trap {
+public class Trap extends MapObject{
     private static TextureRegion TrapImageRegion;
     private static Animation<TextureRegion> trapAnimation;
     private static float trapStateTime;
 
-    public static void trapImageAnimation() {
+    public static void animation() {
         Texture trap = new Texture(Gdx.files.internal("objects.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -23,7 +23,7 @@ public class Trap {
         }
         trapAnimation = new Animation<>(0.8f, trapFrames);
     }
-    public static TextureRegion renderTrap() {
+    public static TextureRegion renderTexture() {
         trapStateTime += Gdx.graphics.getDeltaTime();
         TrapImageRegion = trapAnimation.getKeyFrame(trapStateTime,true);
         return TrapImageRegion;

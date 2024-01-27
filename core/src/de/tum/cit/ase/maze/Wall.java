@@ -1,22 +1,17 @@
 package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 
-public class Wall {
+public class Wall extends MapObject{
     private static TextureRegion WallImageRegion;
     private static TextureRegion WallShadowImageRegion;
     private static TextureRegion MoveableWallImageRegion;
 
-
-
-    public static void loadWall() {
+    public static void load() {
     int frameWidth = 16;
     int frameHeight = 16;
     Texture map = new Texture(Gdx.files.internal("basictiles.png"));
@@ -37,11 +32,14 @@ public class Wall {
         return MoveableWallImageRegion;
     }
 
+
+
+
     private static TextureRegion wallBreakingRegion;
     private static Animation<TextureRegion> wallBreakingAnimation;
     private static float wallBreakingStateTime;
 
-    public static void wallBreakingImageAnimation() {
+    public static void animation() {
         Texture wallBreaking = new Texture(Gdx.files.internal("objects.png"));
         int frameWidth = 33;
         int frameHeight = 33;
@@ -53,7 +51,7 @@ public class Wall {
         }
         wallBreakingAnimation = new Animation<>(1, treasureFrames);
     }
-    public static TextureRegion renderWallBreaking() {
+    public static TextureRegion renderTexture() {
         wallBreakingStateTime += Gdx.graphics.getDeltaTime();
         wallBreakingRegion = wallBreakingAnimation.getKeyFrame(wallBreakingStateTime,false);
         return wallBreakingRegion;
@@ -65,4 +63,5 @@ public class Wall {
     public static void setWallBreakingStateTime(float wallBreakingStateTime) {
         Wall.wallBreakingStateTime = wallBreakingStateTime;
     }
+
 }

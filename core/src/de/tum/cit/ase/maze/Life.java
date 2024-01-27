@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Life {
+public class Life extends MapObject{
     private static Animation<TextureRegion> lifeAnimation;
     private static float lifeStateTime;
 
-    public static void lifeImageAnimation() {
+    public static void animation() {
         Texture life = new Texture(Gdx.files.internal("objects.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -24,7 +24,7 @@ public class Life {
         lifeAnimation = new Animation<>(0.2f, lifeFrames);
     }
 
-    public static void renderLives(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, int characterLives) {
+    public static void render(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, int characterLives) {
         float spacing = 20;
         float lifeWidth = 40;
         float lifeHeight = 40;

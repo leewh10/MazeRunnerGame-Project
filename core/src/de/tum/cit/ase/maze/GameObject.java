@@ -40,4 +40,9 @@ public abstract class GameObject {
         this.y = y;
     }
 
+    public static void loadAnimation() {
+    }
+
+    public void move(float delta) {
+    }
 }

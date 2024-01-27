@@ -45,12 +45,13 @@ public class GameOverScreen implements Screen {
         });
 
         // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Load New Map", game.getSkin());
+        TextButton goToGameButton = new TextButton("Go to Menu", game.getSkin());
         table.add(goToGameButton).width(400).row();
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.openFileChooser();
+                PauseScreen.setReset(true);
+                game.goToMenu();
                 }
         });
 

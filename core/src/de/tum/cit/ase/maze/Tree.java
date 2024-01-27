@@ -2,15 +2,13 @@ package de.tum.cit.ase.maze;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
 
-public class Tree {
+public class Tree extends MapObject{
     private static TextureRegion TreeImageRegion;
     private static TextureRegion TreeTopImageRegion;
 
-    public static void loadWall() {
+    public static void load() {
         int frameWidth = 16;
         int frameHeight = 16;
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));

@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class Entry {
+public class Entry extends MapObject{
     private static TextureRegion EntryPointImageRegion;
-    public static void loadEntry() {
+    public static void load() {
         int frameWidth = 16;
         int frameHeight = 15;
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));

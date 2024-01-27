@@ -17,8 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
 
 
 /**
@@ -61,20 +59,22 @@ public class InstructionScreen implements Screen {
         angelImage = new Image();
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(game.getSkin().get("bold", Label.LabelStyle.class));
-        labelStyle.font.getData().setScale(1.5f);
+        labelStyle.font.getData().setScale(1f);
 
         // Add a label as a title
-        table.add(new Label("How to Play", labelStyle)).padBottom(20).row();
-        table.add(new Label("GOAL: Successfully ESCAPE the MAZE by opening the GATE", game.getSkin(), "bold")).padBottom(20);
+        table.add(new Label("How to Play", game.getSkin(), "title")).padBottom(20).row();
+        table.add(new Label("GOAL: Successfully ESCAPE the MAZE by opening the GATE", labelStyle)).padBottom(20);
         table.add(exitImage).padLeft(50).width(75).height(75).padBottom(20).row();
         table.add(new Label("To move your CHARACTER, use your ARROW or WASD key", game.getSkin(), "bold")).padBottom(20).row();
+        table.add(new Label("Kill GHOSTS by pressing the move key and SPACE simultaneously", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("Find a TREASURE to help you open the GATE", game.getSkin(), "bold")).padBottom(20);
-        table.add(treasureImage).padLeft(-300).width(75).height(75).padBottom(20).row(); // Add ghost image next to the line "BEWARE OF GHOSTS"
+        table.add(treasureImage).padLeft(-300).width(75).height(75).padBottom(20).row();
         table.add(new Label("MOVEABLE WALLS must be opened using a LEVER", game.getSkin(), "bold")).padBottom(20);
         table.add(moveableWallImage).padLeft(-180).width(75).height(75).padBottom(20);
         table.add(leverImage).padLeft(-100).width(75).height(75).padBottom(20).row();
         table.add(new Label("BEWARE OF THE GHOSTS!", game.getSkin(), "bold")).padBottom(20);
         table.add(enemyImage).padLeft(-700).width(75).height(75).padBottom(20).row(); // Add ghost image next to the line "BEWARE OF GHOSTS"
+        table.add(new Label("Kill 5 GHOSTS to get a LIFE!", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("If you see an ANGEL, go say hi!", game.getSkin(), "bold")).padBottom(20);
         table.add(angelImage).padLeft(-550).width(75).height(75).padBottom(20).row();
         table.add(new Label("GOOD LUCK!", game.getSkin(), "bold")).padBottom(50).row();
@@ -87,6 +87,8 @@ public class InstructionScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                PauseScreen.setReset(true);
+                GameScreen.setPaused(false);
                 game.openFileChooser();
                 }
         });

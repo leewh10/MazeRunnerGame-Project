@@ -18,7 +18,6 @@ import java.io.File;
 
 public class VictoryScreen implements Screen {
     private final Stage stage;
-
     public VictoryScreen(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -45,14 +44,15 @@ public class VictoryScreen implements Screen {
             }
         });
 
-        // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Load New Map", game.getSkin());
-        table.add(goToGameButton).width(400).row();
-        goToGameButton.addListener(new ChangeListener() {
+        TextButton menuGameButton = new TextButton("Go to Menu", game.getSkin());
+        table.add(menuGameButton).width(400).row();
+        menuGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.openFileChooser();
-                }
+                PauseScreen.setReset(true);
+                GameScreen.reset();
+                game.goToMenu();
+            }
         });
 
         // Create and add a button to go to the game screen
@@ -61,9 +61,11 @@ public class VictoryScreen implements Screen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                PauseScreen.setReset(true);
                 Gdx.app.exit();
             }
         });
+
     }
 
     @Override

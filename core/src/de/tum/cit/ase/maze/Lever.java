@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class Lever {
+public class Lever  extends MapObject{
     private static TextureRegion leverPointImageRegion;
     private static TextureRegion leverEndPointImageRegion;
 
@@ -14,7 +14,7 @@ public class Lever {
     private static Animation<TextureRegion> leverAnimation;
     private static float leverStateTime;
 
-    public static void loadLever() {
+    public static void load() {
         Texture things = new Texture(Gdx.files.internal("things.png"));
 
         int frameWidth = 16;
@@ -24,7 +24,7 @@ public class Lever {
         leverEndPointImageRegion = new TextureRegion(things, 5 * 16, 4 * 16, frameWidth, frameHeight);
     }
 
-    public static void leverImageAnimation() {
+    public static void animation() {
         Texture things = new Texture(Gdx.files.internal("things.png"));
         int frameWidth = 16;
         int frameHeight = 16;
@@ -37,9 +37,9 @@ public class Lever {
         leverAnimation = new Animation<>(0.3f, leverFrames);
     }
 
-    public static TextureRegion renderLever() {
+    public static TextureRegion renderTexture() {
         if (leverAnimation == null) {
-            leverImageAnimation(); // Initialize leverAnimation if not already initialized
+            animation(); // Initialize leverAnimation if not already initialized
         }
 
         leverStateTime += Gdx.graphics.getDeltaTime();

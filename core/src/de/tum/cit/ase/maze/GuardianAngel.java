@@ -8,7 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-public class GuardianAngel extends GameObject{
+public class GuardianAngel extends GameObject {
+
     private static Animation<TextureRegion> angelDownAnimation;
     private static Animation<TextureRegion> angelUpAnimation;
     private static Animation<TextureRegion> angelLeftAnimation;
@@ -40,7 +41,7 @@ public class GuardianAngel extends GameObject{
         initialise();
     }
 
-    public static void loadAngelAnimation() {
+    public static void loadAnimation() {
         Texture angel = new Texture(Gdx.files.internal("angel-f-001.png"));
 
         int frameWidth = 48;
@@ -66,7 +67,7 @@ public class GuardianAngel extends GameObject{
 
     public void initialise() {
         if (angelDownAnimation == null) {
-            loadAngelAnimation();
+            loadAnimation();
         }
         setAngelImageRegion(angelDownAnimation.getKeyFrame(angelStateTime,true));
     }
@@ -183,7 +184,7 @@ public class GuardianAngel extends GameObject{
 
 
     // Initialize the texture region in a static block
-    public static void loadAngel(){
+    public static void load(){
         Texture angel = new Texture(Gdx.files.internal("angel-f-001.png"));
 
         int frameWidth = 48;
