@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Life extends MapObject{
+    /**
+     * Visual representation of the Lives the Character has
+     */
     private static Animation<TextureRegion> lifeAnimation;
     private static float lifeStateTime;
 
@@ -39,7 +42,6 @@ public class Life extends MapObject{
             spriteBatch.draw(currentLifeFrame, lifeX + i * spacing, lifeY, lifeWidth, lifeHeight);
         }
     }
-
 
 
     public static Animation<TextureRegion> getLifeAnimation() {

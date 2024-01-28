@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Trap extends MapObject{
+    /**
+     * A stationary Obstacle that causes the Character to lose a Life upon Collision
+     */
     private static TextureRegion TrapImageRegion;
     private static Animation<TextureRegion> trapAnimation;
     private static float trapStateTime;
@@ -33,20 +36,5 @@ public class Trap extends MapObject{
         return TrapImageRegion;
     }
 
-    public static Animation<TextureRegion> getTrapAnimation() {
-        return trapAnimation;
-    }
-
-    public static void setTrapAnimation(Animation<TextureRegion> trapAnimation) {
-        Trap.trapAnimation = trapAnimation;
-    }
-
-    public static float getTrapStateTime() {
-        return trapStateTime;
-    }
-
-    public static void setTrapStateTime(float trapStateTime) {
-        Trap.trapStateTime = trapStateTime;
-    }
 }
 

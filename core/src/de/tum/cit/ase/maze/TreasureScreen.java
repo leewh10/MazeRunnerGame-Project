@@ -14,15 +14,25 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class TreasureScreen implements Screen {
+
     private final Stage stage;
     private final Image treasureImage;
     private final MazeRunnerGame game;
     private float elapsedTime;
     private static Music backgroundMusic;
 
+    /**
+     * Constructor for the TreasureScreen
+     * TreasureScreen appears after the Character collides with the Treasure
+     * The treasure animation plays for 1 second, then transitions to the KeyScreen
+     * @param game
+     */
     public TreasureScreen(MazeRunnerGame game) {
         this.game = game;  // Store the MazeRunnerGame instance
-
+        /**
+         * https://www.youtube.com/watch?v=69AyYUJUBTg&ab_channel=DekuSprout
+         * Legend of Zelda - Chest Opening and Getting Item. by Deku Sprout on YouTube
+         */
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Treasure.mp3"));
         backgroundMusic.setLooping(false);
         backgroundMusic.play();
@@ -64,7 +74,7 @@ public class TreasureScreen implements Screen {
         // Increment elapsed time
         elapsedTime += delta;
 
-        // Check if 3 seconds have passed, then transition to the game screen
+        // Check if 1 second has passed, then transition to the game screen
         if (elapsedTime >= 1) {
             PauseScreen.setReset(false);
             game.goToKeyScreen();

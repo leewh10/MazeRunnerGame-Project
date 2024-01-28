@@ -5,6 +5,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Tree extends MapObject{
+    /**
+     * Consists of two MazeObjects
+     * TreeTopImageRegion is a purely aesthetic attribute that is contained within walls
+     * TreeImageRegion is the TextureRegion for the MapObject of value 13 (The Tree of Good and Evil)
+     */
     private static TextureRegion TreeImageRegion;
     private static TextureRegion TreeTopImageRegion;
 

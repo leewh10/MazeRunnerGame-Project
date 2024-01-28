@@ -14,8 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -28,13 +27,17 @@ public class GameScreen implements Screen {
     private static float sinusInput = 0f;
     private SpriteBatch batch;
     private static Character character;
-
     private float textX;
     private float textY;
+    private BitmapFont font;
+
+    /**
+     * mazeArray converts the data from the .properties file into a two-dimensional array
+     */
+    private static int[][] mazeArray;
 
     private static int entryX;
     private static int entryY;
-
     private static int wallX;
     private static int wallY;
     private static int leverX;
@@ -43,12 +46,14 @@ public class GameScreen implements Screen {
     private static int keyY;
     private static int wallMoveableX;
     private static int wallMoveableY;
-    private static int[][] mazeArray;
-    private BitmapFont font;
-    private Enemy enemy;
     private float enemyX1;
     private float enemyY1;
+    private float angelX;
+    private float angelY;
 
+    /**
+     * maxX and maxY identify the largest x and y coordination in each .properties file and sets it as the maximum map size
+     */
     private static int maxX;
     private static int maxY;
 
@@ -62,16 +67,17 @@ public class GameScreen implements Screen {
     private float screenShakeIntensity = 2f;
     private Vector2 originalCameraPosition = new Vector2();  // Store the original camera position for restoration
 
+
+
     private GuardianAngel angel;
-    private float angelX;
-    private float angelY;
+    private Enemy enemy;
+    private static List<Enemy> enemies;
+    private static Map<MapCoordinates, Integer> mapData;
+    private static boolean isPaused;
+    private static long startTime; // Initialize the start time
 
-    public float getAngelX() {
-        return angelX;
-    }
-
-    public float getAngelY() {
-        return angelY;
+    public static long getStartTime() {
+        return startTime;
     }
 
     /**
@@ -81,6 +87,7 @@ public class GameScreen implements Screen {
      */
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
+        mapData = new HashMap<>();
 
         // Create and configure the camera for the game view
         camera = new OrthographicCamera();
@@ -91,8 +98,13 @@ public class GameScreen implements Screen {
         Animation<TextureRegion> characterAnimation = Character.getCharacterDownAnimation();
 
         // Starting position - use the entry coordinates
+        /**
+         * Resets the character if the game is reset, or if there is no character to begin with
+         */
         if (character == null || PauseScreen.isReset()) {
-            character = new Character(this, game, getEntryX(), getEntryY(), false, false, false, 5, characterAnimation);
+            startTime = System.currentTimeMillis();
+
+            character = new Character(this, game, getEntryX(), getEntryY(), false, false, false,5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
         }
@@ -100,28 +112,36 @@ public class GameScreen implements Screen {
         camera.position.set(character.getX(), character.getY(), 0);
         camera.update();
 
-        enemy = new Enemy(getEnemyX1(), getEnemyY1(), 5f, 50, this);
-        Enemy.loadEnemyAnimation();
+        enemies = initialiseEnemy();
+        Enemy.loadAnimation();
 
         angel = new GuardianAngel(getAngelX(), getAngelY(), 20f, 80, this);
-        GuardianAngel.loadAngelAnimation();
+        GuardianAngel.loadAnimation();
 
-        Tree.loadWall();
-        Life.lifeImageAnimation();
-        Exit.exitImageAnimation();
-        Trap.trapImageAnimation();
-        Key.keyImageAnimation();
-        Treasure.treasureImageAnimation();
-        Wall.wallBreakingImageAnimation();
-        Lamps.lampImageAnimation();
+        Tree.load();
+        Life.animation();
+        Exit.animation();
+        Trap.animation();
+        Key.animation();
+        Treasure.animation();
+        Wall.animation();
+        Lamps.animation();
     }
 
+    /**
+     * Reads the file provided line by line and separates the lines into first, before and after an = sign,
+     * then before and after a comma sign.
+     * It then adds this to a two-dimensional array in which before the comma is x, after the comma is y, after the = is value
+     * @param filePath
+     */
     public static void loadMazeDataFromPropertiesFile(String filePath) {
         try {
-            Map<MapCoordinates, Integer> mapData = new HashMap<>();
+            mapData = new HashMap<>();
+
+
 
             /**
-             *  Read the file line by line.
+             *  Read the file line by line
              */
             try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
                 String line;
@@ -173,6 +193,7 @@ public class GameScreen implements Screen {
         }
     }
 
+
     private static class MapCoordinates {
         private final int x;
         private final int y;
@@ -189,23 +210,33 @@ public class GameScreen implements Screen {
         public int getY() {
             return y;
         }
+
     }
 
+    public List<Enemy> initialiseEnemy() {
+        if (enemies == null) {
+            enemies = new ArrayList<>();
 
-    public static int getMaxX() {
-        return maxX;
-    }
+            for (int x = 0; x <= maxX; x++) {
+                for (int y = 0; y <= maxY; y++) {
+                    int variable = mazeArray[x][y];
 
-    public static int getMaxY() {
-        return maxY;
+                    if (variable == 4) {
+                        enemies.add(new Enemy(x * 50, y * 50));
+                    }
+                }
+            }
+        }
+        return enemies;
     }
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     // Screen interface methods with necessary functionality
     @Override
     public void render(float delta) {
+        if (!isPaused) {
+
         if(Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
             camera.zoom += 0.01f;
         }
@@ -213,14 +244,32 @@ public class GameScreen implements Screen {
             camera.zoom -= 0.01f;
         }
 
-        // Check for escape key press to go back to the menu
+        /**
+         * Gdx.input.isKeyJustPressed() as opposed to Gdx.input.isKeyPressed() allows the key to just be pressed once
+         */
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            setPaused(true);
             game.goToPauseScreen();
         }
 
+        /**
+         * If the character kills 5 Enemies, it becomes one Life
+         */
+        if (Character.getEnemiesKilled() >= 5) {
+            Character.setEnemiesKilled(0);  // Reset the count of enemies killed
+            character.setLives(character.getLives() + 1);  // Increase the number of lives
+        }
+
+        /**
+         *
+         */
         if(character.getLives() <= 0) {
             game.goToGameOverScreen();
-            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("SpongeBobFail.mp3"));
+            /**
+             * https://www.youtube.com/watch?v=BVQ_JHmvhCM&ab_channel=SuperMarioBroz.
+             * SUPER MARIO - game over - sound effect by Super Mario Broz. on YouTube
+             */
+            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("SuperMarioGameOverSound.mp3"));
             backgroundMusic.setLooping(false);
             backgroundMusic.play();
         }
@@ -259,50 +308,29 @@ public class GameScreen implements Screen {
                     game.getSpriteBatch().draw(Entry.getEntryPointImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 2:
-                    // Exit point
+                    //Exit
                     if (character.isHasKey()) {
-                        if (character.getX() < mazeX + 50 && character.getX() + 36 > mazeX - 0 &&
-                                character.getY() < mazeY + 50 && character.getY() + 31 > mazeY - 0) {
-                            game.getSpriteBatch().draw(
-                                    Exit.renderExit(),
-                                    mazeX,
-                                    mazeY,
-                                    50,
-                                    50
-                            );
-                            {
-
-                                game.goToVictoryScreen();
-
-                            }
-
-                        } else if (character.getX() < mazeX + 250 && character.getX() + 36 > mazeX - 200 &&
-                                character.getY() < mazeY + 250 && character.getY() + 31 > mazeY - 200) {
-                            game.getSpriteBatch().draw(
-                                    Exit.renderExit(),
-                                    mazeX,
-                                    mazeY,
-                                    50,
-                                    50
-                            );
-                        } else {
-                            // Draw the static exit point image when the character is not at the exit
-                            game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
-                        }
-                    }else {
-                        // Draw the static exit point image when the character is not at the exit
+                        removeFromMazeData(mazeX, mazeY,2,22);
+                    }
+                    else {
                         game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
                     }
-
                     break;
 
                 case 3:
                     // Trap (static obstacle)
                     float trapX = mazeX;
                     float trapY = mazeY;
-                    game.getSpriteBatch().draw(Trap.renderTrap(),mazeX,mazeY,50,50);
+                    game.getSpriteBatch().draw(Trap.renderTexture(),mazeX,mazeY,50,50);
 
-                    if (character.collidesWithTrap(trapX, trapY)) {
+                    /**
+                     * Immunity to fire
+                     */
+                    if (character.collidesWithTrap(trapX, trapY) && !Character.isIsImmuneToFire()) {
+                        /**
+                         * https://www.youtube.com/watch?v=5kl8-IwhQQI&ab_channel=OverknightSounds
+                         * Wrong Buzzer Sound Effect by Overknight Sounds on YouTube
+                         */
                         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
                         backgroundMusic.setLooping(false);
                         backgroundMusic.play();
@@ -311,58 +339,43 @@ public class GameScreen implements Screen {
                     }
                     game.getSpriteBatch().draw(Trap.getTrapImageRegion(), mazeX, mazeY, 50, 50);
                     break;
-                case 4:
-                    // Enemy (dynamic obstacle)
-                    enemy.move(delta);
-                    float enemyX1 = mazeX + enemy.getX();
-                    float enemyY1 = mazeY + enemy.getY();
-
-                    game.getSpriteBatch().draw(
-                            enemy.render(delta),
-                            enemyX1,
-                            enemyY1,
-                            50,
-                            50
-                    );
-
-
-                    if (character.collidesWithEnemy(enemyX1, enemyY1)) {
-                        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                            removeEnemyFromMazeData(enemyX1,enemyY1);
-                        }
-                        else{
-                            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
-                            backgroundMusic.setLooping(false);
-                            backgroundMusic.play();
-                            character.setLives(character.getLives() - 1);
-                            shakeTheScreen();
-                        }
-                    }
-                    break;
                 case 5:
                     // Key
                     keyX = (int) mazeX;
                     keyY = (int) mazeY;
 
                     if(character.isTreasureOpened()) {
-                        game.getSpriteBatch().draw(Key.renderKey(),mazeX, mazeY, 60, 60);
+
+                        game.getSpriteBatch().draw(Key.renderTexture(),mazeX, mazeY, 60, 60);
                         if (character.collidesWithKey(keyX, keyY)) {
                             character.setHasKey(true);
-                            removeKeyFromMazeData(keyX, keyY);
+                            /**
+                             * https://www.youtube.com/watch?v=c9Yb_a4R7ts&ab_channel=SFXWARD
+                             * Level Up Sound Effect by SFX WARD on YouTube
+                             */
+                            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Key.mp3"));
+                            backgroundMusic.setLooping(false);
+                            backgroundMusic.play();
+                            removeFromMazeData(keyX, keyY,5,15);
                         }
                     }
 
                     break;
                 case 6:
                     //Treasure
+                    /**
+                     * If the character is near the treasure, animate the treasure opening
+                     */
                     if (character.getX() < mazeX + 100 && character.getX() + 36 > mazeX - 50 &&
                             character.getY() < mazeY + 100 && character.getY() + 31 > mazeY - 50) {
-                        game.getSpriteBatch().draw(Treasure.renderTreasure(),mazeX, mazeY, 60, 60);
+
+                        game.getSpriteBatch().draw(Treasure.renderTexture(),mazeX, mazeY, 60, 60);
+
                         if (character.collidesWithTreasure(mazeX, mazeY)) {
                             character.setTreasureOpened(true);
                             character.setHasKey(false);
                             game.goToTreasureScreen();
-                            removeTreasureFromMazeData(mazeX, mazeY);
+                            removeFromMazeData(mazeX, mazeY,6,16);
                         }
                     }
                     else {
@@ -383,7 +396,7 @@ public class GameScreen implements Screen {
                     if (character.seesTheAngel(angelX, angelY)) {
                         if (character.collidesWithAngel(angelX, angelY)) {
                             game.goToNpcDialogScreen1();
-                            removeAngelFromMazeData(angelX, angelY);
+                            removeFromMazeData(angelX, angelY,7,17);
                         }
                     }
                     break;
@@ -395,18 +408,21 @@ public class GameScreen implements Screen {
                     break;
                 case 9:
                     //Lamps
-                    game.getSpriteBatch().draw(Lamps.renderLamp(), mazeX, mazeY, 50, 50);
+                    game.getSpriteBatch().draw(Lamps.renderTexture(), mazeX, mazeY, 50, 50);
                     break;
                 case 10:
                     // WallMoveable
                     wallMoveableX = (int) mazeX;
                     wallMoveableY = (int) mazeY;
                     game.getSpriteBatch().draw(Wall.getMoveableWallImageRegion(), mazeX, mazeY, 50, 50);
+
+                    /**
+                     * If the character colllides with the lever, the wall is removed
+                     */
                     if (character.getX() < leverX + 50 && character.getX() + 36 > leverX  &&
                             character.getY() <leverY + 50 && character.getY() + 31 > leverY) {
-                        removeWallMoveableFromMazeData(mazeX, mazeY);
+                        removeFromMazeData(mazeX, mazeY,10,20);
                     }
-
                     break;
                 case 11:
                     //Lever
@@ -414,14 +430,25 @@ public class GameScreen implements Screen {
                     leverY = (int) mazeY;
                     if (character.collidesWithLever(mazeX,mazeY)) {
                         game.getSpriteBatch().draw(
-                                Lever.renderLever(),
+                                Lever.renderTexture(),
                                 mazeX,
                                 mazeY,
                                 50,
                                 50
                         );
+                    }
+
+                    if (character.collidesWithLever(mazeX,mazeY) && !character.isLeverPulled()) {
+                        /**
+                         * https://www.youtube.com/watch?v=oRwHxQnu-gs&ab_channel=catasorusanims
+                         * rock wall smash sound effect fixed. by catasorus anims on YouTube
+                         */
+                        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("WallCrumbleSound.mp3"));
+                        backgroundMusic.setLooping(false);
+                        backgroundMusic.play();
                         character.setLeverPulled(true);
                     }
+
                     if (!character.collidesWithLever(mazeX,mazeY) && !character.isLeverPulled()) {
                         game.getSpriteBatch().draw(Lever.getLeverPointImageRegion(), mazeX, mazeY, 50, 50);
                     }
@@ -434,13 +461,80 @@ public class GameScreen implements Screen {
                     game.getSpriteBatch().draw(Tree.getTreeTopImageRegion(), mazeX, mazeY, 50, 50);
                     break;
                 case 13:
-                    //Tree
+                    //Tree of Good and Evil
                     game.getSpriteBatch().draw(Tree.getTreeImageRegion(), mazeX, mazeY, 50, 50);
+                    if(character.collidesWithTree(mazeX,mazeY)) {
+                        /**
+                         * MathUtils.randomBoolean generates a random boolean and if its true, then we set collided tree as true
+                         * else we set it as false
+                         * The opposite is done for fire immunity
+                         */
+                        if (MathUtils.randomBoolean()) {
+                            Character.setCollidedTree(true);
+                            Character.setIsImmuneToFire(false); // Set the other property to false
+                        } else {
+                            Character.setCollidedTree(false); // Set the other property to false
+                            Character.setIsImmuneToFire(true);
+                        }
+
+
+                        removeFromMazeData(mazeX, mazeY,13,23);
+
+                        /**
+                         * Depending on the result of the random boolean, the corresponding screen is called
+                         */
+                        if(Character.isCollidedTree()) {
+                            game.goToTreeEvil();
+                        }
+                        else{
+                            game.goToTreeGood();
+                        }
+                    }
                     break;
                 case 20:
                     //Moveable Wall dissapearing
                     if (character.isLeverPulled()) {
-                        game.getSpriteBatch().draw(Wall.renderWallBreaking(), mazeX, mazeY, 50, 50);
+                        game.getSpriteBatch().draw(Wall.renderTexture(), mazeX, mazeY, 50, 50);
+                    }
+                    break;
+                case 22:
+                    //Exit after being removed
+                    if (character.isHasKey()) {
+                        if (character.getX() < mazeX + 50 && character.getX() + 36 > mazeX - 0 &&
+                                character.getY() < mazeY + 50 && character.getY() + 31 > mazeY - 0) {
+                            game.getSpriteBatch().draw(
+                                    Exit.renderTexture(),
+                                    mazeX,
+                                    mazeY,
+                                    50,
+                                    50
+                            );{
+
+                                game.goToVictoryScreen();
+
+                                /**
+                                 * https://www.youtube.com/watch?v=teUWsONJkk8&ab_channel=SoundEffectsFree
+                                 * Victory Sound Effect by Sound Effects Free on YouTube
+                                 */
+                                Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Victory.mp3"));
+                                backgroundMusic.setLooping(false);
+                                backgroundMusic.play();
+                            }
+
+                        } else if (character.getX() < mazeX + 250 && character.getX() + 36 > mazeX - 200 &&
+                                character.getY() < mazeY + 250 && character.getY() + 31 > mazeY - 200) {
+                            game.getSpriteBatch().draw(
+                                    Exit.renderTexture(),
+                                    mazeX,
+                                    mazeY,
+                                    50,
+                                    50
+                            );
+                        } else {
+                            game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
+                        }
+                    }else {
+                        game.getSpriteBatch().draw(Exit.getExitPointImageRegion(), mazeX, mazeY, 50, 50);
                     }
                     break;
                 default:
@@ -457,7 +551,41 @@ public class GameScreen implements Screen {
             applyScreenShakeEffect(delta);
         }
         game.getSpriteBatch().end();
-        camera.update(); // Update the camera position
+
+            /**
+             * render Enemies
+             */
+            for (Iterator<Enemy> iterator = enemies.iterator(); iterator.hasNext(); ) {
+                Enemy enemy = iterator.next();
+                float distance = Vector2.dst(character.getX(), character.getY(), enemy.getX(), enemy.getY());
+                boolean isEnemyVisible = distance < 150;
+                ////////
+                if ((Character.isCollidedTree() && isEnemyVisible) || !Character.isCollidedTree()) {
+                    enemy.move(delta);
+                    enemy.render(delta, game.getSpriteBatch());
+                    if (character.collidesWithEnemy(enemy.getX(), enemy.getY())) {
+                        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Slice.mp3"));
+                            backgroundMusic.setLooping(false);
+                            backgroundMusic.play();
+
+                            // Remove the enemy from the maze data and the list
+                            removeEnemyFromMazeData(enemy.getX(), enemy.getY());
+                            iterator.remove();
+
+                            character.setEnemiesKilled(character.getEnemiesKilled() + 1);
+                        } else {
+                            Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
+                            backgroundMusic.setLooping(false);
+                            backgroundMusic.play();
+                            character.setLives(character.getLives() - 1);
+                            shakeTheScreen();
+                        }
+                    }
+                }
+            }
+
+            camera.update(); // Update the camera position
 
         // Move text in a circular path to have an example of a moving object
         sinusInput += delta;
@@ -478,56 +606,38 @@ public class GameScreen implements Screen {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /**
-         * Character's Lives
+         * Character's Lives HUD
          */
-        float lifeTextX = camera.position.x - camera.viewportWidth / 10 - 500;
-        float lifeTextY = camera.position.y + camera.viewportHeight / 10 + 300;
-        Life.renderLives(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
-        font.draw(game.getSpriteBatch(), "Lives: " + character.getLives(), lifeTextX, lifeTextY);
+        Life.render(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
+        /**
+         * Character's Key HUD
+         */
+        Key.render(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
+        /**
+         * Character's Enemies HDU
+         */
+        Enemy.renderEnemies(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, Character.getEnemiesKilled());
+
 
         /**
-         * Character's Key
-         */
-        Key.renderKeys(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
-
-
-        float keyTextX = camera.position.x - camera.viewportWidth / 10 - 550;
-        float keyTextY = camera.position.y + camera.viewportHeight / 10 + 340;
-
-        if (character.isHasKey()) {
-            font.draw(game.getSpriteBatch(), "Key Collected", keyTextX, keyTextY);
-        } else {
-            font.draw(game.getSpriteBatch(), "No Key", keyTextX, keyTextY);
-        }
-
-        /**
-         * collision image
+         * collision image with trap/enemy (!)
          */
         float collisionX = camera.position.x - 10;
         float collisionY = camera.position.y;
         character.renderCollision(game.getSpriteBatch(),collisionX,collisionY);
 
         /**
-         * angel meeting image
+         * angel meeting image (?)
          */
         float angelMeetingX = camera.position.x - 10;
         float angelMeetingY = camera.position.y;
         character.renderAngelMeeting(game.getSpriteBatch(),angelMeetingX,angelMeetingY);
 
 
-
-        /**
-         * key image
-         */
-        float keyX = camera.position.x - 50;
-        float keyY = camera.position.y;
-        character.renderKeyImage(game.getSpriteBatch(),keyX,keyY);
-
         /**
          * character movement commands
          */
         character.move();
-
         if (!character.isShouldMove()){
             // Use a default frame when not moving, but before game starts
             character.setX(entryX + 100);
@@ -535,15 +645,15 @@ public class GameScreen implements Screen {
             character.setCharacterRegion(Character.getCharacterDownAnimation().getKeyFrame(sinusInput, true));
             character.setLeverPulled(false);
             character.setTextVisible(true);
-        }
-        else{
+        } else{
             // Use a default frame when not moving, after game starts
-            textX = camera.position.x;   //makes te character stop moving in circles, refer to line 93
-            textY = camera.position.y;   //makes te character stop moving in circles, refer to line 94
+            textX = camera.position.x;
+            textY = camera.position.y;
             character.setTextVisible(false);
         }
+
         /**
-         * creates the character
+         * creates the stationary character
          */
         if(character.isKeyPressed()){
             game.getSpriteBatch().draw(
@@ -568,79 +678,77 @@ public class GameScreen implements Screen {
 
         game.getSpriteBatch().end();
         batch.setProjectionMatrix(camera.combined);
-
-    }
-
-    private void removeKeyFromMazeData(float x, float y) {
-        for (int i = 0; i <= maxX; i++) {
-            for (int j = 0; j <= maxY; j++) {
-                if (mazeArray[i][j] == 5) {
-                    mazeArray[i][j] = 15;  // Set variable to 0 to remove key from rendering
-                    break;
-                }
-            }
         }
     }
-    private void removeAngelFromMazeData(float x, float y) {
+
+
+    /**
+     * removeMazeFromMazeData() allows for the object to be removed by changing the value of the object.
+     * This way, even after the object is removed, we can work with it. An example is the moveable wall crumbling after it has been removed.
+     *
+     * @param x the x coordinate of the object being removed
+     * @param y the y coordinate of the object being removed
+     * @param fromWhere the original value of the object being removed as in switch case statement
+     * @param toWhere the new value of the object being removed as in switch case statement
+     */
+
+    private void removeFromMazeData(float x, float y, int fromWhere, int toWhere) {
         for (int i = 0; i <= maxX; i++) {
             for (int j = 0; j <= maxY; j++) {
-                if (mazeArray[i][j] == 7) {
-                    mazeArray[i][j] = 17;  // Set variable to 0 to remove key from rendering
-                    break;
-                }
-            }
-        }
-    }
-    private void removeWallMoveableFromMazeData(float x, float y) {
-        for (int i = 0; i <= maxX; i++) {
-            for (int j = 0; j <= maxY; j++) {
-                if (mazeArray[i][j] == 10) {
-                    mazeArray[i][j] = 20;  // Set variable to 0 to remove key from rendering
+                if (mazeArray[i][j] == fromWhere) {
+                    mazeArray[i][j] = toWhere;
                     break;
                 }
             }
         }
     }
 
-    private void removeTreasureFromMazeData(float x, float y) {
-        for (int i = 0; i <= maxX; i++) {
-         for (int j = 0; j <= maxY; j++) {
-            if (mazeArray[i][j] == 6) {
-                mazeArray[i][j] = 16;  // Set variable to 0 to remove key from rendering
-                break;
-            }
-        }
-     }
-    }
+    /**
+     * removeEnemyFromMazeData() is seperate because this method allows for individual enemies to be removed as opposed to all of them at once
+     * The ones that are removed are specifically the ones that are collided with
+     * @param x
+     * @param y
+     */
     private void removeEnemyFromMazeData(float x, float y) {
         for (int i = 0; i <= maxX; i++) {
             for (int j = 0; j <= maxY; j++) {
                       if (mazeArray[i][j] == 4 && i == (int) (x / 50) && j == (int) (y / 50)) {
-                    mazeArray[i][j] = 14;  // Set variable to 0 to remove key from rendering
+                    mazeArray[i][j] = 14;
                     break;
                 }
             }
         }
     }
 
+
+    /**
+     * reset() puts all the removed mazeData back in its original positions by having the values reset.
+     * By using this method of removing objects from the maze, we are able to give them a different appearance once they are removed
+     * for example when the wall is "removed", it shows a crumbling animation
+     */
     public static void reset() {
         Wall.setWallBreakingStateTime(0);
+        Character.setEnemiesKilled(0);
+        Character.setCollidedTree(false);
+        Character.setIsImmuneToFire(false);
+        startTime = 0;
+        enemies = null;
+
         //Key
         for (int i = 0; i <= maxX; i++) {
             for (int j = 0; j <= maxY; j++) {
                 if (mazeArray[i][j] == 15) {
-                    mazeArray[i][j] = 5;  // Set variable to 0 to remove key from rendering
+                    mazeArray[i][j] = 5;
                     break;
                 }
             }
         }
-
 
         //Angel
         for (int i = 0; i <= maxX; i++) {
             for (int j = 0; j <= maxY; j++) {
                 if (mazeArray[i][j] == 17) {
-                    mazeArray[i][j] = 7;  // Set variable to 0 to remove key from rendering
+                    mazeArray[i][j] = 7;
                     break;
                 }
             }
@@ -659,7 +767,7 @@ public class GameScreen implements Screen {
             for (int j = 0; j <= maxY; j++) {
                 if (mazeArray[i][j] == 20) {
                     mazeArray[i][j] = 10;  // Set variable to 0 to remove key from rendering
-                    break;
+
                 }
             }
         }
@@ -668,16 +776,36 @@ public class GameScreen implements Screen {
             for (int j = 0; j <= maxY; j++) {
                 if (mazeArray[i][j] == 14) {
                     mazeArray[i][j] = 4;  // Set variable to 0 to remove key from rendering
-                    break;
+
+                }
+            }
+        }
+        //Tree
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 23) {
+                    mazeArray[i][j] = 13;  // Set variable to 0 to remove key from rendering
+
+                }
+            }
+        }
+        //Exit
+        for (int i = 0; i <= maxX; i++) {
+            for (int j = 0; j <= maxY; j++) {
+                if (mazeArray[i][j] == 22) {
+                    mazeArray[i][j] = 2;  // Set variable to 0 to remove key from rendering
+
                 }
             }
         }
     }
 
+
     /**
      * methods for shaking the screen.
      * @return
      */
+
     private void shakeTheScreen() {
         isScreenShaking = true;
         screenShakeTime = 0f;
@@ -699,6 +827,7 @@ public class GameScreen implements Screen {
             } else {
                 // generates random values 'shakeAmountX' and shakeAmountY' within screenShakeIntensity
                 float shakeAmountX = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
+
                 float shakeAmountY = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
 
                 camera.position.x += shakeAmountX;
@@ -708,10 +837,42 @@ public class GameScreen implements Screen {
             }
         }
     }
+    public static int getMaxX() {
+        return maxX;
+    }
+
+    public static void setMaxX(int maxX) {
+        GameScreen.maxX = maxX;
+    }
+
+    public static int getMaxY() {
+        return maxY;
+    }
+
+    public static void setMaxY(int maxY) {
+        GameScreen.maxY = maxY;
+    }
+
+    /**
+     * Getters and Setters
+     */
 
     public float getSinusInput() {
         return sinusInput;
     }
+
+    public static boolean isPaused() {
+        return isPaused;
+    }
+
+    public static void setPaused(boolean paused) {
+        isPaused = paused;
+    }
+
+    public static int[][] getMazeArray() {
+        return mazeArray;
+    }
+
 
     public float getTextX() {
         return textX;
@@ -744,9 +905,15 @@ public class GameScreen implements Screen {
     public float getEnemyY1() {
         return enemyY1;
     }
-    public static int[][] getMazeArray() {
-        return mazeArray;
+
+    public float getAngelX() {
+        return angelX;
     }
+
+    public float getAngelY() {
+        return angelY;
+    }
+
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
@@ -771,13 +938,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        batch.dispose();
     }
-
     // Additional methods and logic can be added as needed for the game screen
-
-
-
-
-
 }

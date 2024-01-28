@@ -7,18 +7,24 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 
-public class TreeScreen implements Screen {
+public class TreeScreenGood implements Screen {
     private final Stage stage;
-    private static Music backgroundMusic;
 
-
-    public TreeScreen(MazeRunnerGame game) {
+    /**
+     * Constructor for TreeScreenGood
+     * TreeScreenGood appears if the Character collides with the Tree and the random boolean generated is false
+     * @param game
+     */
+    public TreeScreenGood(MazeRunnerGame game) {
 
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -33,8 +39,9 @@ public class TreeScreen implements Screen {
         Image treeImage = new Image(Tree.getTreeImageRegion());
         table.add(treeImage).width(300).height(420).padBottom(80).row();
 
-        table.add(new Label("This is the Tree of Only Evil", game.getSkin(),"title")).padBottom(80).row();
-        table.add(new Label("From now on until the end of the game, you will only see enimies when they are close to you.", game.getSkin(),"bold")).padBottom(80).row();
+        table.add(new Label("This is the Tree of GOOD and EVIL", game.getSkin(),"title")).padBottom(80).row();
+        table.add(new Label("Fortunately you got GOOD", game.getSkin(),"bold")).padBottom(80).row();
+        table.add(new Label("From now on, you are immune to FIRE", game.getSkin(),"bold")).padBottom(80).row();
 
         TextButton resumeGameButton = new TextButton("Continue", game.getSkin());
         table.add(resumeGameButton).width(400).row();
@@ -46,10 +53,6 @@ public class TreeScreen implements Screen {
             }
         });
 
-    }
-
-    public static Music getBackgroundMusic() {
-        return backgroundMusic;
     }
 
     @Override

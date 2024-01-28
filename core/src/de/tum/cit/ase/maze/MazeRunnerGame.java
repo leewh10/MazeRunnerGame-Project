@@ -28,7 +28,7 @@ public class MazeRunnerGame extends Game {
     private InstructionScreen instructionScreen;
     private KeyScreen keyScreen;
     private InstructionScreen treasureScreen;
-    private TreeScreen treeScreen;
+    private TreeScreenEvil treeScreen;
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
@@ -40,7 +40,6 @@ public class MazeRunnerGame extends Game {
 
     /**
      * Constructor for MazeRunnerGame.
-     *
      * @param fileChooser The file chooser for the game, typically used in desktop environment.
      */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
@@ -48,6 +47,9 @@ public class MazeRunnerGame extends Game {
         this.fileChooser = fileChooser;
     }
 
+    /**
+     * Opens the fileChooser and specifically goes to the local directory, the folder names "maps"
+     */
     public void openFileChooser() {
         var fileChooserConfig = new NativeFileChooserConfiguration();
         fileChooserConfig.title = "Load Map";
@@ -59,8 +61,8 @@ public class MazeRunnerGame extends Game {
             @Override
             public void onFileChosen(FileHandle fileHandle) {
                 String path = fileHandle.path();
-                GameScreen.loadMazeDataFromPropertiesFile(path);
-                goToGame();
+                GameScreen.loadMazeDataFromPropertiesFile(path); //Load the file selected onto the game
+                goToGame(); //Go to game after the file is chosen
             }
 
             @Override
@@ -71,6 +73,7 @@ public class MazeRunnerGame extends Game {
             @Override
             public void onError(Exception exception) {
                 System.err.println("Error picking maze file: " + exception.getMessage());
+                //Print an error message if the file cannot be used
             }
         });
     }
@@ -99,22 +102,30 @@ public class MazeRunnerGame extends Game {
 
         // Load character animation
         Character.loadAnimation();
+
         // Play some background music
         // Background sound
-
-
         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
         backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+        //backgroundMusic.play();
 
         goToMenu(); // Navigate to the menu screen
-
     }
 
 
+    /**
+     * Disposes of the Screen and sets it to null to optimize the game
+     * @param screen
+     */
+    public void disposeAndSetNull(Screen screen) {
+        if (screen != null) {
+            screen.dispose();
+            screen = null;
+        }
+    }
 
     /**
-     * Switches to the menu screen.
+     * Switches to different Screens.
      */
     public void goToMenu() {
         disposeAndSetNull(pauseScreen);
@@ -129,10 +140,8 @@ public class MazeRunnerGame extends Game {
 
 
         this.setScreen(new MenuScreen(this)); // Set the current screen to MenuScreen
-
     }
-
-    public void goToTree() {
+    public void goToTreeEvil() {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
@@ -143,18 +152,22 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(menuScreen);
 
-        this.setScreen(new TreeScreen(this)); // Set the current screen to MenuScreen
+        this.setScreen(new TreeScreenEvil(this));
 
     }
+    public void goToTreeGood() {
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(instructionScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(menuScreen);
 
-    /**
-     * Switches to the game screen.
-     */
-    public void disposeAndSetNull(Screen screen) {
-        if (screen != null) {
-            screen.dispose();
-            screen = null;
-        }
+        this.setScreen(new TreeScreenGood(this));
+
     }
 
     public void goToGame() {
@@ -170,7 +183,6 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(treeScreen);
 
 
-        // Set the game screen
         this.setScreen(new GameScreen(this));
     }
 
@@ -187,7 +199,6 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(treeScreen);
 
 
-        // Set the game screen
         this.setScreen(new InstructionScreen(this));
     }
 

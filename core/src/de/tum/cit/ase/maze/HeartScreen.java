@@ -18,6 +18,11 @@ public class HeartScreen implements Screen {
     private final MazeRunnerGame game;
     private float elapsedTime;
 
+    /**
+     * Constructor for HeartScreen
+     * HeartScreen appears when the Heart being collected after the AngelScreen
+     * @param game
+     */
     public HeartScreen(MazeRunnerGame game) {
         this.game = game;  // Store the MazeRunnerGame instance
 
@@ -32,7 +37,6 @@ public class HeartScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         Heart.load();
-
         // Create an Image widget to display the heart animation
         heartImage = new Image();
 
@@ -60,7 +64,7 @@ public class HeartScreen implements Screen {
         // Increment elapsed time
         elapsedTime += delta;
 
-        // Check if 3 seconds have passed, then transition to the game screen
+        // Check if 1 second has passed, then transition to the game screen
         if (elapsedTime >= 1) {
             AngelScreen.getBackgroundMusic().stop();
             PauseScreen.setReset(false);

@@ -7,6 +7,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Wall extends MapObject{
+    /**
+     * The Wall restricts the character movement by rerouting the characters motion
+     * They are set the borders for the maze and throughout the maze
+     */
     private static TextureRegion WallImageRegion;
     private static TextureRegion WallShadowImageRegion;
     private static TextureRegion MoveableWallImageRegion;
@@ -34,7 +38,10 @@ public class Wall extends MapObject{
 
 
 
-
+    /**
+     * The Moveable Wall restricts the character movement by acting as a regular Wall until the Lever is pulled
+     * After the Lever is pulled, the character can access the area that was previously restricted
+     */
     private static TextureRegion wallBreakingRegion;
     private static Animation<TextureRegion> wallBreakingAnimation;
     private static float wallBreakingStateTime;
@@ -56,10 +63,6 @@ public class Wall extends MapObject{
         wallBreakingRegion = wallBreakingAnimation.getKeyFrame(wallBreakingStateTime,false);
         return wallBreakingRegion;
     }
-    public static TextureRegion getWallBreakingRegion() {
-        return wallBreakingRegion;
-    }
-
     public static void setWallBreakingStateTime(float wallBreakingStateTime) {
         Wall.wallBreakingStateTime = wallBreakingStateTime;
     }

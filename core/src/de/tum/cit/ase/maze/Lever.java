@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Lever  extends MapObject{
+    /**
+     * Pulling the Lever makes the Moveable Walls to crumble, allowing the character to access the Objects contained within
+     */
     private static TextureRegion leverPointImageRegion;
     private static TextureRegion leverEndPointImageRegion;
 
@@ -56,35 +59,4 @@ public class Lever  extends MapObject{
         return leverEndPointImageRegion;
     }
 
-    public static void setLeverEndPointImageRegion(TextureRegion leverEndPointImageRegion) {
-        Lever.leverEndPointImageRegion = leverEndPointImageRegion;
-    }
-
-    public static void setLeverPointImageRegion(TextureRegion leverPointImageRegion) {
-        Lever.leverPointImageRegion = leverPointImageRegion;
-    }
-
-    public static TextureRegion getLeverRegion() {
-        return leverRegion;
-    }
-
-    public static void setLeverRegion(TextureRegion leverRegion) {
-        Lever.leverRegion = leverRegion;
-    }
-
-    public static Animation<TextureRegion> getLeverAnimation() {
-        return leverAnimation;
-    }
-
-    public static void setLeverAnimation(Animation<TextureRegion> leverAnimation) {
-        Lever.leverAnimation = leverAnimation;
-    }
-
-    public static float getLeverStateTime() {
-        return leverStateTime;
-    }
-
-    public static void setLeverStateTime(float leverStateTime) {
-        Lever.leverStateTime = leverStateTime;
-    }
 }

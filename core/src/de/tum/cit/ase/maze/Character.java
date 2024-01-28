@@ -19,6 +19,12 @@ import com.badlogic.gdx.utils.Array;
      private static int enemiesKilled;
      private final Animation<TextureRegion> animation;
      private static float stateTime;
+     private static boolean isImmuneToFire;
+     private boolean isTextVisible;
+     private boolean shouldMove;
+     private boolean isLeverPulled;
+     private boolean isKeyPressed;
+     private boolean isTreasureOpened;
 
 
      // Character animation downwards
@@ -33,21 +39,17 @@ import com.badlogic.gdx.utils.Array;
 
      private TextureRegion characterRegion;
 
-     private boolean isTextVisible;
-     private boolean shouldMove;
-     private boolean isLeverPulled;
+
      private final OrthographicCamera camera;
      private final MazeRunnerGame game;
      private final BitmapFont font;
      private final GameScreen gameScreen;
-     private boolean isKeyPressed;
-     private boolean isTreasureOpened;
 
+     //Collision cool down
      private long lastCollisionTime;
      private static final long COLLISION_COOLDOWN = 3000; // for 3 seconds, the character doesn't lose its lives
      private static final long COLLISION_COOLDOWN1 = 1000;
 
-     private boolean doneCooling;
 
 
      private static Animation<TextureRegion> currentAnimation;
@@ -57,9 +59,18 @@ import com.badlogic.gdx.utils.Array;
      private static TextureRegion keyImageRegion;
 
 
-
-
-     //Constructor
+     /**
+      * Constructor for Character
+      * @param gameScreen
+      * @param game
+      * @param x
+      * @param y
+      * @param hasKey
+      * @param isLeverPulled
+      * @param isTreasureOpened
+      * @param lives
+      * @param animation
+      */
      public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, boolean isLeverPulled, boolean isTreasureOpened, int lives,  Animation<TextureRegion> animation) {
          super(x, y);
          this.game = game; // Store the game instance
@@ -70,13 +81,14 @@ import com.badlogic.gdx.utils.Array;
          this.gameScreen = gameScreen;
          this.isLeverPulled = isLeverPulled;
          this.isTreasureOpened=isTreasureOpened;
+         isImmuneToFire = false;
+         isCollidedTree = false;
 
          camera = new OrthographicCamera();
          camera.setToOrtho(true);
          font = game.getSkin().getFont("font");
 
          currentAnimation = getCharacterDownAnimation();
-
      }
 
 
@@ -101,7 +113,6 @@ import com.badlogic.gdx.utils.Array;
          Array<TextureRegion> walkFramesFightLeft = new Array<>(TextureRegion.class);
          Array<TextureRegion> walkFramesFightUp = new Array<>(TextureRegion.class);
          Array<TextureRegion> walkFramesFightDown = new Array<>(TextureRegion.class);
-
 
          // Add frames to the respective animations
          for (int col = 0; col < animationFrames; col++) {
@@ -174,14 +185,15 @@ import com.badlogic.gdx.utils.Array;
          stateTime += Gdx.graphics.getDeltaTime();
 
          /**
-          * boolean for the text showing
+          * Boolean for the text showing
           */
          if (isTextVisible) {
              font.draw(game.getSpriteBatch(), "Press ESC to Pause", gameScreen.getTextX(), gameScreen.getTextY());
          }
 
+         //All key controls to move the character
          /**
-          * All key controls to move the character
+          * Before the game starts (before any key is pressed), the character is moving in circles
           */
          if (Gdx.input.isKeyPressed(Input.Keys.UP)
                  || Gdx.input.isKeyPressed(Input.Keys.W)
@@ -199,6 +211,13 @@ import com.badlogic.gdx.utils.Array;
              isTextVisible = true;
          }
 
+         /**
+          * If any of the arrow keys are pressed, the character moves in the specified direction by 5 units
+          * If the SPACE bar is pressed at the same time, it can kill enemies
+          * The character will only change location by 5 units if it will not collide with a wall (view collidesWithWall() method)
+          * While the key is pressed, the character will animate in the direction indicated
+          * Once the key is let go of, the Character stops animating and remains stationary facing the direction last specified
+          */
          if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
              if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
                  characterRegion = getCharacterFightUpAnimation().getKeyFrame(gameScreen.getSinusInput(), true);
@@ -272,17 +291,13 @@ import com.badlogic.gdx.utils.Array;
 
      }
 
-     private long leverPullTime;
-
-
-     public long getLeverPullTime() {
-         return leverPullTime;
-     }
-
-     public void setLeverPullTime(long leverPullTime) {
-         this.leverPullTime = leverPullTime;
-     }
-
+     /**
+      *
+      * @param newX the x coordinate that is being analysed to see if it will result in a collision
+      * @param newY the y coordinate that is being analysed to see if it will result in a collision
+      * @param mazeArray the array that contains the coordinates of all map and game objects
+      * @return whether the character will collide with a wall
+      */
      public boolean collidesWithWall(float newX, float newY, int[][] mazeArray) {
          // Allowing the character to go through the wall a little bit to avoid getting stuck
          float collisionMarginTopRight = 0.8f * 50;
@@ -308,6 +323,15 @@ import com.badlogic.gdx.utils.Array;
              return true;
          }
 
+
+         /**
+          * All the mazeArray values through which a character should not go through
+          * 0 = a regular wall
+          * 8 = the shadow of a wall
+          * 10 = a moveable wall
+          * 2 = exit before a key is acquired
+          * 1 = entry after the character starts the game
+          */
          boolean collisionTop = mazeArray[cellXForTopRight][cellYForTopRight] == 0; //
          boolean collisionBottom = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 0;
          boolean collisionLeft = mazeArray[cellXForBottomLeft][cellYForBottomLeft] == 0;
@@ -340,6 +364,13 @@ import com.badlogic.gdx.utils.Array;
                  || collisionBottomEntry || collisionLeftEntry || collisionRightEntry|| collisionTopEntry;
      }
 
+     /**
+      * The collidesWith methods allow for the character to collide with various maze objects and have something happen as a result of this collision
+      * These methods are primarily used in the GameScreen class during the switch-case statements
+      * @param enemyX1 the x coordinate of the game object in question (in this example this is the enemy)
+      * @param enemyY1 the y coordinate of the game object in question (in this example this is the enemy)
+      * @return whether the character has collided with the game object
+      */
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
          //retrieves the current time in milliseconds.
          long currentTime = System.currentTimeMillis();
@@ -359,17 +390,17 @@ import com.badlogic.gdx.utils.Array;
                      characterX + characterWidth > enemyX1 &&
                      characterY < enemyY1 + keyHeight &&
                      characterY + characterHeight > enemyY1) {
-                 // Set the last collision time
 
                  if(!Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                     // Set the last collision time for collision cool-down time
                      lastCollisionTime = currentTime;
+                     //visual to help the character know if their cool-down time is up
                      loadCollisionImage();
                  }
                  return true;
              }
          }
          return false;
-
      }
 
      public boolean collidesWithKey(float keyX, float keyY) {
@@ -385,31 +416,6 @@ import com.badlogic.gdx.utils.Array;
                  characterX + characterWidth > keyX &&
                  characterY < keyY + keyHeight &&
                  characterY + characterHeight > keyY;
-     }
-
-
-     public boolean seesTheAngel(float angelX, float angelY) {
-         long currentTime = System.currentTimeMillis();
-         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN1) {
-
-             float characterX = getX();
-             float characterY = getY();
-             float characterWidth = 36;
-             float characterHeight = 62;
-
-             float angelWidth = 50;
-             float angelHeight = 50;
-
-
-             if (characterX < angelX + angelWidth + 100 &&
-                     characterX + characterWidth + 100 > angelX &&
-                     characterY < angelY + angelHeight + 100 &&
-                     characterY + characterHeight + 100 > angelY) {
-                 loadAngelMeetingImage();
-                 return true;
-             }
-         }
-             return false;
      }
 
      public boolean collidesWithAngel(float angelX, float angelY) {
@@ -485,16 +491,21 @@ import com.badlogic.gdx.utils.Array;
                      characterY + 25< trapY + trapHeight &&
                      characterY + characterHeight > trapY) {
 
-                 // Set the last collision time
-                 lastCollisionTime = currentTime;
-                 loadCollisionImage();
-                 doneCooling = true;
+                 if(!isIsImmuneToFire()) {
+                     // Set the last collision time for collision cool-down time
+                     lastCollisionTime = currentTime;
+                     //visual to help the character know if their cool-down time is up
+                     loadCollisionImage();
+                 }
                  return true;
              }
          }
          return false;
      }
 
+     /**
+      * Images that are loaded to inform the player that they have or will collide with a GameObject
+      */
      private void loadCollisionImage() {
          Texture collisionMark = new Texture(Gdx.files.internal("objects.png"));
 
@@ -517,6 +528,13 @@ import com.badlogic.gdx.utils.Array;
      }
 
 
+     /**
+      * Images that are rendered to inform the player that they have collided with an Enemy of Trap
+      * They appear temporarily then disappear after some time (specifically after the cool-down time is up)
+      * @param batch
+      * @param viewportWidth
+      * @param viewportHeight
+      */
      public void renderCollision(SpriteBatch batch, float viewportWidth, float viewportHeight) {
          float collisionMarkWidth = 40;
          float collisionMarkHeight = 40;
@@ -534,6 +552,12 @@ import com.badlogic.gdx.utils.Array;
          }
      }
 
+     /**
+      * Informs the character that they are near a GuardianAngel
+      * @param batch
+      * @param viewportWidth
+      * @param viewportHeight
+      */
      public void renderAngelMeeting(SpriteBatch batch, float viewportWidth, float viewportHeight) {
         float angelMeetingMarkWidth = 40;
         float angelMeetingMarkHeight = 40;
@@ -550,26 +574,43 @@ import com.badlogic.gdx.utils.Array;
              angelMeetingImageRegion = null;
          }
      }
+     public boolean seesTheAngel(float angelX, float angelY) {
+         long currentTime = System.currentTimeMillis();
+         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN1) {
 
-     public void renderKeyImage(SpriteBatch batch, float viewportWidth, float viewportHeight) {
-         float keyMarkWidth = 30;
-         float keyMarkHeight = 30;
+             float characterX = getX();
+             float characterY = getY();
+             float characterWidth = 36;
+             float characterHeight = 62;
 
-         float keyImageX = viewportWidth + 20;
-         float keyImageY = viewportHeight + 100;
+             float angelWidth = 50;
+             float angelHeight = 50;
 
-         if (keyImageRegion != null) {
-             batch.draw(keyImageRegion,keyImageX,keyImageY,keyMarkWidth,keyMarkHeight);
+
+             if (characterX < angelX + angelWidth + 100 &&
+                     characterX + characterWidth + 100 > angelX &&
+                     characterY < angelY + angelHeight + 100 &&
+                     characterY + characterHeight + 100 > angelY) {
+                 loadAngelMeetingImage();
+                 return true;
+             }
          }
-
-         if (System.currentTimeMillis() - lastCollisionTime >= COLLISION_COOLDOWN1) {
-             // Reset the cooldown image
-             keyImageRegion = null;
-         }
+         return false;
      }
 
+     /**
+      * Getters and Setters
+      * @return
+      */
+     public static boolean isIsImmuneToFire() {
+         return isImmuneToFire;
+     }
 
-    public static Animation<TextureRegion> getCharacterDownAnimation() {
+     public static void setIsImmuneToFire(boolean isImmuneToFire) {
+         Character.isImmuneToFire = isImmuneToFire;
+     }
+
+     public static Animation<TextureRegion> getCharacterDownAnimation() {
         return characterDownAnimation;
     }
 
@@ -677,10 +718,10 @@ import com.badlogic.gdx.utils.Array;
          this.lives = lives;
      }
 
-     public boolean isDoneCooling() {
-         return doneCooling;
-     }
-
+     /**
+      * Renders the character
+      * @param batch
+      */
      public void render(SpriteBatch batch) {
          TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
          float width = 4*currentFrame.getRegionWidth();

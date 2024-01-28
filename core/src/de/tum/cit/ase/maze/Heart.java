@@ -7,10 +7,18 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Heart extends MapObject{
+    /**
+     * The Heart that appears on the HeartScreen specifically
+     */
     private static Animation<TextureRegion> heartAnimation;
     private static float heartStateTime;
 
+
     public static void load() {
+        /**
+         * https://opengameart.org/content/heart-pixel-art
+         * Sprite sheet created by Flixberry Entertainment
+         */
         Texture heart1 = new Texture(Gdx.files.internal("heart-1.png"));
         Texture heart2 = new Texture(Gdx.files.internal("heart-2.png"));
         Texture heart3 = new Texture(Gdx.files.internal("heart-3.png"));
@@ -26,6 +34,8 @@ public class Heart extends MapObject{
 
         heartAnimation = new Animation<>(0.2f, heartFrames, Animation.PlayMode.LOOP);
     }
+
+
 
     public static TextureRegion renderTexture() {
         heartStateTime += Gdx.graphics.getDeltaTime();

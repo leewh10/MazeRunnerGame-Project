@@ -8,10 +8,21 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Key extends MapObject{
+    /**
+     * The Key requires to open the Exit
+     * Only appears on the Maze after it is unlocked by the Treasure
+     */
     private static TextureRegion KeyImageRegion;
     private static Animation<TextureRegion> keyAnimation;
     private static float keyStateTime;
+
+
+
     public static void animation() {
+        /**
+         *https://opengameart.org/content/locks-and-keys
+         * Sprite sheet created by Kelvin Shadewing
+         */
         Texture key = new Texture(Gdx.files.internal("key-gold.png"));
 
         int frameWidth = 16;
@@ -24,11 +35,15 @@ public class Key extends MapObject{
         }
         keyAnimation = new Animation<>(0.2f, keyFrames);
     }
+
+
     public static TextureRegion renderTexture() {
         keyStateTime += Gdx.graphics.getDeltaTime();
         KeyImageRegion = keyAnimation.getKeyFrame(keyStateTime,true);
         return KeyImageRegion;
     }
+
+
 
     public static void render(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
         float keyWidth = 30;
@@ -46,9 +61,6 @@ public class Key extends MapObject{
     }
 
 
-    public static TextureRegion getKeyImageRegion() {
-        return KeyImageRegion;
-    }
 
     public static Animation<TextureRegion> getKeyAnimation() {
         return keyAnimation;

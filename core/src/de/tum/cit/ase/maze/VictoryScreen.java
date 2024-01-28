@@ -18,6 +18,14 @@ import java.io.File;
 
 public class VictoryScreen implements Screen {
     private final Stage stage;
+
+    /**
+     * Constructor for VictoryScreen
+     * VictoryScreen appears when the Character successfully exits the Maze with a Key and at least 1 Life
+     * From here, the character can Restart, Go to Menu or Exit
+     * @param game
+     * @param gameScreen
+     */
     public VictoryScreen(MazeRunnerGame game, GameScreen gameScreen) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -29,6 +37,12 @@ public class VictoryScreen implements Screen {
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
+
+        long elapsedTimeMillis = System.currentTimeMillis()-GameScreen.getStartTime();
+        String formattedTime = formatElapsedTime(elapsedTimeMillis);
+
+        // Add a label to display the elapsed time on VictoryScreen
+        table.add(new Label("Time: " + formattedTime, game.getSkin(), "default")).padBottom(40).row();
 
         // Add a label as a title
         table.add(new Label("VICTORY", game.getSkin(), "title")).padBottom(80).row();
@@ -67,13 +81,22 @@ public class VictoryScreen implements Screen {
         });
 
     }
+    private String formatElapsedTime(long elapsedTimeMillis) {
+        long totalSeconds = elapsedTimeMillis / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+
+        return String.format("%02d:%02d", minutes, seconds);
+    }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
-        stage.draw(); // Draw the stage
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
     }
+
 
     @Override
     public void resize(int width, int height) {

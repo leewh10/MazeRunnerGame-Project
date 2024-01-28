@@ -51,6 +51,12 @@ public class InstructionScreen implements Screen {
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
+
+        /**
+         * The same concepts as HeartScreen is used
+         * Creates a drawable from the original TextureRegion, then sets the drawables to the image regions
+         * Using Images helps with playing the object at specific locations on the screen with reference to the text
+         */
         enemyImage = new Image();
         exitImage = new Image();
         treasureImage = new Image();

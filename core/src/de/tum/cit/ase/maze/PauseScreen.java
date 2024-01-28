@@ -1,14 +1,10 @@
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -16,11 +12,17 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 
-
 public class PauseScreen implements Screen {
     private final Stage stage;
-    private static boolean reset;
+    private static boolean reset; //Allows the game to be reset by re-initializing attributes and the character
 
+    /**
+     * Constructor for PauseScreen
+     * PauseScreen appears when the player presses ESC from the GameScreen
+     * From here the player can Resume, Restart, Exit or Go to Menu
+     * @param game
+     * @param gameScreen
+     */
     public PauseScreen(MazeRunnerGame game, GameScreen gameScreen) {
 
         var camera = new OrthographicCamera();
@@ -45,7 +47,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = false;
-                GameScreen.setPaused(false);
+                GameScreen.setPaused(false); //Do not reset the game
                 game.goToGame();
             }
         });
@@ -56,7 +58,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = true;
-                GameScreen.reset();
+                GameScreen.reset(); //Call the reset method to set all objects back to their original place and reset attributes
                 GameScreen.setPaused(false);
                 game.goToGame();
             }
@@ -83,7 +85,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset=true;
-                Gdx.app.exit();
+                Gdx.app.exit(); //Closes the game
             }
         });
 

@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 public class Treasure extends MapObject{
+    /**
+     * An intermediate "key" which allows the Key to appear on the maze
+     */
     private static TextureRegion TreasurePointImageRegion;
     private static TextureRegion treasureRegion;
     private static Animation<TextureRegion> treasureAnimation;
@@ -37,9 +40,7 @@ public class Treasure extends MapObject{
         return treasureRegion;
     }
 
-    public static TextureRegion getTreasureRegion() {
-        return treasureRegion;
-    } public static TextureRegion getTreasurePointImageRegion() {
+    public static TextureRegion getTreasurePointImageRegion() {
         return TreasurePointImageRegion;
     }
 }

@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Random;
+
 /**
  * Represents dynamic obstacles in the maze.
  * Enemies can move and cause the player to lose a life on contact.
@@ -23,7 +25,6 @@ public class Enemy extends GameObject{
 
     private float stateTime = 0f;
     private float speed;
-    private boolean movingRight;
     private float oscillationDistance;
     private float sinusInput = 0f;
     private TextureRegion enemyRegion;
@@ -37,6 +38,10 @@ public class Enemy extends GameObject{
 
     private int currentState = STILL;
     private GameScreen gameScreen;
+    private float distanceWalked = 0;
+    private Animation<TextureRegion> currentAnimation;
+
+    private int currentDirection;  // 0: Still 1: Up
 
 
     /**
@@ -46,12 +51,10 @@ public class Enemy extends GameObject{
      * @param y The initial y-coordinate of the Enemy.
      */
 
-    public Enemy(float x, float y, float speed, float oscillationDistance, GameScreen gameScreen) {
+    public Enemy(float x, float y) {
         super(x, y);
-        this.speed = speed;
-        this.movingRight = true;
-        this.oscillationDistance = oscillationDistance;
-        this.gameScreen = gameScreen;
+        this.speed = 50f;
+        this.oscillationDistance = 70f;
         initialise();
     }
     public static void load() {
@@ -74,7 +77,7 @@ public class Enemy extends GameObject{
         Array<TextureRegion> enemyUpFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> enemyDownFrames = new Array<>(TextureRegion.class);
 
-        for (int col = 6; col < 9; col++) {
+        for (int col = 0; col < 3; col++) {
             enemyStillFrames.add(new TextureRegion(enemySheet, col * frameWidth, 4 * frameHeight, frameWidth , frameHeight));
             enemyLeftFrames.add(new TextureRegion(enemySheet, col * frameWidth, 5 * frameHeight, frameWidth, frameHeight));
             enemyRightFrames.add(new TextureRegion(enemySheet, col * frameWidth, 6 * frameWidth, frameWidth, frameHeight));
@@ -103,66 +106,115 @@ public class Enemy extends GameObject{
     }
 
     public void move(float delta) {
-        speed = 5;
-        // delta = the time elapsed since the last frame or update
+        updateCurrentAnimation();
 
-        // Keep track of previous position
-        float prevX = x;
-        float prevY = y;
+        float newX = x;
+        float newY = y;
 
-        // Generate a random direction (0 = left, 1 = right, 2 = up, 3 = down)
-        int randomDirection = MathUtils.random(0, 3);
+        float movingDistance = speed * delta;
 
-        // Update the enemy's position based on the random direction
-        switch (randomDirection) {
-            case 0: // Move left
-                x -= speed * delta;
+        distanceWalked += movingDistance;
+
+        if (distanceWalked >= oscillationDistance) {
+            Random random = new Random();
+            int randomDirection = random.nextInt(4); //
+            setCurrentDirection(randomDirection);
+            distanceWalked = 0;
+        }
+
+        switch (currentDirection) {
+            case MOVING_UP:
+                newY += movingDistance;
                 break;
-            case 1: // Move right
-                x += speed * delta;
+            case MOVING_DOWN:
+                newY -= movingDistance;
                 break;
-            case 2: // Move up
-                y += speed * delta;
+            case MOVING_LEFT:
+                newX -= movingDistance;
                 break;
-            case 3: // Move down
-                y -= speed * delta;
+            case MOVING_RIGHT:
+                newX += movingDistance;
                 break;
         }
 
-        // Check if the new position is within the specified area
-        if (!isWithinBounds()) {
-            // If out of bounds, revert to the previous position
-            x = prevX;
-            y = prevY;
-        }
-
-        // Update the enemy state based on movement direction
-        currentState = determineState(x - prevX, y - prevY);
-    }
-
-    private int determineState(float deltaX, float deltaY) {
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            // Moving horizontally
-            return (deltaX > 0) ? MOVING_RIGHT : MOVING_LEFT;
-        } else {
-            // Moving vertically
-            return (deltaY > 0) ? MOVING_UP : MOVING_DOWN;
+        if (!collidesWithWalls(newX,newY,GameScreen.getMazeArray())) {
+            x = newX;
+            y = newY;
         }
     }
 
-    private boolean isWithinBounds() {
-        // Check if the new position is within the specified 200 by 200 range
-        float minX = gameScreen.getEnemyX1();
-        float maxX = gameScreen.getEnemyX1()+200;
-        float minY = gameScreen.getEnemyY1();
-        float maxY = gameScreen.getEnemyY1()+200;
+    private boolean collidesWithWalls(float newX, float newY, int[][] mazeArray) {
+        float collisionMarginTopRight = 0.5f * 50;
+        float collisionMarginDownLeft = 0.05f * 50;
 
-        return x >= minX && x <= maxX && y >= minY && y <= maxY;
+        float xWithCollisionMargin = newX + collisionMarginTopRight;
+        float yWithCollisionMargin = newY + collisionMarginDownLeft;
+
+        int cellX = (int) (xWithCollisionMargin / 50);
+        int cellY = (int) (yWithCollisionMargin / 50);
+
+
+        // Check if the adjusted position is within the maze boundaries
+        if (cellX < 0 || cellX >= mazeArray.length || cellY < 0 || cellY >= mazeArray[0].length) {
+            return true;  // Outside maze boundaries
+        }
+
+        boolean collisionTop = mazeArray[cellX][cellY] == 0;
+        boolean collisionBottom = mazeArray[cellX][cellY] == 0;
+        boolean collisionLeft = mazeArray[cellX][cellY] == 0;
+        boolean collisionRight = mazeArray[cellX][cellY] == 0;
+
+        boolean collisionTopEntry = mazeArray[cellX][cellY] == 1;
+        boolean collisionBottomEntry = mazeArray[cellX][cellY] == 1;
+        boolean collisionLeftEntry = mazeArray[cellX][cellY] == 1;
+        boolean collisionRightEntry = mazeArray[cellX][cellY] == 1;
+
+        boolean collisionTopExit = mazeArray[cellX][cellY] == 2;
+        boolean collisionBottomExit = mazeArray[cellX][cellY] == 2;
+        boolean collisionLeftExit = mazeArray[cellX][cellY] == 2;
+        boolean collisionRightExit = mazeArray[cellX][cellY] == 2;
+
+        boolean collisionTopTrap = mazeArray[cellX][cellY] == 3;
+        boolean collisionBottomTrap = mazeArray[cellX][cellY] == 3;
+        boolean collisionLeftTrap = mazeArray[cellX][cellY] == 3;
+        boolean collisionRightTrap = mazeArray[cellX][cellY] == 3;
+
+        boolean collisionTopShadow = mazeArray[cellX][cellY] == 8; //
+        boolean collisionBottomShadow = mazeArray[cellX][cellY] == 8;
+        boolean collisionLeftShadow = mazeArray[cellX][cellY] == 8;
+        boolean collisionRightShadow = mazeArray[cellX][cellY] == 8;
+
+        boolean collisionTopMove = mazeArray[cellX][cellY] == 10; //
+        boolean collisionBottomMove = mazeArray[cellX][cellY] == 10;
+        boolean collisionLeftMove = mazeArray[cellX][cellY] == 10;
+        boolean collisionRightMove = mazeArray[cellX][cellY] == 10;
+
+        return collisionTop || collisionBottom || collisionLeft || collisionRight
+                || collisionBottomEntry || collisionLeftEntry || collisionRightEntry|| collisionTopEntry
+                || collisionBottomExit || collisionLeftExit || collisionRightExit|| collisionTopExit
+                || collisionBottomTrap || collisionLeftTrap || collisionRightTrap|| collisionTopTrap
+                || collisionBottomShadow || collisionLeftShadow || collisionRightShadow|| collisionTopShadow
+                || collisionBottomMove || collisionLeftMove || collisionRightMove|| collisionTopMove ;
+    }
+    private void updateCurrentAnimation() {
+        switch (currentDirection) {
+            case 0:
+                currentAnimation = enemyUpAnimation;
+                break;
+            case 2:
+                currentAnimation = enemyLeftAnimation;
+                break;
+            case 3:
+                currentAnimation = enemyRightAnimation;
+                break;
+            default:
+                currentAnimation = enemyDownAnimation;
+        }
     }
 
+    public TextureRegion render(float delta,SpriteBatch batch) {
 
 
-    public TextureRegion render(float delta) {
         // delta = the time elapsed since the last frame or update
         // Increment the state time by the time passed since the last frame
         stateTime += delta;
@@ -179,7 +231,11 @@ public class Enemy extends GameObject{
         // Get the current frame of the animation at the updated state time
         // The 'false' parameter indicates no looping of the animation
         enemyRegion = currentAnimation.getKeyFrame(stateTime, false);
+        batch.begin();
 
+        batch.draw(enemyRegion,getX(),getY(),50,50);
+
+        batch.end();
         // Check if the animation has completed (not looping) and reset the state time
         if (currentAnimation.isAnimationFinished(stateTime)) {
             stateTime = 0f;
@@ -207,5 +263,10 @@ public class Enemy extends GameObject{
     }
     public void setEnemyRegion(TextureRegion enemyRegion) {
         this.enemyRegion = enemyRegion;
+    }
+
+
+    public void setCurrentDirection(int currentDirection) {
+        this.currentDirection = currentDirection;
     }
 }

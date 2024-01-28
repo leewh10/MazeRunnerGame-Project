@@ -17,9 +17,19 @@ public class AngelScreen implements Screen {
     private final Stage stage;
     private static Music backgroundMusic;
 
-
+    /**
+     * Constructor for AngelScreen
+     * AngelScreen appears after the Character collides with the angel
+     * Serves as an informative Screen
+     * @param game
+     * @param gameScreen
+     */
     public AngelScreen(MazeRunnerGame game, GameScreen gameScreen) {
 
+        /**
+         *https://www.youtube.com/watch?v=dSRA3ngRoW8&ab_channel=SoundFX
+         * Angel - Sound Effect (HD) by Sound FX on YouTube
+         */
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("AngelSound.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
@@ -34,6 +44,9 @@ public class AngelScreen implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
+        /**
+         * Creates an Image that can be added to the screen from the ImageRegion then adds it to the screen
+         */
         Image angelImage = new Image(GuardianAngel.getDefaultAngelImageRegion());
         table.add(angelImage).width(300).height(420).padBottom(80).row();
 

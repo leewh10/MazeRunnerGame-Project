@@ -18,10 +18,16 @@ import java.io.File;
 public class GameOverScreen implements Screen {
     private final Stage stage;
 
+    /**
+     * Constructor for GameOverScreen
+     * GameOverScreen appears when the Character has 0 lives left
+     * It allows the character to Try Again, Exit or go to the Menu Screen
+     * @param game
+     */
+
     public GameOverScreen(MazeRunnerGame game) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
-
 
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements

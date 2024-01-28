@@ -9,7 +9,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 public class GuardianAngel extends GameObject {
-
+    /**
+     * A dynamic Non Player Character that, upon Collision, gives the Character a Life
+     */
     private static Animation<TextureRegion> angelDownAnimation;
     private static Animation<TextureRegion> angelUpAnimation;
     private static Animation<TextureRegion> angelLeftAnimation;
@@ -42,6 +44,10 @@ public class GuardianAngel extends GameObject {
     }
 
     public static void loadAnimation() {
+        /**
+         * https://opengameart.org/node/83286
+         * Sprite sheet created by AntumDeluge
+         */
         Texture angel = new Texture(Gdx.files.internal("angel-f-001.png"));
 
         int frameWidth = 48;
@@ -74,17 +80,9 @@ public class GuardianAngel extends GameObject {
 
     public TextureRegion render(float delta) {
         angelStateTime += delta;
-        moveRandomDirection();
 
-        Animation<TextureRegion> currentAnimation = switch (currentState) {
-            case MOVING_RIGHT -> angelRightAnimation;
-            case MOVING_LEFT -> angelLeftAnimation;
-            case MOVING_UP -> angelUpAnimation;
-            default -> angelDownAnimation;
-        };
-        angelImageRegion = currentAnimation.getKeyFrame(angelStateTime,true);
         defaultAngelImageRegion = angelDownAnimation.getKeyFrame(angelStateTime,true);
-        return angelImageRegion;
+        return defaultAngelImageRegion;
     }
 
     public void move(float delta) {

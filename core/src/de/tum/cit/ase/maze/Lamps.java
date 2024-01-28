@@ -6,13 +6,17 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-    public class Lamps extends MapObject{
-        private static TextureRegion LampImageRegion;
-        private static Animation<TextureRegion> lampAnimation;
-        private static float lampStateTime;
-        public static void animation() {
-            Texture lamp = new Texture(Gdx.files.internal("basictiles.png"));
+public class Lamps extends MapObject{
+    /**
+     * Purely aesthetic attribute of the Maze stationed on either side of the Exit
+     */
+    private static TextureRegion LampImageRegion;
+    private static Animation<TextureRegion> lampAnimation;
+    private static float lampStateTime;
 
+    public static void animation() {
+
+        Texture lamp = new Texture(Gdx.files.internal("basictiles.png"));
             int frameWidth = 16;
             int frameHeight = 16;
             int animationFrames = 2;
@@ -30,7 +34,9 @@ import com.badlogic.gdx.utils.Array;
             return LampImageRegion;
         }
 
-        public static TextureRegion getLampImageRegion() {
+
+
+    public static TextureRegion getLampImageRegion() {
             return LampImageRegion;
         }
     }

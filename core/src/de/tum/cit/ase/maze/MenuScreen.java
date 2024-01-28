@@ -28,7 +28,7 @@ public class MenuScreen implements Screen {
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
-     *
+     *Allows the player to naviagte to the InstructionScreen or Load a new Map by opening FileChooser
      * @param game The main game class, used to access global resources and methods.
      */
     public MenuScreen(MazeRunnerGame game) {
