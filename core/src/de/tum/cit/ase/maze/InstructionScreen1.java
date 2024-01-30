@@ -31,6 +31,7 @@ public class InstructionScreen1 implements Screen {
     private Image angelImage;
     private Image treeImage;
     private Image fireImage;
+    private Image devilImage;
 
 
     public InstructionScreen1(MazeRunnerGame game) {
@@ -58,6 +59,7 @@ public class InstructionScreen1 implements Screen {
         angelImage = new Image();
         treeImage = new Image();
         fireImage = new Image();
+        devilImage = new Image();
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(game.getSkin().get("bold", Label.LabelStyle.class));
         labelStyle.font.getData().setScale(1f);
@@ -78,6 +80,8 @@ public class InstructionScreen1 implements Screen {
         table.add(angelImage).padLeft(-550).width(75).height(75).padBottom(20).row();
         table.add(new Label("Visit the Tree of Good and Evil!", game.getSkin(), "bold")).padBottom(20);
         table.add(treeImage).padLeft(-550).width(75).height(75).padBottom(20).row();
+        table.add(new Label("Watch out for the GRIM REAPER that walks through walls!", game.getSkin(), "bold")).padBottom(20);
+        table.add(devilImage).padLeft(-50).width(75).height(75).padBottom(20).row();
 
 
         TextButton goToGameButton = new TextButton("Continue", game.getSkin());
@@ -106,6 +110,7 @@ public class InstructionScreen1 implements Screen {
         TextureRegion moveableWallTextureRegion = Wall.getMoveableWallImageRegion();
         TextureRegion angelTextureRegion = GuardianAngel.getAngelImageRegion();
         TextureRegion treeTextureRegion = Tree.getTreeImageRegion();
+        TextureRegion devilTextureRegion = Devil.getDevilImageRegion();
 
         // Convert TextureRegions to Drawables
         Drawable fireDrawable = new TextureRegionDrawable(fireTextureRegion);
@@ -116,6 +121,7 @@ public class InstructionScreen1 implements Screen {
         Drawable moveableWallDrawable = new TextureRegionDrawable(moveableWallTextureRegion);
         Drawable angelDrawable = new TextureRegionDrawable(angelTextureRegion);
         Drawable treeDrawable = new TextureRegionDrawable(treeTextureRegion);
+        Drawable devilDrawable = new TextureRegionDrawable(devilTextureRegion);
 
 
         // Set the drawables to the respective Image widgets
@@ -127,6 +133,7 @@ public class InstructionScreen1 implements Screen {
         moveableWallImage.setDrawable(moveableWallDrawable);
         angelImage.setDrawable(angelDrawable);
         treeImage.setDrawable(treeDrawable);
+        devilImage.setDrawable(devilDrawable);
 
     }
 

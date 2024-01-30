@@ -3,7 +3,8 @@ package de.tum.cit.ase.maze;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -14,9 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
-import javax.swing.*;
-import java.io.File;
 
 
 /**
@@ -37,14 +35,20 @@ public class MenuScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
-        // Play some background music
-        // Background sound
+
+        /**
+         *https://www.youtube.com/watch?si=hTmrF_L33vlAZw0r&v=mcS6u_xwK-g&feature=youtu.be&ab_channel=JoelArmishaw%7CPianist
+         * Okami - Shinshu Field - Piano by Joel Armishaw | Pianist on YouTube
+         */
         MenuScreenMusic = Gdx.audio.newMusic(Gdx.files.internal("MenuScreenMusic.mp3"));
         MenuScreenMusic.setLooping(true);
+        MenuScreenMusic.setVolume(3f);
         MenuScreenMusic.play();
+
 
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
@@ -85,6 +89,7 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         stage.draw(); // Draw the stage
+
     }
 
     @Override

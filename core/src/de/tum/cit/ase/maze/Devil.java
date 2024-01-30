@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * Represents dynamic obstacles in the maze.
- * Enemies can move and cause the player to lose a life on contact.
+ * The devil can move and cause the player to lose a life on contact.
  */
 public class Devil extends GameObject {
     private static Animation<TextureRegion> devilStillAnimation;
@@ -30,7 +30,7 @@ public class Devil extends GameObject {
     private static final int MOVING_RIGHT = 2;
     private static final int MOVING_UP = 3;
     private static final int MOVING_DOWN = 4;
-    private GameScreen gameScreen;
+
     private Animation<TextureRegion> currentAnimation;
 
     private int currentDirection;  //
@@ -50,6 +50,10 @@ public class Devil extends GameObject {
         initialise();
     }
 
+    /**
+     * Initialise the devil's animations if null
+     * Sets the initial frame of the animation
+     */
     public void initialise() {
         // Check if the enemy animation is not loaded
         if (devilStillAnimation == null) {
@@ -62,6 +66,13 @@ public class Devil extends GameObject {
         setDevilImageRegion(devilStillAnimation.getKeyFrame(sinusInput, true));
     }
 
+    public static void load() {
+        int frameWidth = 32;
+        int frameHeight = 36;
+        Texture devil = new Texture(Gdx.files.internal("reaper_blade_1.png"));
+
+        devilImageRegion = new TextureRegion(devil, frameWidth, 0, frameWidth, frameHeight);
+    }
 
     public static void loadAnimation() {
         /**
@@ -101,13 +112,14 @@ public class Devil extends GameObject {
     /**
      * moveTowardsCharacter method allows the devil to follow the character
      * This method is used in the GameScreen class while the devil is rendered
+     * In this method, the vertical and horizontal distance between the character and the devil is calculated
+     * It then decides if it is optimal for the devil to travel horizontally or vertically to reach the character
      *
      * @param characterX
      * @param characterY
      * @param delta
      */
     public void moveTowardsCharacter(float characterX, float characterY, float delta) {
-        updateCurrentAnimation();
 
         float deltaX = characterX - x;
         float deltaY = characterY - y;
@@ -127,27 +139,14 @@ public class Devil extends GameObject {
     }
 
     /**
+     * render() renders the devil in the GameScreen class
+     * The method updates the statetime by delta time and changes the current animation based on the current direction
+     * It draws the Devil with the described height and width
      *
+     * @param delta
+     * @param batch
+     * @return
      */
-    private void updateCurrentAnimation() {
-        switch (currentDirection) {
-            case 1:
-                currentAnimation = devilLeftAnimation;
-                break;
-            case 2:
-                currentAnimation = devilRightAnimation;
-                break;
-            case 3:
-                currentAnimation = devilUpAnimation;
-                break;
-            case 4:
-                currentAnimation = devilDownAnimation;
-                break;
-            default:
-                currentAnimation = devilStillAnimation;
-        }
-    }
-
     public TextureRegion render(float delta, SpriteBatch batch) {
         // delta = the time elapsed since the last frame or update
         // Increment the state time by the time passed since the last frame
@@ -177,9 +176,7 @@ public class Devil extends GameObject {
     }
 
 
-
     //Getters and Setters
-
 
     public static TextureRegion getDevilImageRegion() {
         return devilImageRegion;
@@ -189,11 +186,4 @@ public class Devil extends GameObject {
         Devil.devilImageRegion = devilImageRegion;
     }
 
-    public int getCurrentDirection() {
-        return currentDirection;
-    }
-
-    public void setCurrentDirection(int currentDirection) {
-        this.currentDirection = currentDirection;
-    }
 }

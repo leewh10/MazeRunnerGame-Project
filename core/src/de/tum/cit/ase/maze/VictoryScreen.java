@@ -41,8 +41,11 @@ public class VictoryScreen implements Screen {
         long elapsedTimeMillis = System.currentTimeMillis()-GameScreen.getStartTime();
         String formattedTime = formatElapsedTime(elapsedTimeMillis);
 
+        Label.LabelStyle labelStyle = new Label.LabelStyle(game.getSkin().get("bold", Label.LabelStyle.class));
+        labelStyle.font.getData().setScale(1.75f);
+
         // Add a label to display the elapsed time on VictoryScreen
-        table.add(new Label("Time: " + formattedTime, game.getSkin(), "default")).padBottom(40).row();
+        table.add(new Label("Time: " + formattedTime, labelStyle)).padBottom(40).row();
 
         // Add a label as a title
         table.add(new Label("VICTORY", game.getSkin(), "title")).padBottom(80).row();
@@ -63,6 +66,7 @@ public class VictoryScreen implements Screen {
         menuGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getGameScreenMusic().stop();
                 PauseScreen.setReset(true);
                 GameScreen.reset();
                 game.goToMenu();

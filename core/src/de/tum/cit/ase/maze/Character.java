@@ -10,6 +10,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * The Character is the central GameObject that the player controls.
+ * It has a restricted number of lives that is initialized to 5.
+ * The character can move in four directions, up, down, left, and right.
+ * Upon colliding with other Game or Map Objects, the character may gain or lose characteristics, lives, etc.
+ * If the character loses all their lives before reaching and opening the exit (see below), it's game over.
+ */
 
  public class Character extends GameObject {
 
@@ -55,9 +62,7 @@ import com.badlogic.gdx.utils.Array;
      private static Animation<TextureRegion> currentAnimation;
      private static TextureRegion collisionImageRegion;
      private static TextureRegion angelMeetingImageRegion;
-     private static TextureRegion heartImageRegion;
-     private static TextureRegion keyImageRegion;
-
+     private boolean gameStarted;
 
      /**
       * Constructor for Character
@@ -89,6 +94,7 @@ import com.badlogic.gdx.utils.Array;
          font = game.getSkin().getFont("font");
 
          currentAnimation = getCharacterDownAnimation();
+         gameStarted = false;
      }
 
 
@@ -205,6 +211,7 @@ import com.badlogic.gdx.utils.Array;
              gameScreen.setTextX(camera.position.x);
              gameScreen.setTextY(camera.position.y);
              isTextVisible = false;
+             gameStarted=true;
          } else {
              isTextVisible = true;
          }
@@ -370,6 +377,9 @@ import com.badlogic.gdx.utils.Array;
       * @return whether the character has collided with the game object
       */
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
+         if (!gameStarted) {
+             return false;
+         }
          //retrieves the current time in milliseconds.
          long currentTime = System.currentTimeMillis();
 
@@ -402,6 +412,9 @@ import com.badlogic.gdx.utils.Array;
      }
 
      public boolean collidesWithDevil(float devilX, float devilY) {
+         if (!gameStarted) {
+             return false;
+         }
          long currentTime = System.currentTimeMillis();
 
          if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {

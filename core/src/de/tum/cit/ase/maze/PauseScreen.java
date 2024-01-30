@@ -71,6 +71,7 @@ public class PauseScreen implements Screen {
         goToGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getGameScreenMusic().stop();
                 reset = true;
                 GameScreen.reset();
                 GameScreen.setPaused(false);

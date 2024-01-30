@@ -45,7 +45,7 @@ public class Key extends MapObject{
 
 
 
-    public static void render(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, boolean characterKey) {
+    public static void render(SpriteBatch spriteBatch, float viewportWidth, float viewportHeight, boolean characterKey) {
         float keyWidth = 30;
         float keyHeight = 30;
 

@@ -3,7 +3,6 @@ package de.tum.cit.ase.maze;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -102,6 +101,7 @@ public class MazeRunnerGame extends Game {
         GuardianAngel.load();
         Tree.load();
         Trap.load();
+        Devil.load();
 
         // Load character animation
         Character.loadAnimation();
@@ -263,7 +263,7 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new PauseScreen(this,gameScreen));
 
     }
-    public void goToNpcDialogScreen1() {
+    public void goToAngelScreen() {
         disposeAndSetNull(menuScreen);
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);

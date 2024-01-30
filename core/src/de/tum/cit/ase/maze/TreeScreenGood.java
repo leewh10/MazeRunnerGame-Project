@@ -32,6 +32,15 @@ public class TreeScreenGood implements Screen {
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
+        /**
+         * https://www.youtube.com/watch?si=yYTXOdGTnNVzy2EY&v=kIGOSewuZdA&feature=youtu.be
+         * Gorgeous Fantasy Fairy Tale Music Magical Royalty Free Background Music No Copyright by NO COPYRIGHT PLAY on YouTube
+         */
+        Music treeMusic = Gdx.audio.newMusic(Gdx.files.internal("Tree.mp3"));
+        treeMusic.setLooping(true);
+        treeMusic.setVolume(0.1f);
+        treeMusic.play();
+
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
@@ -49,6 +58,7 @@ public class TreeScreenGood implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 PauseScreen.setReset(false);
+                treeMusic.stop();
                 game.goToGame();
             }
         });

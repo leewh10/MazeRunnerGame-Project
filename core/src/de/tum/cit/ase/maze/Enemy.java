@@ -42,6 +42,7 @@ public class Enemy extends GameObject{
 
     /**
      * Constructor for Enemy.
+     * It sets its speed and oscillation distance
      *
      * @param x The initial x-coordinate of the Enemy.
      * @param y The initial y-coordinate of the Enemy.
@@ -90,6 +91,10 @@ public class Enemy extends GameObject{
     }
 
 
+    /**
+     * loads the enemy's animation, if there is no animation to begin with.
+     * sets the initial frame of the animation
+     */
     public void initialise() {
         // Check if the enemy animation is not loaded
         if (enemyStillAnimation == null) {
@@ -97,14 +102,15 @@ public class Enemy extends GameObject{
             loadAnimation();
         }
 
-        // Set the initial frame of the animation
         // Get the frame at time 'sinusInput' and set it as the current enemyRegion
         setEnemyRegion(enemyStillAnimation.getKeyFrame(sinusInput, true));
     }
 
+    /**
+     * This method allows the enemy to move in all four directions (LEFT, RIGHT, UP, DOWN)
+     * @param delta
+     */
     public void move(float delta) {
-        updateCurrentAnimation(); //updates the animation to match the direction of movement
-
         float movingDistance = speed * delta;
         float newX = x;
         float newY = y;
@@ -122,6 +128,9 @@ public class Enemy extends GameObject{
             distanceWalked = 0; //Reset the distance walked
         }
 
+        /**
+         * Based on the current direction, it updates the enemy's x and y coordinates
+         */
         switch (currentDirection) {
             case STILL:
                 break;
@@ -140,7 +149,7 @@ public class Enemy extends GameObject{
         }
 
         if (!collidesWithWalls(newX,newY,GameScreen.getMazeArray())) {
-            x = newX; //upon collision, the enemy stops moving
+            x = newX; // upon collision, the enemy stops moving
             y = newY;
         }
     }
@@ -154,142 +163,63 @@ public class Enemy extends GameObject{
      * 10 = a movable wall
      */
     private boolean collidesWithWalls(float newX, float newY, int[][] mazeArray) {
+        float marginTop = 0.5f * 50f;
+        float marginBottomLeft = 0.5f * 50f;
 
-        //Shadow Wall
-        float shadowWallCollisionMarginTop = 0.3f * 50f;
-        float shadowWallCollisionMarginBottomLeft = 0.5f * 50f;
-
-        float xShadowWallTR = newX + shadowWallCollisionMarginTop;
-        float yShadowWallTR = newY + shadowWallCollisionMarginTop;
-        float xShadowWallBL = newX + shadowWallCollisionMarginBottomLeft;
-        float yShadowWallBL = newY + shadowWallCollisionMarginBottomLeft;
-
-        int shadowWallCellXTR = (int) (xShadowWallTR / 50) ;
-        int shadowWallCellYTR = (int) (yShadowWallTR / 50) ;
-        if (shadowWallCellXTR < 0 || shadowWallCellXTR >= mazeArray.length || shadowWallCellYTR < 0 || shadowWallCellYTR >= mazeArray[0].length) {
-            return true;  // Outside maze boundaries
-        }
-
-        int shadowWallCellXBL = (int) (xShadowWallBL / 50) ;
-        int shadowWallCellYBL = (int) (yShadowWallBL / 50) ;
-        if (shadowWallCellXBL < 0 || shadowWallCellXBL >= mazeArray.length || shadowWallCellYBL < 0 || shadowWallCellYBL >= mazeArray[0].length) {
-            return true;  // Outside maze boundaries
-        }
-
-        boolean collisionTopShadow = mazeArray[shadowWallCellXTR][shadowWallCellYTR] == 8; //
-        boolean collisionBottomShadow = mazeArray[shadowWallCellXBL][shadowWallCellYBL] == 8;
-        boolean collisionLeftShadow = mazeArray[shadowWallCellXBL][shadowWallCellYBL] == 8;
-        boolean collisionRightShadow = mazeArray[shadowWallCellXTR][shadowWallCellYTR] == 8;
-
-        //Movable Wall
-        float movableWallCollisionMargin = 0.45f * 50f;
-        float xMovWall = newX + movableWallCollisionMargin;
-        float yMovWall = newY + movableWallCollisionMargin;
-
-        int cellX1 = (int) (xMovWall / 50);
-        int cellY1 = (int) (yMovWall / 50);
-        if (cellX1 < 0 || cellX1 >= mazeArray.length || cellY1 < 0 || cellY1 >= mazeArray[0].length) {
+        // Shadow Wall
+        if (collidesWithMargin(newX, newY, marginTop, marginBottomLeft, 8, mazeArray)) {
             return true;
         }
-        boolean collisionTopMove = mazeArray[cellX1][cellY1] == 10; //
-        boolean collisionBottomMove = mazeArray[cellX1][cellY1] == 10;
-        boolean collisionLeftMove = mazeArray[cellX1][cellY1] == 10;
-        boolean collisionRightMove = mazeArray[cellX1][cellY1] == 10;
 
-
-        //Normal Wall
-        float normalWallCollisionMarginTop = 0.4f * 50f;
-        float normalWallCollisionMarginBottomLeft = 0.5f * 50f;
-
-        float xNormalWallTR = newX + normalWallCollisionMarginTop;
-        float yNormalWallTR = newY + normalWallCollisionMarginTop;
-        float xNormalWallBL = newX + normalWallCollisionMarginBottomLeft;
-        float yNormalWallBL = newY + normalWallCollisionMarginBottomLeft;
-
-        int normalWallCellXTR = (int) (xNormalWallTR / 50) ;
-        int normalWallCellYTR = (int) (yNormalWallTR / 50) ;
-        if (normalWallCellXTR < 0 || normalWallCellXTR >= mazeArray.length || normalWallCellYTR < 0 || normalWallCellYTR >= mazeArray[0].length) {
-            return true;  // Outside maze boundaries
+        // Movable Wall
+        if (collidesWithMargin(newX, newY, 0.45f * 50f, 0.45f * 50f, 10, mazeArray)) {
+            return true;
         }
 
-        int normalWallCellXBL = (int) (xNormalWallBL / 50) ;
-        int normalWallCellYBL = (int) (yNormalWallBL / 50) ;
-        if (normalWallCellXBL < 0 || normalWallCellXBL >= mazeArray.length || normalWallCellYBL < 0 || normalWallCellYBL >= mazeArray[0].length) {
-            return true;  // Outside maze boundaries
+        // Normal Wall
+        if (collidesWithMargin(newX, newY, 0.4f * 50f, 0.5f * 50f, 0, mazeArray)) {
+            return true;
         }
 
-        boolean collisionTop = mazeArray[normalWallCellXTR][normalWallCellYTR] == 0;
-        boolean collisionBottom = mazeArray[normalWallCellXBL][normalWallCellYBL] == 0;
-        boolean collisionLeft = mazeArray[normalWallCellXBL][normalWallCellYBL] == 0;
-        boolean collisionRight = mazeArray[normalWallCellXTR][normalWallCellYTR] == 0;
-
-
-        //////////////////////////////////////////////////
-
-        float collisionMarginTopRight = 0.5f * 50;
-        float collisionMarginDownLeft = 0.05f * 50;
-
-        float xWithCollisionMargin = newX + collisionMarginTopRight;
-        float yWithCollisionMargin = newY + collisionMarginDownLeft;
-
-        int cellX = (int) (xWithCollisionMargin / 50);
-        int cellY = (int) (yWithCollisionMargin / 50);
-
-        // Check if the adjusted position is within the maze boundaries
-        if (cellX < 0 || cellX >= mazeArray.length || cellY < 0 || cellY >= mazeArray[0].length) {
-            return true;  // Outside maze boundaries
+        // Entry, Exit, Trap, Angel
+        if (collidesWithMargin(newX, newY, 0.5f * 50, 0.05f * 50, 1, mazeArray) ||
+                collidesWithMargin(newX, newY, 0.5f * 50, 0.05f * 50, 2, mazeArray) ||
+                collidesWithMargin(newX, newY, 0.5f * 50, 0.05f * 50, 3, mazeArray) ||
+                collidesWithMargin(newX, newY, 0.5f * 50, 0.05f * 50, 7, mazeArray)) {
+            return true;
         }
 
-
-        boolean collisionTopEntry = mazeArray[cellX][cellY] == 1;
-        boolean collisionBottomEntry = mazeArray[cellX][cellY] == 1;
-        boolean collisionLeftEntry = mazeArray[cellX][cellY] == 1;
-        boolean collisionRightEntry = mazeArray[cellX][cellY] == 1;
-
-        boolean collisionTopExit = mazeArray[cellX][cellY] == 2;
-        boolean collisionBottomExit = mazeArray[cellX][cellY] == 2;
-        boolean collisionLeftExit = mazeArray[cellX][cellY] == 2;
-        boolean collisionRightExit = mazeArray[cellX][cellY] == 2;
-
-        boolean collisionTopTrap = mazeArray[cellX][cellY] == 3;
-        boolean collisionBottomTrap = mazeArray[cellX][cellY] == 3;
-        boolean collisionLeftTrap = mazeArray[cellX][cellY] == 3;
-        boolean collisionRightTrap = mazeArray[cellX][cellY] == 3;
-
-        boolean collisionTopAngel = mazeArray[cellX][cellY] == 7;
-        boolean collisionBottomAngel = mazeArray[cellX][cellY] == 7;
-        boolean collisionLeftAngel = mazeArray[cellX][cellY] == 7;
-        boolean collisionRightAngel = mazeArray[cellX][cellY] == 7;
-
-
-        return collisionTop || collisionBottom || collisionLeft || collisionRight
-                || collisionBottomEntry || collisionLeftEntry || collisionRightEntry|| collisionTopEntry
-                || collisionBottomExit || collisionLeftExit || collisionRightExit|| collisionTopExit
-                || collisionBottomTrap || collisionLeftTrap || collisionRightTrap|| collisionTopTrap
-                || collisionBottomAngel || collisionLeftAngel || collisionRightAngel|| collisionTopAngel
-                || collisionBottomShadow || collisionLeftShadow || collisionRightShadow|| collisionTopShadow
-                || collisionBottomMove || collisionLeftMove || collisionRightMove|| collisionTopMove;
+        return false;
     }
 
-    private void updateCurrentAnimation() {
-        switch (currentDirection) {
-            case 1:
-                currentAnimation = enemyLeftAnimation; //Set the current animation to match the direction of movement
-                break;
-            case 2:
-                currentAnimation = enemyRightAnimation;
-                break;
-            case 3:
-                currentAnimation = enemyUpAnimation;
-                break;
-            case 4:
-                currentAnimation = enemyDownAnimation;
-                break;
-            default:
-                currentAnimation = enemyStillAnimation;
+    private boolean collidesWithMargin(float x, float y, float top, float bottomLeft, int value, int[][] mazeArray) {
+        float xTop = x + top;
+        float yTop = y + top;
+        float xBottomLeft = x + bottomLeft;
+        float yBottomLeft = y + bottomLeft;
+
+        int cellXTop = (int) (xTop / 50);
+        int cellYTop = (int) (yTop / 50);
+
+        int cellXBottomLeft = (int) (xBottomLeft / 50);
+        int cellYBottomLeft = (int) (yBottomLeft / 50);
+
+        if (cellXTop < 0 || cellXTop >= mazeArray.length || cellYTop < 0 || cellYTop >= mazeArray[0].length ||
+                cellXBottomLeft < 0 || cellXBottomLeft >= mazeArray.length || cellYBottomLeft < 0 || cellYBottomLeft >= mazeArray[0].length) {
+            return true;  // Outside maze boundaries
         }
+
+        return mazeArray[cellXTop][cellYTop] == value || mazeArray[cellXBottomLeft][cellYBottomLeft] == value;
     }
 
+    /**
+     * This method is used, when the enemy is rendered in the GameScreen class.
+     * It updates the enemy's current animation based on its current direction.
+     * It draws the enemy with its width and height
+     * @param delta
+     * @param batch
+     * @return
+     */
     public TextureRegion render(float delta,SpriteBatch batch) {
         // delta = the time elapsed since the last frame or update
         // Increment the state time by the time passed since the last frame
@@ -320,7 +250,7 @@ public class Enemy extends GameObject{
         return enemyRegion;
     }
 
-    public static void renderEnemies(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, int characterEnemies) {
+    public static void renderEnemies(SpriteBatch spriteBatch, float viewportWidth, float viewportHeight, int characterEnemies) {
         float spacing = 20;
         float enemyWidth = 40;
         float enemyHeight = 40;

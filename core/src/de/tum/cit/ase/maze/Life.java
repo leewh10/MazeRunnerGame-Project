@@ -27,7 +27,7 @@ public class Life extends MapObject{
         lifeAnimation = new Animation<>(0.2f, lifeFrames);
     }
 
-    public static void render(SpriteBatch spriteBatch, float delta, float viewportWidth, float viewportHeight, int characterLives) {
+    public static void render(SpriteBatch spriteBatch, float viewportWidth, float viewportHeight, int characterLives) {
         float spacing = 20;
         float lifeWidth = 40;
         float lifeHeight = 40;

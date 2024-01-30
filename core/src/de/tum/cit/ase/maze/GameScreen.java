@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -78,13 +77,14 @@ public class GameScreen implements Screen {
     private Enemy enemy;
     private static List<Enemy> enemies;
     private static Map<MapCoordinates, Integer> mapData;
+    private static Music GameScreenMusic;
     private static boolean isPaused;
     private static long startTime; // Initialize the start time
 
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
-     *
+     * It also loads and initializes any attributes needed
      * @param game The main game class, used to access global resources and methods.
      */
     public GameScreen(MazeRunnerGame game) {
@@ -105,7 +105,6 @@ public class GameScreen implements Screen {
          */
         if (character == null || PauseScreen.isReset()) {
             startTime = System.currentTimeMillis();
-
             character = new Character(this, game, getEntryX(), getEntryY(), false, false, false, false,5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
@@ -114,10 +113,14 @@ public class GameScreen implements Screen {
         // Play some background music
         // Background sound
         MenuScreen.getMenuScreenMusic().stop();
-        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
-        backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0.1f);
-        backgroundMusic.play();
+        /**
+         * https://www.youtube.com/watch?si=Y7agZAdQtl1HJRjj&v=dTuWBmdkdRg&feature=youtu.be&ab_channel=NorrisTheSpider
+         * Shinshu Plains- Okami (EXTENDED) by NorrisTheSpider on YouTube
+         */
+        GameScreenMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
+        GameScreenMusic.setLooping(true);
+        GameScreenMusic.setVolume(0.5f);
+        GameScreenMusic.play();
 
 
         camera.position.set(character.getX(), character.getY(), 0);
@@ -131,6 +134,7 @@ public class GameScreen implements Screen {
         devil = new Devil(0,0);
         initialiseDevil();
         Devil.loadAnimation();
+
         /**
          * Load all the required animations for the Game Screen
          */
@@ -299,6 +303,7 @@ public class GameScreen implements Screen {
          *
          */
         if(character.getLives() <= 0) {
+            GameScreenMusic.stop();
             game.goToGameOverScreen();
             /**
              * https://www.youtube.com/watch?v=BVQ_JHmvhCM&ab_channel=SuperMarioBroz.
@@ -409,6 +414,7 @@ public class GameScreen implements Screen {
                         if (character.collidesWithTreasure(mazeX, mazeY)) {
                             character.setTreasureOpened(true);
                             character.setHasKey(false);
+                            GameScreenMusic.stop();
                             game.goToTreasureScreen();
                             removeFromMazeData(mazeX, mazeY,6,16);
                         }
@@ -430,7 +436,8 @@ public class GameScreen implements Screen {
                     );
                     if (character.seesTheAngel(angelX, angelY)) {
                         if (character.collidesWithAngel(angelX, angelY)) {
-                            game.goToNpcDialogScreen1();
+                            GameScreenMusic.stop();
+                            game.goToAngelScreen();
                             removeFromMazeData(angelX, angelY,7,17);
                         }
                     }
@@ -519,9 +526,11 @@ public class GameScreen implements Screen {
                          * Depending on the result of the random boolean, the corresponding screen is called
                          */
                         if(Character.isCollidedTree()) {
+                            GameScreenMusic.stop();
                             game.goToTreeEvil();
                         }
                         else{
+                            GameScreenMusic.stop();
                             game.goToTreeGood();
                         }
                     }
@@ -544,7 +553,7 @@ public class GameScreen implements Screen {
                                     50,
                                     50
                             );{
-
+                                GameScreenMusic.stop();
                                 game.goToVictoryScreen();
 
                                 /**
@@ -662,15 +671,15 @@ public class GameScreen implements Screen {
         /**
          * Character's Lives HUD
          */
-        Life.render(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.getLives());
+        Life.render(game.getSpriteBatch(), camera.position.x, camera.position.y, character.getLives());
         /**
          * Character's Key HUD
          */
-        Key.render(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, character.isHasKey());
+        Key.render(game.getSpriteBatch(), camera.position.x, camera.position.y, character.isHasKey());
         /**
          * Character's Enemies HDU
          */
-        Enemy.renderEnemies(game.getSpriteBatch(), delta, camera.position.x, camera.position.y, Character.getEnemiesKilled());
+        Enemy.renderEnemies(game.getSpriteBatch(), camera.position.x, camera.position.y, Character.getEnemiesKilled());
 
 
         /**
@@ -831,7 +840,6 @@ public class GameScreen implements Screen {
             for (int j = 0; j <= maxY; j++) {
                 if (mazeArray[i][j] == 14) {
                     mazeArray[i][j] = 4;  // Set variable to 0 to remove key from rendering
-
                 }
             }
         }
@@ -893,6 +901,9 @@ public class GameScreen implements Screen {
         }
     }
 
+    public static Music getGameScreenMusic() {
+        return GameScreenMusic;
+    }
 
     /**
      * Getters and Setters
