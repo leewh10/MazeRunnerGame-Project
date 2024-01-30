@@ -41,6 +41,7 @@ public class Devil extends GameObject {
      *
      * @param x The initial x-coordinate of the Enemy.
      * @param y The initial y-coordinate of the Enemy.
+     * sets the speed of the devil
      */
 
     public Devil(float x, float y) {
@@ -63,13 +64,13 @@ public class Devil extends GameObject {
 
 
     public static void loadAnimation() {
-
         /**
          * grim reaper
          * https://finalbossblues.com/timefantasy/freebies/grim-reaper-sprites/
          * Sprite sheet created by Jason
          */
         Texture devil = new Texture(Gdx.files.internal("reaper_blade_1.png"));
+
 
         int frameWidth = 32;
         int frameHeight = 36;
@@ -98,7 +99,7 @@ public class Devil extends GameObject {
     }
 
     /**
-     * moveTowardsCharacter method allows the smart enemy to follow the character
+     * moveTowardsCharacter method allows the devil to follow the character
      * This method is used in the GameScreen class while the devil is rendered
      *
      * @param characterX
@@ -124,6 +125,10 @@ public class Devil extends GameObject {
             currentDirection = (deltaY > 0) ? MOVING_UP : MOVING_DOWN;
         }
     }
+
+    /**
+     *
+     */
     private void updateCurrentAnimation() {
         switch (currentDirection) {
             case 1:

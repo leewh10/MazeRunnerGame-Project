@@ -106,7 +106,7 @@ public class GameScreen implements Screen {
         if (character == null || PauseScreen.isReset()) {
             startTime = System.currentTimeMillis();
 
-            character = new Character(this, game, getEntryX(), getEntryY(), false, false, false,5, characterAnimation);
+            character = new Character(this, game, getEntryX(), getEntryY(), false, false, false, false,5, characterAnimation);
             camera.position.set(character.getX(), character.getY(), 0);
             camera.update();
         }
@@ -129,6 +129,7 @@ public class GameScreen implements Screen {
         angel = new GuardianAngel(getAngelX(), getAngelY());
         GuardianAngel.loadAnimation();
         devil = new Devil(0,0);
+        initialiseDevil();
         Devil.loadAnimation();
         /**
          * Load all the required animations for the Game Screen

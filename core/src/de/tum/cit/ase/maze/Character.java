@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.Array;
      private boolean isTreasureOpened;
 
 
+
      // Character animation downwards
      private static Animation<TextureRegion> characterDownAnimation;
      private static Animation<TextureRegion> characterUpAnimation;
@@ -51,7 +52,6 @@ import com.badlogic.gdx.utils.Array;
      private static final long COLLISION_COOLDOWN1 = 1000;
 
 
-
      private static Animation<TextureRegion> currentAnimation;
      private static TextureRegion collisionImageRegion;
      private static TextureRegion angelMeetingImageRegion;
@@ -71,7 +71,7 @@ import com.badlogic.gdx.utils.Array;
       * @param lives
       * @param animation
       */
-     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, boolean isLeverPulled, boolean isTreasureOpened, int lives,  Animation<TextureRegion> animation) {
+     public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, boolean isLeverPulled, boolean isTreasureOpened, boolean isEnemyCollided, int lives,  Animation<TextureRegion> animation) {
          super(x, y);
          this.game = game; // Store the game instance
          this.hasKey = hasKey;
@@ -80,7 +80,7 @@ import com.badlogic.gdx.utils.Array;
          stateTime = 0f;
          this.gameScreen = gameScreen;
          this.isLeverPulled = isLeverPulled;
-         this.isTreasureOpened=isTreasureOpened;
+         this.isTreasureOpened= isTreasureOpened;
          isImmuneToFire = false;
          isCollidedTree = false;
 
@@ -180,10 +180,8 @@ import com.badlogic.gdx.utils.Array;
      }
 
 
-
      public void move() {
          stateTime += Gdx.graphics.getDeltaTime();
-
          /**
           * Boolean for the text showing
           */
@@ -403,40 +401,6 @@ import com.badlogic.gdx.utils.Array;
          return false;
      }
 
-     public boolean collidesWithKey(float keyX, float keyY) {
-         float characterX = getX();
-         float characterY = getY();
-         float characterWidth = 36;
-         float characterHeight = 62;
-
-         float keyWidth = 50;
-         float keyHeight = 50;
-
-         return characterX < keyX + keyWidth &&
-                 characterX + characterWidth > keyX &&
-                 characterY < keyY + keyHeight &&
-                 characterY + characterHeight > keyY;
-     }
-
-     public boolean collidesWithAngel(float angelX, float angelY) {
-         float characterX = getX();
-         float characterY = getY();
-         float characterWidth = 36;
-         float characterHeight = 62;
-
-         float angelWidth = 50;
-         float angelHeight = 50;
-
-
-         if (characterX < angelX + angelWidth + 20 &&
-                  characterX + characterWidth + 20 > angelX &&
-                  characterY < angelY + angelHeight + 20 &&
-                  characterY + characterHeight + 20 > angelY) {
-             loadAngelMeetingImage();
-             return true;
-         }
-         return false;
-     }
      public boolean collidesWithDevil(float devilX, float devilY) {
          long currentTime = System.currentTimeMillis();
 
@@ -461,6 +425,41 @@ import com.badlogic.gdx.utils.Array;
              }
          } return false;
      }
+
+     public boolean collidesWithKey(float keyX, float keyY) {
+         float characterX = getX();
+         float characterY = getY();
+         float characterWidth = 36;
+         float characterHeight = 62;
+
+         float keyWidth = 50;
+         float keyHeight = 50;
+
+         return characterX < keyX + keyWidth &&
+                 characterX + characterWidth > keyX &&
+                 characterY < keyY + keyHeight &&
+                 characterY + characterHeight > keyY;
+     }
+
+     public boolean collidesWithAngel(float angelX, float angelY) {
+         float characterX = getX();
+         float characterY = getY();
+         float characterWidth = 36;
+         float characterHeight = 62;
+
+         float angelWidth = 50;
+         float angelHeight = 50;
+
+         if (characterX < angelX + angelWidth + 20 &&
+                  characterX + characterWidth + 20 > angelX &&
+                  characterY < angelY + angelHeight + 20 &&
+                  characterY + characterHeight + 20 > angelY) {
+             loadAngelMeetingImage();
+             return true;
+         }
+         return false;
+     }
+
      public boolean collidesWithLever(float leverX, float leverY) {
          float characterX = getX();
          float characterY = getY();
