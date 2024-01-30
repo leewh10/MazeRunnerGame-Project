@@ -21,6 +21,7 @@ public class TreeScreenGood implements Screen {
 
     /**
      * Constructor for TreeScreenGood
+     * Sets up the camera, viewport, stage, and UI elements.
      * TreeScreenGood appears if the Character collides with the Tree and the random boolean generated is false
      * @param game
      */

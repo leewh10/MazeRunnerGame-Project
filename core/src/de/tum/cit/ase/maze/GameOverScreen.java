@@ -11,15 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
-
 
 public class GameOverScreen implements Screen {
     private final Stage stage;
 
     /**
      * Constructor for GameOverScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * GameOverScreen appears when the Character has 0 lives left
      * It allows the character to Try Again, Exit or go to the Menu Screen
      * @param game
@@ -43,6 +41,7 @@ public class GameOverScreen implements Screen {
         resumeGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getGameScreenMusic().stop();
                 PauseScreen.setReset(true);
                 GameScreen.reset();
                 game.goToGame();

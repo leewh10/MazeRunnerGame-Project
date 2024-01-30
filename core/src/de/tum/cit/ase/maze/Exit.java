@@ -17,7 +17,6 @@ public class Exit extends MapObject{
     private static Animation<TextureRegion> exitAnimation;
     private static float exitStateTime;
 
-
     public static void load() {
         Texture map = new Texture(Gdx.files.internal("basictiles.png"));
 
@@ -26,7 +25,6 @@ public class Exit extends MapObject{
 
         ExitPointImageRegion = new TextureRegion(map, 0, 96, frameWidth, frameHeight);
     }
-
 
     public static void animation() {
         Texture exit = new Texture(Gdx.files.internal("things.png"));
@@ -41,31 +39,14 @@ public class Exit extends MapObject{
         exitAnimation = new Animation<>(0.3f, exitFrames);
     }
 
-
     public static TextureRegion renderTexture() {
         exitStateTime += Gdx.graphics.getDeltaTime();
         ExitRegion = exitAnimation.getKeyFrame(exitStateTime,true);
         return ExitRegion;
     }
 
-
     public static TextureRegion getExitPointImageRegion() {
         return ExitPointImageRegion;
-    }
-    public static Animation<TextureRegion> getExitAnimation() {
-        return exitAnimation;
-    }
-
-    public static TextureRegion getExitRegion() {
-        return ExitRegion;
-    }
-
-    public static float getExitStateTime() {
-        return exitStateTime;
-    }
-
-    public static void setExitStateTime(float exitStateTime) {
-        Exit.exitStateTime = exitStateTime;
     }
 
 }

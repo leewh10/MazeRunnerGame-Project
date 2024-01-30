@@ -18,6 +18,7 @@ public class TreeScreenEvil implements Screen {
 
     /**
      * Constructor for TreeScreenEvil
+     * Sets up the camera, viewport, stage, and UI elements.
      * TreeScreenEvil appears if the Character collides with the Tree and the random boolean generated is true
      * @param game
      */

@@ -12,7 +12,7 @@ import java.util.Random;
 
 /**
  * Represents dynamic obstacles in the maze.
- * Enemies can move and cause the player to lose a life on contact.
+ * Enemies can randomly move and cause the player to lose a life on contact.
  */
 public class Enemy extends GameObject{
     private static Animation<TextureRegion> enemyStillAnimation;
@@ -192,6 +192,17 @@ public class Enemy extends GameObject{
         return false;
     }
 
+    /**
+     * Simplified the collision margin into one method that allows for the different maze objects to be called
+     * This method is used in collidesWithWalls
+     * @param x
+     * @param y
+     * @param top
+     * @param bottomLeft
+     * @param value
+     * @param mazeArray
+     * @return
+     */
     private boolean collidesWithMargin(float x, float y, float top, float bottomLeft, int value, int[][] mazeArray) {
         float xTop = x + top;
         float yTop = y + top;

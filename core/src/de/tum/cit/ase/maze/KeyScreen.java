@@ -1,6 +1,5 @@
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -23,6 +22,7 @@ public class KeyScreen implements Screen {
     /**
      * Constructor for KeyScreen
      * KeyScreen appears when the TreasureScreen is done rendering
+     * Sets up the camera, viewport, stage, and UI elements.
      * Allows the player to continue the game after informing them they must collect the Key
      * Serves as an informative Screen
      * @param game
@@ -80,7 +80,6 @@ public class KeyScreen implements Screen {
         // Set the drawable to the Image widget
         keyImage.setDrawable(drawable);
     }
-
 
     @Override
     public void resize(int width, int height) {

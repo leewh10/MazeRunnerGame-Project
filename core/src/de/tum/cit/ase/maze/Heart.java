@@ -13,7 +13,6 @@ public class Heart extends MapObject{
     private static Animation<TextureRegion> heartAnimation;
     private static float heartStateTime;
 
-
     public static void load() {
         /**
          * https://opengameart.org/content/heart-pixel-art
@@ -34,8 +33,6 @@ public class Heart extends MapObject{
 
         heartAnimation = new Animation<>(0.2f, heartFrames, Animation.PlayMode.LOOP);
     }
-
-
 
     public static TextureRegion renderTexture() {
         heartStateTime += Gdx.graphics.getDeltaTime();

@@ -19,8 +19,6 @@ public class Entry extends MapObject{
         EntryPointImageRegion = new TextureRegion(map,32, 96, frameWidth, frameHeight);
     }
 
-
-
     public static TextureRegion getEntryPointImageRegion() {
         return EntryPointImageRegion;
     }

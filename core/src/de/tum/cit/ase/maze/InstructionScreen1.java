@@ -33,7 +33,12 @@ public class InstructionScreen1 implements Screen {
     private Image fireImage;
     private Image devilImage;
 
-
+    /**
+     * This Screen appears when the player wants to know how to play the game
+     * Sets up the camera, viewport, stage, and UI elements.
+     * It provides a detailed explanation of all the game/map objects and provides images for additional clarification
+     * @param game
+     */
     public InstructionScreen1(MazeRunnerGame game) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -107,7 +112,7 @@ public class InstructionScreen1 implements Screen {
         TextureRegion exitTextureRegion = Exit.getExitPointImageRegion(); // Get the exit texture region
         TextureRegion treasureTextureRegion = Treasure.getTreasurePointImageRegion();
         TextureRegion leverTextureRegion = Lever.getLeverPointImageRegion();
-        TextureRegion moveableWallTextureRegion = Wall.getMoveableWallImageRegion();
+        TextureRegion moveableWallTextureRegion = Wall.getMovableWallImageRegion();
         TextureRegion angelTextureRegion = GuardianAngel.getAngelImageRegion();
         TextureRegion treeTextureRegion = Tree.getTreeImageRegion();
         TextureRegion devilTextureRegion = Devil.getDevilImageRegion();

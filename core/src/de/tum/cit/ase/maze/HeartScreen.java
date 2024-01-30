@@ -20,6 +20,7 @@ public class HeartScreen implements Screen {
 
     /**
      * Constructor for HeartScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * HeartScreen appears when the Heart being collected after the AngelScreen
      * @param game
      */

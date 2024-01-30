@@ -47,7 +47,7 @@ the Tree of Good and Evil, the character experiences either a restricted view of
 
 - Lamp.java: represents a purely aesthetic attribute of the maze stationed on either side of the Exit.
 
-Temporary and Informative Screens
+Temporary and Informative Screens of the parent class Screens
 
 Informative screens are screens that appear after collisions throughout the game. They are set to provide the player with
 a description of the Maze Object or Game Object they collided with. Additionally, it describes what happens to the character

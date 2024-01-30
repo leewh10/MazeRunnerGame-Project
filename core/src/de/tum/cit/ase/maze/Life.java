@@ -47,8 +47,4 @@ public class Life extends MapObject{
     public static Animation<TextureRegion> getLifeAnimation() {
         return lifeAnimation;
     }
-
-    public static float getLifeStateTime() {
-        return lifeStateTime;
-    }
 }

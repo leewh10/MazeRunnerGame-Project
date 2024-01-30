@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Treasure extends MapObject{
     /**
-     * An intermediate "key" which allows the Key to appear on the maze
+     * An intermediate mazeObject that must be collided with in order for the Key to appear on the maze
      */
     private static TextureRegion TreasurePointImageRegion;
     private static TextureRegion treasureRegion;

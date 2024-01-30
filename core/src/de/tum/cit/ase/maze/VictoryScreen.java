@@ -1,8 +1,8 @@
 package de.tum.cit.ase.maze;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -18,9 +18,11 @@ import java.io.File;
 
 public class VictoryScreen implements Screen {
     private final Stage stage;
+    private Music victoryMusic;
 
     /**
      * Constructor for VictoryScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * VictoryScreen appears when the Character successfully exits the Maze with a Key and at least 1 Life
      * From here, the character can Restart, Go to Menu or Exit
      * @param game
@@ -33,6 +35,14 @@ public class VictoryScreen implements Screen {
 
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+
+        /**
+         * https://www.youtube.com/watch?v=teUWsONJkk8&ab_channel=SoundEffectsFree
+         * Victory Sound Effect by Sound Effects Free on YouTube
+         */
+        victoryMusic = Gdx.audio.newMusic(Gdx.files.internal("Victory.mp3"));
+        victoryMusic.setLooping(false);
+        victoryMusic.play();
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
@@ -55,6 +65,8 @@ public class VictoryScreen implements Screen {
         restartGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                GameScreen.getGameScreenMusic().stop();
+                victoryMusic.stop();
                 PauseScreen.setReset(true);
                 GameScreen.reset();
                 game.goToGame();
@@ -68,6 +80,7 @@ public class VictoryScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 GameScreen.getGameScreenMusic().stop();
                 PauseScreen.setReset(true);
+                victoryMusic.stop();
                 GameScreen.reset();
                 game.goToMenu();
             }

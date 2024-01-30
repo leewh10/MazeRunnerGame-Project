@@ -9,7 +9,7 @@ public abstract class MapObject {
     public static void load() {};
 
     /**
-     * Loads the dynamic texture for moving MapObjects from one or many .pngs
+     * Loads the dynamic texture for moving MapObjects from one or many .png(s)
      */
     public static void animation() {};
 
@@ -23,7 +23,6 @@ public abstract class MapObject {
 
     /**
      * Primarily used to render the HUD of the specified texture at a specified location
-     *
      */
     public static void render() {}
 }

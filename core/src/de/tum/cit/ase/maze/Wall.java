@@ -13,7 +13,7 @@ public class Wall extends MapObject{
      */
     private static TextureRegion WallImageRegion;
     private static TextureRegion WallShadowImageRegion;
-    private static TextureRegion MoveableWallImageRegion;
+    private static TextureRegion MovableWallImageRegion;
 
     public static void load() {
     int frameWidth = 16;
@@ -22,7 +22,7 @@ public class Wall extends MapObject{
 
     WallImageRegion = new TextureRegion(map, 16, 0, frameWidth, frameHeight);
     WallShadowImageRegion = new TextureRegion(map, 16*2, 0, frameWidth, frameHeight);
-    MoveableWallImageRegion = new TextureRegion(map,16*6,16, frameWidth,frameHeight);
+    MovableWallImageRegion = new TextureRegion(map,16*6,16, frameWidth,frameHeight);
     }
     public static TextureRegion getWallImageRegion() {
         return WallImageRegion;
@@ -32,14 +32,14 @@ public class Wall extends MapObject{
         return WallShadowImageRegion;
     }
 
-    public static TextureRegion getMoveableWallImageRegion() {
-        return MoveableWallImageRegion;
+    public static TextureRegion getMovableWallImageRegion() {
+        return MovableWallImageRegion;
     }
 
 
 
     /**
-     * The Moveable Wall restricts the character movement by acting as a regular Wall until the Lever is pulled
+     * The Movable Wall restricts the character movement by acting as a regular Wall until the Lever is pulled
      * After the Lever is pulled, the character can access the area that was previously restricted
      */
     private static TextureRegion wallBreakingRegion;

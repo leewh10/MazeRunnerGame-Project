@@ -23,6 +23,7 @@ public class TreasureScreen implements Screen {
 
     /**
      * Constructor for the TreasureScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * TreasureScreen appears after the Character collides with the Treasure
      * The treasure animation plays for 1 second, then transitions to the KeyScreen
      * @param game

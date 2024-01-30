@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 public class GuardianAngel extends GameObject {
@@ -16,7 +15,6 @@ public class GuardianAngel extends GameObject {
     private static float angelStateTime;
     private static TextureRegion angelImageRegion;
     private static TextureRegion defaultAngelImageRegion;
-
 
 
     public GuardianAngel(float x, float y) {
@@ -49,8 +47,9 @@ public class GuardianAngel extends GameObject {
         return defaultAngelImageRegion;
     }
 
-
-    // Initialize the texture region in a static block
+    /**
+     * Initialize the texture region in a static block
+     */
     public static void load(){
         Texture angel = new Texture(Gdx.files.internal("angel-f-001.png"));
 

@@ -16,8 +16,6 @@ public class Key extends MapObject{
     private static Animation<TextureRegion> keyAnimation;
     private static float keyStateTime;
 
-
-
     public static void animation() {
         /**
          *https://opengameart.org/content/locks-and-keys
@@ -36,14 +34,11 @@ public class Key extends MapObject{
         keyAnimation = new Animation<>(0.2f, keyFrames);
     }
 
-
     public static TextureRegion renderTexture() {
         keyStateTime += Gdx.graphics.getDeltaTime();
         KeyImageRegion = keyAnimation.getKeyFrame(keyStateTime,true);
         return KeyImageRegion;
     }
-
-
 
     public static void render(SpriteBatch spriteBatch, float viewportWidth, float viewportHeight, boolean characterKey) {
         float keyWidth = 30;
@@ -59,8 +54,6 @@ public class Key extends MapObject{
             spriteBatch.draw(currentKeyFrame, keyX + 65, keyY - 10, keyWidth, keyHeight);
         }
     }
-
-
 
     public static Animation<TextureRegion> getKeyAnimation() {
         return keyAnimation;

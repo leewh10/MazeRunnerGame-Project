@@ -19,8 +19,9 @@ public class AngelScreen implements Screen {
 
     /**
      * Constructor for AngelScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * AngelScreen appears after the Character collides with the angel
-     * Serves as an informative Screen
+     * Serves as an informative screen and offers the character a life
      * @param game
      * @param gameScreen
      */

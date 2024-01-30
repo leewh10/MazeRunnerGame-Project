@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Lamps extends MapObject{
     /**
-     * Purely aesthetic attribute of the Maze stationed on either side of the Exit
+     * Purely aesthetic attribute of the Maze, stationed on either side of the Exit
      */
     private static TextureRegion LampImageRegion;
     private static Animation<TextureRegion> lampAnimation;
@@ -34,9 +34,4 @@ public class Lamps extends MapObject{
             return LampImageRegion;
         }
 
-
-
-    public static TextureRegion getLampImageRegion() {
-            return LampImageRegion;
-        }
     }

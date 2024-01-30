@@ -18,6 +18,7 @@ public class PauseScreen implements Screen {
 
     /**
      * Constructor for PauseScreen
+     * Sets up the camera, viewport, stage, and UI elements.
      * PauseScreen appears when the player presses ESC from the GameScreen
      * From here the player can Resume, Restart, Exit or Go to Menu
      * @param game
@@ -46,8 +47,9 @@ public class PauseScreen implements Screen {
         resumeGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                reset = false;
-                GameScreen.setPaused(false); //Do not reset the game
+                reset = false; //Do not reset the game
+                GameScreen.setPaused(false);
+                GameScreen.getGameScreenMusic().stop();
                 game.goToGame();
             }
         });
@@ -58,6 +60,7 @@ public class PauseScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 reset = true;
+                GameScreen.getGameScreenMusic().stop();
                 GameScreen.reset(); //Call the reset method to set all objects back to their original place and reset attributes
                 GameScreen.setPaused(false);
                 game.goToGame();
@@ -74,6 +77,7 @@ public class PauseScreen implements Screen {
                 GameScreen.getGameScreenMusic().stop();
                 reset = true;
                 GameScreen.reset();
+                GameScreen.getGameScreenMusic().stop();
                 GameScreen.setPaused(false);
                 game.goToMenu();
             }

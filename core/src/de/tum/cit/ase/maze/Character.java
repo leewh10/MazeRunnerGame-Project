@@ -47,7 +47,6 @@ import com.badlogic.gdx.utils.Array;
 
      private TextureRegion characterRegion;
 
-
      private final OrthographicCamera camera;
      private final MazeRunnerGame game;
      private final BitmapFont font;
@@ -70,10 +69,10 @@ import com.badlogic.gdx.utils.Array;
       * @param game
       * @param x
       * @param y
-      * @param hasKey
+      * @param hasKey If the Key has been collected
       * @param isLeverPulled
       * @param isTreasureOpened
-      * @param lives
+      * @param lives The restricted number of lives the character has
       * @param animation
       */
      public Character(GameScreen gameScreen, MazeRunnerGame game, float x, float y, boolean hasKey, boolean isLeverPulled, boolean isTreasureOpened, boolean isEnemyCollided, int lives,  Animation<TextureRegion> animation) {
@@ -218,7 +217,7 @@ import com.badlogic.gdx.utils.Array;
 
          /**
           * If any of the arrow or WASD keys are pressed, the character moves in the specified direction by 5 units
-          * If the SPACE bar is pressed at the same time as the arrow or WASD key, it can kill enemies
+          * If the SPACE bar is pressed at the same time as any of the arrow or WASD keys, it can kill enemies
           * The character will only change location by 5 units if it will not collide with a wall (view collidesWithWall() method)
           * While the key is pressed, the character will animate in the direction indicated
           * Once the key is let go of, the Character stops animating and remains stationary facing the direction last specified
@@ -369,13 +368,13 @@ import com.badlogic.gdx.utils.Array;
                  || collisionBottomEntry || collisionLeftEntry || collisionRightEntry|| collisionTopEntry;
      }
 
-     /**
-      * The collidesWith methods allow for the character to collide with various maze objects and have something happen as a result of this collision
-      * These methods are primarily used in the GameScreen class during the switch-case statements
-      * @param enemyX1 the x coordinate of the game object in question (in this example this is the enemy)
-      * @param enemyY1 the y coordinate of the game object in question (in this example this is the enemy)
-      * @return whether the character has collided with the game object
-      */
+    /**
+     * The collidesWith methods allow for the character to collide with various maze objects and have something happen as a result of this collision
+     * These methods are primarily used in the GameScreen class during the switch-case statements
+     * @param enemyX1 the x coordinate of the game object in question (in this example this is the enemy)
+     * @param enemyY1 the y coordinate of the game object in question (in this example this is the enemy)
+     * @return whether the character has collided with the game object
+     */
      public boolean collidesWithEnemy(float enemyX1, float enemyY1) {
          if (!gameStarted) {
              return false;
@@ -609,6 +608,13 @@ import com.badlogic.gdx.utils.Array;
              angelMeetingImageRegion = null;
          }
      }
+
+    /**
+     * Recognizes if the character is within the vicinity of the angel
+     * @param angelX
+     * @param angelY
+     * @return
+     */
      public boolean seesTheAngel(float angelX, float angelY) {
          long currentTime = System.currentTimeMillis();
          if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN1) {

@@ -4,16 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -21,15 +17,12 @@ public class InstructionScreen implements Screen {
 
     private final Stage stage;
 
-    // Add the following Image field to hold the enemy image
-    private Image enemyImage;
-    private Image exitImage;
-    private Image treasureImage;
-    private Image leverImage;
-    private Image moveableWallImage;
-    private Image angelImage;
-    private Image treeImage;
-
+    /**
+     * This Screen follows the InstructionScreen1 and is specifically used to inform the player on what key to press to
+     * Sets up the camera, viewport, stage, and UI elements.
+     * play the game
+     * @param game
+     */
     public InstructionScreen(MazeRunnerGame game) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -50,7 +43,7 @@ public class InstructionScreen implements Screen {
 
         table.add(new Label("To move your CHARACTER, use your ARROW or WASD key.", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row(); //Add a space between each row
-        table.add(new Label("Kill GHOSTS by pressing the move key and SPACE simultaneously", game.getSkin(), "bold")).padBottom(20).row();
+        table.add(new Label("Kill GHOSTS by pressing any move key and SPACE simultaneously", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("To interact with Game Objects or Map Objects, stand on top of them", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row();
@@ -58,7 +51,7 @@ public class InstructionScreen implements Screen {
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("Hint: Kill 5 GHOSTS to get a LIFE!", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row();
-        table.add(new Label("Hint: If you go to TREASURE or the TREE OF GOOD AND EVIL, the GRIM REAPER resets", game.getSkin(), "bold")).padBottom(20).row();
+        table.add(new Label("Hint: If you go to the TREASURE or the TREE OF GOOD AND EVIL, the GRIM REAPER resets", game.getSkin(), "bold")).padBottom(20).row();
         table.add(new Label("", game.getSkin(), "bold")).padBottom(20).row();
 
         table.add(new Label("GOOD LUCK!", game.getSkin(), "bold")).padBottom(50).row();
