@@ -24,7 +24,6 @@ public class GameOverScreen implements Screen {
      * It allows the character to Try Again, Exit or go to the Menu Screen
      * @param game
      */
-
     public GameOverScreen(MazeRunnerGame game) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -71,7 +70,6 @@ public class GameOverScreen implements Screen {
             }
         });
     }
-
 
 
     @Override

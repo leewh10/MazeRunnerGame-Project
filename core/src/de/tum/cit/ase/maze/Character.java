@@ -212,8 +212,8 @@ import com.badlogic.gdx.utils.Array;
          }
 
          /**
-          * If any of the arrow keys are pressed, the character moves in the specified direction by 5 units
-          * If the SPACE bar is pressed at the same time, it can kill enemies
+          * If any of the arrow or WASD keys are pressed, the character moves in the specified direction by 5 units
+          * If the SPACE bar is pressed at the same time as the arrow or WASD key, it can kill enemies
           * The character will only change location by 5 units if it will not collide with a wall (view collidesWithWall() method)
           * While the key is pressed, the character will animate in the direction indicated
           * Once the key is let go of, the Character stops animating and remains stationary facing the direction last specified
@@ -437,7 +437,30 @@ import com.badlogic.gdx.utils.Array;
          }
          return false;
      }
+     public boolean collidesWithDevil(float devilX, float devilY) {
+         long currentTime = System.currentTimeMillis();
 
+         if (currentTime - lastCollisionTime >= COLLISION_COOLDOWN) {
+
+             float characterX = getX();
+             float characterY = getY();
+             float characterWidth = 36;
+             float characterHeight = 62;
+
+             float devilWidth = 80;
+             float devilHeight = 80;
+
+             if (characterX < devilX + devilWidth &&
+                     characterX + characterWidth > devilX &&
+                     characterY < devilY + devilHeight &&
+                     characterY + characterHeight > devilY) {
+                 lastCollisionTime = currentTime;
+                 //visual to help the character know if their cool-down time is up
+                 loadCollisionImage();
+                 return true;
+             }
+         } return false;
+     }
      public boolean collidesWithLever(float leverX, float leverY) {
          float characterX = getX();
          float characterY = getY();

@@ -23,12 +23,14 @@ public class MazeRunnerGame extends Game {
     private PauseScreen pauseScreen;
     private VictoryScreen victoryScreen;
     private GameOverScreen gameOverScreen;
-    private AngelScreen npcDialogScreen1;
+    private AngelScreen angelScreen;
     private HeartScreen heartScreen;
     private InstructionScreen instructionScreen;
     private KeyScreen keyScreen;
     private InstructionScreen treasureScreen;
     private TreeScreenEvil treeScreen;
+    private InstructionScreen1 instructionScreen1;
+
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
@@ -98,16 +100,11 @@ public class MazeRunnerGame extends Game {
         Lever.load();
         Enemy.load();
         GuardianAngel.load();
-
+        Tree.load();
+        Trap.load();
 
         // Load character animation
         Character.loadAnimation();
-
-        // Play some background music
-        // Background sound
-        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
-        backgroundMusic.setLooping(true);
-        //backgroundMusic.play();
 
         goToMenu(); // Navigate to the menu screen
     }
@@ -131,12 +128,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
 
 
         this.setScreen(new MenuScreen(this)); // Set the current screen to MenuScreen
@@ -145,12 +143,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(menuScreen);
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new TreeScreenEvil(this));
 
@@ -159,12 +158,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(menuScreen);
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new TreeScreenGood(this));
 
@@ -175,13 +175,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(treeScreen);
-
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new GameScreen(this));
     }
@@ -191,7 +191,21 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
+        disposeAndSetNull(heartScreen);
+        disposeAndSetNull(keyScreen);
+        disposeAndSetNull(treasureScreen);
+        disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
+
+        this.setScreen(new InstructionScreen(this));
+    }
+    public void goToInstructionScreen1() {
+        disposeAndSetNull(menuScreen);
+        disposeAndSetNull(pauseScreen);
+        disposeAndSetNull(victoryScreen);
+        disposeAndSetNull(gameOverScreen);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
@@ -199,20 +213,21 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(treeScreen);
 
 
-        this.setScreen(new InstructionScreen(this));
+        this.setScreen(new InstructionScreen1(this));
     }
 
     public void goToGameOverScreen(){
         disposeAndSetNull(menuScreen);
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new GameOverScreen(this));
     }
@@ -220,13 +235,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(menuScreen);
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(treeScreen);
-
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new VictoryScreen(this, gameScreen));
     }
@@ -236,14 +251,14 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(menuScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
-
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new PauseScreen(this,gameScreen));
 
@@ -259,7 +274,7 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
-
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new AngelScreen(this,gameScreen));
     }
@@ -269,13 +284,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
-
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new HeartScreen(this));
     }
@@ -284,12 +299,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new TreasureScreen(this));
     }
@@ -298,12 +314,13 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
 
         this.setScreen(new KeyScreen(this));
     }
@@ -319,13 +336,14 @@ public class MazeRunnerGame extends Game {
         disposeAndSetNull(pauseScreen);
         disposeAndSetNull(victoryScreen);
         disposeAndSetNull(gameOverScreen);
-        disposeAndSetNull(npcDialogScreen1);
+        disposeAndSetNull(angelScreen);
         disposeAndSetNull(heartScreen);
         disposeAndSetNull(instructionScreen);
         disposeAndSetNull(keyScreen);
         disposeAndSetNull(treasureScreen);
         disposeAndSetNull(gameScreen);
         disposeAndSetNull(treeScreen);
+        disposeAndSetNull(instructionScreen1);
 
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin

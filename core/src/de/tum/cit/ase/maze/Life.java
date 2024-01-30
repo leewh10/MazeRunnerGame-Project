@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Life extends MapObject{
     /**
-     * Visual representation of the Lives the Character has
+     * Visual representation of the number of Lives the Character has
      */
     private static Animation<TextureRegion> lifeAnimation;
     private static float lifeStateTime;

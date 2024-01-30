@@ -9,6 +9,7 @@ public class Tree extends MapObject{
      * Consists of two MazeObjects
      * TreeTopImageRegion is a purely aesthetic attribute that is contained within walls
      * TreeImageRegion is the TextureRegion for the MapObject of value 13 (The Tree of Good and Evil)
+     * Upon collision with the Tree of Good and Evil, the character is either affected with a restricted view of enemies or is immune to fire
      */
     private static TextureRegion TreeImageRegion;
     private static TextureRegion TreeTopImageRegion;

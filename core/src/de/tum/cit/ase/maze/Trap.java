@@ -26,6 +26,14 @@ public class Trap extends MapObject{
         }
         trapAnimation = new Animation<>(0.8f, trapFrames);
     }
+
+    public static void load() {
+        int frameWidth = 16;
+        int frameHeight = 16;
+        Texture map = new Texture(Gdx.files.internal("objects.png"));
+
+        TrapImageRegion = new TextureRegion(map, 8*frameWidth + 1, 3*frameHeight, frameWidth, frameHeight);
+    }
     public static TextureRegion renderTexture() {
         trapStateTime += Gdx.graphics.getDeltaTime();
         TrapImageRegion = trapAnimation.getKeyFrame(trapStateTime,true);

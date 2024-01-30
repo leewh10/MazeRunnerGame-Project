@@ -50,6 +50,10 @@ public class GameScreen implements Screen {
     private float enemyY1;
     private float angelX;
     private float angelY;
+    private Devil devil;
+    private int devilX;
+    private int devilY;
+
 
     /**
      * maxX and maxY identify the largest x and y coordination in each .properties file and sets it as the maximum map size
@@ -68,7 +72,6 @@ public class GameScreen implements Screen {
     private Vector2 originalCameraPosition = new Vector2();  // Store the original camera position for restoration
 
 
-
     private GuardianAngel angel;
     private Enemy enemy;
     private static List<Enemy> enemies;
@@ -76,9 +79,6 @@ public class GameScreen implements Screen {
     private static boolean isPaused;
     private static long startTime; // Initialize the start time
 
-    public static long getStartTime() {
-        return startTime;
-    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -109,16 +109,27 @@ public class GameScreen implements Screen {
             camera.update();
         }
 
+        // Play some background music
+        // Background sound
+        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.1f);
+        backgroundMusic.play();
+
+
         camera.position.set(character.getX(), character.getY(), 0);
         camera.update();
 
         enemies = initialiseEnemy();
         Enemy.loadAnimation();
 
-        angel = new GuardianAngel(getAngelX(), getAngelY(), 20f, 80, this);
+        angel = new GuardianAngel(getAngelX(), getAngelY());
         GuardianAngel.loadAnimation();
-
-        Tree.load();
+        devil = new Devil(0,0);
+        Devil.loadAnimation();
+        /**
+         * Load all the required animations for the Game Screen
+         */
         Life.animation();
         Exit.animation();
         Trap.animation();
@@ -126,6 +137,7 @@ public class GameScreen implements Screen {
         Treasure.animation();
         Wall.animation();
         Lamps.animation();
+
     }
 
     /**
@@ -137,9 +149,6 @@ public class GameScreen implements Screen {
     public static void loadMazeDataFromPropertiesFile(String filePath) {
         try {
             mapData = new HashMap<>();
-
-
-
             /**
              *  Read the file line by line
              */
@@ -174,9 +183,9 @@ public class GameScreen implements Screen {
             mazeArray = new int[maxX + 1][maxY + 1];
 
             /**
-             * we have to choose wall for this. so we need to add floor in the switch-case statement.
+             * Add a standard background that appears in an unspecified case
              */
-            int defaultValue = -1; // (We have to choose Floor for this)
+            int defaultValue = -1;
             // Populate the mazeArray with values from the mapData, using defaultValue for unspecified cells
             for (int i = 0; i <= maxX; i++) {
                 for (int j = 0; j <= maxY; j++) {
@@ -193,7 +202,10 @@ public class GameScreen implements Screen {
         }
     }
 
-
+    /**
+     * Created a private class here for simplicity and easier access to the x and y coordinates
+     * Otherwise, everytime a coordinate needed to me called, a class would have to be called first
+     */
     private static class MapCoordinates {
         private final int x;
         private final int y;
@@ -213,6 +225,11 @@ public class GameScreen implements Screen {
 
     }
 
+    /**
+     * Initialize the enemy by adding each individual Enemy from the mazeArray to an ArrayList
+     * This allows for each individual enemy to act independent of the other
+     * @return
+     */
     public List<Enemy> initialiseEnemy() {
         if (enemies == null) {
             enemies = new ArrayList<>();
@@ -230,6 +247,20 @@ public class GameScreen implements Screen {
         return enemies;
     }
 
+    /**
+     * Initialising the devil's position based on the level properties files.
+     */
+    public void initialiseDevil() {
+        for (int x = 0; x <= maxX; x++) {
+            for (int y = 0; y <= maxY; y++) {
+                int variable = mazeArray[x][y];
+
+                if (variable == 25) {
+                    devil = new Devil(x * 50, y * 50);
+                }
+            }
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Screen interface methods with necessary functionality
@@ -556,22 +587,27 @@ public class GameScreen implements Screen {
              * render Enemies
              */
             for (Iterator<Enemy> iterator = enemies.iterator(); iterator.hasNext(); ) {
+                //Iterate through every enemy separately and render accordingly
                 Enemy enemy = iterator.next();
+                //Vector distance creates a 2-dimensional range with the distance
                 float distance = Vector2.dst(character.getX(), character.getY(), enemy.getX(), enemy.getY());
                 boolean isEnemyVisible = distance < 150;
-                ////////
+                /**
+                 * This if statement ensure that the enemy only appears when the Character is within the range of vision
+                 * The range of vision is restricted is the Tree of Good and Evil only allows the Character to see the enemy when they are near
+                 */
                 if ((Character.isCollidedTree() && isEnemyVisible) || !Character.isCollidedTree()) {
                     enemy.move(delta);
                     enemy.render(delta, game.getSpriteBatch());
                     if (character.collidesWithEnemy(enemy.getX(), enemy.getY())) {
-                        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) { //The condition for killing enemies
                             Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Slice.mp3"));
                             backgroundMusic.setLooping(false);
                             backgroundMusic.play();
 
-                            // Remove the enemy from the maze data and the list
+                            // Change the value of the Enemy to have it disappear from the screen
                             removeEnemyFromMazeData(enemy.getX(), enemy.getY());
-                            iterator.remove();
+                            iterator.remove(); //remove the enemy from the list
 
                             character.setEnemiesKilled(character.getEnemiesKilled() + 1);
                         } else {
@@ -583,6 +619,20 @@ public class GameScreen implements Screen {
                         }
                     }
                 }
+            }
+
+            /**
+             * render Devil
+             */
+
+            devil.render(delta,game.getSpriteBatch());
+            devil.moveTowardsCharacter(character.getX(), character.getY(), delta);
+            if (character.collidesWithDevil(devil.getX(),devil.getY())) {
+                Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("LoseLife.mp3"));
+                backgroundMusic.setLooping(false);
+                backgroundMusic.play();
+                character.setLives(character.getLives() - 1);
+                shakeTheScreen();
             }
 
             camera.update(); // Update the camera position
@@ -647,7 +697,7 @@ public class GameScreen implements Screen {
             character.setTextVisible(true);
         } else{
             // Use a default frame when not moving, after game starts
-            textX = camera.position.x;
+            textX = camera.position.x; //Character and Camera are in sync
             textY = camera.position.y;
             character.setTextVisible(false);
         }
@@ -657,15 +707,17 @@ public class GameScreen implements Screen {
          */
         if(character.isKeyPressed()){
             game.getSpriteBatch().draw(
+                    //Move the character with the animation that matches the direction of movement
                     Character.getCurrentAnimation().getKeyFrame(sinusInput, true),
-                    textX,   // -96
-                    textY,   // -64
+                    textX,
+                    textY,
                     64,
                     128
             );
         }
         else if (!character.isKeyPressed()){
             game.getSpriteBatch().draw(
+                    //Stop moving and face the direction of the key last pressed when the move key is let go of
                     Character.getCurrentAnimation().getKeyFrame(3, true),
                     textX,   // -96
                     textY,   // -64
@@ -691,7 +743,6 @@ public class GameScreen implements Screen {
      * @param fromWhere the original value of the object being removed as in switch case statement
      * @param toWhere the new value of the object being removed as in switch case statement
      */
-
     private void removeFromMazeData(float x, float y, int fromWhere, int toWhere) {
         for (int i = 0; i <= maxX; i++) {
             for (int j = 0; j <= maxY; j++) {
@@ -825,7 +876,7 @@ public class GameScreen implements Screen {
                 camera.position.x = originalCameraPosition.x;
                 camera.position.y = originalCameraPosition.y;
             } else {
-                // generates random values 'shakeAmountX' and shakeAmountY' within screenShakeIntensity
+                // generates random values 'shakeAmountX' and 'shakeAmountY' within screenShakeIntensity
                 float shakeAmountX = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
 
                 float shakeAmountY = MathUtils.random(-screenShakeIntensity, screenShakeIntensity);
@@ -837,21 +888,7 @@ public class GameScreen implements Screen {
             }
         }
     }
-    public static int getMaxX() {
-        return maxX;
-    }
 
-    public static void setMaxX(int maxX) {
-        GameScreen.maxX = maxX;
-    }
-
-    public static int getMaxY() {
-        return maxY;
-    }
-
-    public static void setMaxY(int maxY) {
-        GameScreen.maxY = maxY;
-    }
 
     /**
      * Getters and Setters
@@ -868,7 +905,6 @@ public class GameScreen implements Screen {
     public static void setPaused(boolean paused) {
         isPaused = paused;
     }
-
     public static int[][] getMazeArray() {
         return mazeArray;
     }
@@ -898,20 +934,22 @@ public class GameScreen implements Screen {
         return entryY;
     }
 
-    public float getEnemyX1() {
-        return enemyX1;
-    }
-
-    public float getEnemyY1() {
-        return enemyY1;
-    }
-
     public float getAngelX() {
         return angelX;
     }
 
     public float getAngelY() {
         return angelY;
+    }
+    public int getDevilX() {
+        return devilX;
+    }
+
+    public int getDevilY() {
+        return devilY;
+    }
+    public static long getStartTime() {
+        return startTime;
     }
 
     @Override
