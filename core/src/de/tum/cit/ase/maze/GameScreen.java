@@ -11,10 +11,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -111,6 +113,7 @@ public class GameScreen implements Screen {
 
         // Play some background music
         // Background sound
+        MenuScreen.getMenuScreenMusic().stop();
         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(0.1f);

@@ -26,6 +26,7 @@ import java.io.File;
 public class MenuScreen implements Screen {
 
     private final Stage stage;
+    private static Music MenuScreenMusic;
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -38,9 +39,9 @@ public class MenuScreen implements Screen {
 
         // Play some background music
         // Background sound
-        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("MenuScreenMusic.mp3"));
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+        MenuScreenMusic = Gdx.audio.newMusic(Gdx.files.internal("MenuScreenMusic.mp3"));
+        MenuScreenMusic.setLooping(true);
+        MenuScreenMusic.play();
 
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -73,6 +74,10 @@ public class MenuScreen implements Screen {
                 game.goToInstructionScreen1();
             }
         });
+    }
+
+    public static Music getMenuScreenMusic() {
+        return MenuScreenMusic;
     }
 
     @Override
