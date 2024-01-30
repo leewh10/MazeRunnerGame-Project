@@ -12,10 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import javax.swing.*;
-import java.io.File;
-
-
 public class VictoryScreen implements Screen {
     private final Stage stage;
     private Music victoryMusic;

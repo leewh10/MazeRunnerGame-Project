@@ -23,15 +23,15 @@ public class InstructionScreen1 implements Screen {
     private final Stage stage;
 
     // Add the following Image field to hold the enemy image
-    private Image enemyImage;
-    private Image exitImage;
-    private Image treasureImage;
-    private Image leverImage;
-    private Image moveableWallImage;
-    private Image angelImage;
-    private Image treeImage;
-    private Image fireImage;
-    private Image devilImage;
+    private final Image enemyImage;
+    private final Image exitImage;
+    private final Image treasureImage;
+    private final Image leverImage;
+    private final Image moveableWallImage;
+    private final Image angelImage;
+    private final Image treeImage;
+    private final Image fireImage;
+    private final Image devilImage;
 
     /**
      * This Screen appears when the player wants to know how to play the game

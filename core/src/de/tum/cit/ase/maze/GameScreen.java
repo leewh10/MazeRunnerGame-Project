@@ -29,26 +29,21 @@ public class GameScreen implements Screen {
     private static Character character;
     private float textX;
     private float textY;
-    private BitmapFont font;
+
     /**
      * mazeArray converts the data from the .properties file into a two-dimensional array
      */
     private static int[][] mazeArray;
     private static int entryX;
     private static int entryY;
-    private static int wallX;
-    private static int wallY;
     private static int leverX;
     private static int leverY;
     private static int keyX;
     private static int keyY;
-    private static int wallMoveableX;
-    private static int wallMoveableY;
     private float angelX;
     private float angelY;
     private Devil devil;
-    private int devilX;
-    private int devilY;
+
     /**
      * maxX and maxY identify the largest x and y coordination in each .properties file and sets it as the maximum map size
      */
@@ -83,7 +78,7 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(true);
         camera.zoom = 0.80f;
-        font = game.getSkin().getFont("font");
+        BitmapFont font = game.getSkin().getFont("font");
 
         Animation<TextureRegion> characterAnimation = Character.getCharacterDownAnimation();
 
@@ -315,8 +310,6 @@ public class GameScreen implements Screen {
                     switch (variable) {
                         case 0:
                             // Wall
-                            wallX = (int) mazeX;
-                            wallY = (int) mazeY;
                             game.getSpriteBatch().draw(Wall.getWallImageRegion(), mazeX, mazeY, 50, 50);
                             break;
                         case 1:
@@ -416,8 +409,6 @@ public class GameScreen implements Screen {
                             break;
                         case 8:
                             // WallShadow
-                            wallX = (int) mazeX;
-                            wallY = (int) mazeY;
                             game.getSpriteBatch().draw(Wall.getWallShadowImageRegion(), mazeX, mazeY, 50, 50);
                             break;
                         case 9:
@@ -426,8 +417,6 @@ public class GameScreen implements Screen {
                             break;
                         case 10:
                             // WallMovable
-                            wallMoveableX = (int) mazeX;
-                            wallMoveableY = (int) mazeY;
                             game.getSpriteBatch().draw(Wall.getMovableWallImageRegion(), mazeX, mazeY, 50, 50);
 
                             /**

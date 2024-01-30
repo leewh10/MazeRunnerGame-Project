@@ -33,7 +33,7 @@ public class Devil extends GameObject {
 
     private Animation<TextureRegion> currentAnimation;
 
-    private int currentDirection;  //
+    private int currentDirection;
 
 
     /**
